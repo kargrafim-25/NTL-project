@@ -211,7 +211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({
         status: 'connected',
-        model: 'gpt-5',
+        model: 'gpt-5-mini',
         timestamp: new Date().toISOString(),
         testSignal
       });
