@@ -1,0 +1,34 @@
+Ntl project  Overview
+ A professional AI-powered trading platform that provides real-time XAUUSD (Gold) trading signals using OpenAI's GPT-5 Mini. The platform features subscription tiers, credit systems, live market analysis, and a sleek modern interface.
+ Core Functionality
+1. Real-Time Trading Signals: Uses GPT-5 Mini API to generate live XAUUSD trading signals with entry/exit points, stop losses, take profits, and confidence ratings
+2. Subscription System: Three tiers (Free, Starter Trader, Pro Trader) with different credit limits and features
+3. Credit Management: Daily/monthly credit tracking with automatic resets
+4. Market Hours Validation: Prevents signal generation when markets are closed
+5. Live TradingView Charts: Integrated XAUUSD charts with multiple timeframes
+6. Animated UI: Professional loading animations during API calls
+ Technical Stack
+
+* AI Integration: OpenAI GPT-5 Mini API (gpt-5-mini model)
+* I need it to be safe and with a pro and new era frontend
+* Charts: TradingView widget integration
+
+ Key Features
+* No Fallback Data: Real GPT-5 Mini responses only, or clear error messages
+* Real-Time Processing: Live API calls with proper error handling
+* Responsive Design: Works on desktop and mobile
+* Professional UI: Gradient backgrounds, smooth animations, modern card layouts
+* Market Status: Live market hours checking (Casablanca timezone)
+* Debug Endpoints: For testing GPT-5 Mini connectivity
+ API Endpoints
+* GET / - Main frontend interface
+* POST /api/v1/generate-signal - Generate trading signals
+* GET /api/v1/health - Health check
+* GET /api/v1/market-status - Market hours status
+* GET /api/v1/debug-gpt5 - Debug GPT-5 Mini connectivity
+ Business Logic
+* Free Tier: 2 daily signals, basic analysis
+* Starter Tier: 50 daily signals, multiple take-profits, brief analysis
+* Pro Tier: Unlimited signals, detailed analysis, future predictions
+* Credit System: Prevents overuse, resets daily/monthly
+* Market Hours: Gold market operates Sunday 10PM - Friday 9PM (Casablanca time)
