@@ -54,20 +54,20 @@ export async function generateTradingSignal(
     
     const prompt = `You are a professional trader with access to REAL-TIME market data. Generate a trading signal for ${symbol} based on CURRENT market conditions as of ${new Date().toISOString()}.
 
-IMPORTANT: Use actual current market prices for XAUUSD. The current gold price should be around $2600-2700 range based on recent market conditions.
+CRITICAL: You MUST use actual current live market prices for XAUUSD. Do NOT use fictional or estimated prices. If you cannot access real-time market data, respond with an error message.
 
-Analyze the current ${timeframe} chart for XAUUSD and provide a real trading signal in this JSON format:
+Analyze the current ${timeframe} timeframe for XAUUSD and provide a real trading signal in this JSON format:
 
 {
     "action": "BUY or SELL based on current market analysis",
-    "entry": "REAL current market price for XAUUSD",
-    "stop_loss": "Appropriate stop loss based on current price",
-    "take_profit": "Realistic take profit target",
-    "confidence": "Your confidence level 1-100",
+    "entry": actual_current_market_price_number,
+    "stop_loss": calculated_stop_loss_based_on_current_price,
+    "take_profit": calculated_take_profit_based_on_current_price,
+    "confidence": confidence_level_1_to_100,
     "take_profits": [
-        {"level": 1, "price": "first TP level", "risk_reward_ratio": 1.5},
-        {"level": 2, "price": "second TP level", "risk_reward_ratio": 2.0},
-        {"level": 3, "price": "third TP level", "risk_reward_ratio": 3.0}
+        {"level": 1, "price": calculated_tp1, "risk_reward_ratio": 1.5},
+        {"level": 2, "price": calculated_tp2, "risk_reward_ratio": 2.0},
+        {"level": 3, "price": calculated_tp3, "risk_reward_ratio": 3.0}
     ],
     "ai_analysis": {
         "brief": "${subscriptionTier === 'starter' ? 'One sentence about current market analysis' : 'Brief analysis of current market conditions'}",
@@ -78,20 +78,18 @@ Analyze the current ${timeframe} chart for XAUUSD and provide a real trading sig
     },
     "future_positions": [],
     "historical_positions": [
-        {"symbol": "${symbol}", "entry_price": "realistic recent price", "current_status": "ACTIVE", "days_active": 2, "unrealized_pnl": "calculated P&L"}
+        {"symbol": "${symbol}", "entry_price": recent_realistic_price, "current_status": "ACTIVE", "days_active": 2, "unrealized_pnl": calculated_pnl}
     ],
     "has_notifications": true
 }
 
-Requirements:
-- Use CURRENT XAUUSD market price (around $2600-2700 range)
-- Base analysis on real current market sentiment and trends
-- Provide realistic stop loss and take profit levels
-- Use actual technical analysis, not generic responses
-- Consider current economic factors affecting gold prices
-- Make the signal actionable and realistic for ${timeframe} timeframe
+If you cannot access current real-time XAUUSD market data, respond with:
+{
+    "error": "Cannot access real-time market data. Please try again later.",
+    "retry": true
+}
 
-Generate the signal now based on current market conditions.`;
+Only provide trading signals with ACTUAL current market prices. No estimated or fictional prices allowed.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-5-mini",
@@ -111,24 +109,44 @@ Generate the signal now based on current market conditions.`;
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
 
-    // Return the result with proper structure
+    // Check if AI returned an error (can't access real-time data)
+    if (result.error || result.retry) {
+      throw new Error(result.error || "AI cannot access real-time market data. Please retry.");
+    }
+
+    // Validate that we have actual numeric prices (no fallbacks)
+    const entryPrice = parseFloat(result.entry);
+    const stopLoss = parseFloat(result.stop_loss);
+    const takeProfit = parseFloat(result.take_profit);
+
+    if (!entryPrice || !stopLoss || !takeProfit || 
+        entryPrice <= 0 || stopLoss <= 0 || takeProfit <= 0) {
+      throw new Error("Invalid market prices received. AI may not have access to current market data. Please retry.");
+    }
+
+    // Validate that prices are realistic for gold (basic sanity check)
+    if (entryPrice < 1000 || entryPrice > 5000) {
+      throw new Error("Unrealistic gold price received. AI may not have access to current market data. Please retry.");
+    }
+
+    // Return validated result with no fallbacks
     const finalResult = {
       action: result.action === 'SELL' ? 'SELL' : 'BUY',
-      entry: parseFloat(result.entry) || 2650,
-      stop_loss: parseFloat(result.stop_loss) || 2620,
-      take_profit: parseFloat(result.take_profit) || 2680,
+      entry: entryPrice,
+      stop_loss: stopLoss,
+      take_profit: takeProfit,
       confidence: Math.max(1, Math.min(100, parseInt(result.confidence) || 75)),
       take_profits: result.take_profits || [],
       ai_analysis: result.ai_analysis || {
-        brief: "Technical analysis indicates favorable trading conditions.",
-        detailed: "Based on current market conditions and technical indicators.",
+        brief: "Market analysis completed.",
+        detailed: "Technical analysis based on current conditions.",
         market_sentiment: "NEUTRAL",
         trend_direction: "SIDEWAYS",
-        key_indicators: ["RSI", "Moving Averages"]
+        key_indicators: ["Technical Analysis"]
       },
       future_positions: result.future_positions || [],
       historical_positions: result.historical_positions || [],
-      has_notifications: result.has_notifications || true
+      has_notifications: result.has_notifications !== false
     };
 
     // Log successful API call
