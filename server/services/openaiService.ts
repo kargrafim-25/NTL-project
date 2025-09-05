@@ -38,8 +38,19 @@ Generate a real-time trading signal for XAUUSD with the following requirements:
 8. Include detailed analysis explaining the signal rationale with current market context
 
 ${subscriptionTier === 'starter' ? 
-  'Provide brief analysis with key technical points and current market factors.' : 
-  'Provide comprehensive analysis including technical indicators, market sentiment, current news impact, and future predictions.'
+  `**STARTER ANALYSIS**: Provide brief analysis (2-3 sentences) covering:
+  - Key technical indicator signal
+  - Primary market factor driving the trade
+  - Simple risk/reward explanation` : 
+  subscriptionTier === 'pro' ? 
+  `**PRO ANALYSIS**: Provide comprehensive detailed analysis (5-7 sentences) covering:
+  - Multiple technical indicators (RSI, MACD, moving averages, support/resistance)
+  - Current market sentiment and economic factors
+  - News/events impact on gold prices
+  - USD strength analysis
+  - Risk management strategy
+  - Future price predictions and key levels to watch` :
+  `**STANDARD ANALYSIS**: Provide moderate analysis covering key technical points and market factors.`
 }
 
 **Note**: Base your analysis on real market conditions, not hypothetical prices. Consider current gold market dynamics, USD strength, inflation concerns, and technical chart patterns.
