@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { apiLogger, APILogEntry } from "../utils/apiLogger";
 
 // Using GPT-5 Mini as requested by the user
 const openai = new OpenAI({ 
@@ -42,8 +43,12 @@ export interface TradingSignalData {
 
 export async function generateTradingSignal(
   timeframe: string, 
-  subscriptionTier: string
+  subscriptionTier: string,
+  userId?: string
 ): Promise<TradingSignalData> {
+  const startTime = Date.now();
+  let logEntry: APILogEntry;
+  
   try {
     const symbol = "XAUUSD";
     
@@ -95,7 +100,7 @@ export async function generateTradingSignal(
     const result = JSON.parse(response.choices[0].message.content || '{}');
 
     // Return the result with proper structure
-    return {
+    const finalResult = {
       action: result.action === 'SELL' ? 'SELL' : 'BUY',
       entry: parseFloat(result.entry) || 2000,
       stop_loss: parseFloat(result.stop_loss) || 1980,
@@ -114,8 +119,50 @@ export async function generateTradingSignal(
       has_notifications: result.has_notifications || true
     };
 
+    // Log successful API call
+    const executionTime = Date.now() - startTime;
+    logEntry = {
+      timestamp: new Date().toISOString(),
+      userId: userId || 'unknown',
+      timeframe,
+      subscriptionTier,
+      request: {
+        symbol,
+        timeframe,
+        userTier: subscriptionTier
+      },
+      response: finalResult,
+      executionTime,
+      success: true
+    };
+
+    await apiLogger.logSignalGeneration(logEntry);
+    
+    return finalResult;
+
   } catch (error) {
     console.error("OpenAI API error:", error);
+    
+    // Log failed API call
+    const executionTime = Date.now() - startTime;
+    logEntry = {
+      timestamp: new Date().toISOString(),
+      userId: userId || 'unknown',
+      timeframe,
+      subscriptionTier,
+      request: {
+        symbol: "XAUUSD",
+        timeframe,
+        userTier: subscriptionTier
+      },
+      response: null,
+      executionTime,
+      success: false,
+      error: error.message
+    };
+
+    await apiLogger.logSignalGeneration(logEntry);
+    
     throw new Error(`Failed to generate trading signal: ${error.message}`);
   }
 }

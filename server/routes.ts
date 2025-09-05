@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { generateTradingSignal } from "./services/openaiService";
+import { apiLogger } from "./utils/apiLogger";
 import { isMarketOpen } from "./services/marketService";
 import { insertSignalSchema } from "@shared/schema";
 import { z } from "zod";
@@ -109,7 +110,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Generate signal using OpenAI
-      const signalData = await generateTradingSignal(timeframe, user.subscriptionTier);
+      const signalData = await generateTradingSignal(timeframe, user.subscriptionTier, userId);
 
       // Create signal record
       const signal = await storage.createSignal({
@@ -198,6 +199,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // View API logs (admin only)
+  app.get('/api/v1/logs', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.claims?.email !== process.env.ADMIN_EMAIL) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { date } = req.query;
+      
+      if (date) {
+        // Get logs for specific date
+        const logs = await apiLogger.getLogsByDate(date);
+        res.json({ date, logs });
+      } else {
+        // Get all log files
+        const logFiles = await apiLogger.getAllLogFiles();
+        res.json({ logFiles });
+      }
+
+    } catch (error) {
+      console.error("Error fetching logs:", error);
+      res.status(500).json({ message: "Failed to fetch logs" });
+    }
+  });
+
   // Debug GPT-5 connectivity
   app.get('/api/v1/debug-gpt5', isAuthenticated, async (req: any, res) => {
     try {
@@ -207,7 +234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Test basic OpenAI connectivity
-      const testSignal = await generateTradingSignal('1H', 'pro');
+      const testSignal = await generateTradingSignal('1H', 'pro', user.claims.sub);
       
       res.json({
         status: 'connected',
