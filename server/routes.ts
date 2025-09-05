@@ -115,13 +115,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const signal = await storage.createSignal({
         userId,
         pair: "XAUUSD",
-        direction: signalData.direction,
+        direction: signalData.action,
         timeframe,
-        entryPrice: signalData.entryPrice.toString(),
-        stopLoss: signalData.stopLoss.toString(),
-        takeProfit: signalData.takeProfit.toString(),
+        entryPrice: signalData.entry.toString(),
+        stopLoss: signalData.stop_loss.toString(),
+        takeProfit: signalData.take_profit.toString(),
         confidence: signalData.confidence,
-        analysis: signalData.analysis,
+        analysis: `${signalData.ai_analysis.brief} ${signalData.ai_analysis.detailed}`,
         status: "active",
       });
 
