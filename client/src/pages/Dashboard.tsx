@@ -7,7 +7,7 @@ import LatestSignal from "@/components/LatestSignal";
 import TradingViewChart from "@/components/TradingViewChart";
 import SignalHistory from "@/components/SignalHistory";
 import PremiumFeatures from "@/components/PremiumFeatures";
-import { TrendingUp, LogOut } from "lucide-react";
+import { TrendingUp, LogOut, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -104,6 +104,18 @@ export default function Dashboard() {
                   {getSubscriptionLabel(user.subscriptionTier)}
                 </Badge>
               )}
+
+              {/* Admin Logs Button */}
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => window.location.href = '/admin/logs'}
+                className="text-muted-foreground hover:text-foreground"
+                data-testid="button-admin-logs"
+                title="View API Logs"
+              >
+                <Database className="h-4 w-4" />
+              </Button>
 
               {/* Logout Button */}
               <Button 
