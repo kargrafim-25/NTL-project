@@ -52,18 +52,15 @@ export async function generateTradingSignal(
   try {
     const symbol = "XAUUSD";
     
-    const prompt = `You are a professional trader with access to REAL-TIME market data. Generate a trading signal for ${symbol} based on CURRENT market conditions as of ${new Date().toISOString()}.
-
-CRITICAL: You MUST use actual current live market prices for XAUUSD. Do NOT use fictional or estimated prices. If you cannot access real-time market data, respond with an error message.
-
+    const prompt = `You are a professional trader. Generate a trading signal for XAUUSD based on CURRENT market conditions.
+CRITICAL: You MUST use actual current live market prices for XAUUSD. Do NOT use fictional or estimated prices.
 Analyze the current ${timeframe} timeframe for XAUUSD and provide a real trading signal in this JSON format:
-
 {
     "action": "BUY or SELL based on current market analysis",
     "entry": actual_current_market_price_number,
     "stop_loss": calculated_stop_loss_based_on_current_price,
     "take_profit": calculated_take_profit_based_on_current_price,
-    "confidence": confidence_level_1_to_100,
+    "confidence": confidence_level_60_to_100,
     "take_profits": [
         {"level": 1, "price": calculated_tp1, "risk_reward_ratio": 1.5},
         {"level": 2, "price": calculated_tp2, "risk_reward_ratio": 2.0},
@@ -78,18 +75,16 @@ Analyze the current ${timeframe} timeframe for XAUUSD and provide a real trading
     },
     "future_positions": [],
     "historical_positions": [
-        {"symbol": "${symbol}", "entry_price": recent_realistic_price, "current_status": "ACTIVE", "days_active": 2, "unrealized_pnl": calculated_pnl}
+        {"symbol": "XAUUSD", "entry_price": recent_realistic_price, "current_status": "ACTIVE", "days_active": 2, "unrealized_pnl": calculated_pnl}
     ],
     "has_notifications": true
 }
-
-If you cannot access current real-time XAUUSD market data, respond with:
+If you cannot analyze any signal now, respond with:
 {
-    "error": "Cannot access real-time market data. Please try again later.",
+    "error": "Cannot analyze any signal now due to market conditions. Please try again later.",
     "retry": true
 }
-
-Only provide trading signals with ACTUAL current market prices. No estimated or fictional prices allowed.`;
+Only provide trading signals with ACTUAL current market prices.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-5-mini",
