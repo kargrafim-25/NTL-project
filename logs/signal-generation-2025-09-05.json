@@ -1,0 +1,36 @@
+[
+  {
+    "timestamp": "2025-09-05T15:17:10.566Z",
+    "userId": "46304040",
+    "timeframe": "5M",
+    "subscriptionTier": "starter",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "5M",
+      "userTier": "starter"
+    },
+    "response": {
+      "action": "BUY",
+      "entry": 2000,
+      "stop_loss": 1980,
+      "take_profit": 2020,
+      "confidence": 75,
+      "take_profits": [],
+      "ai_analysis": {
+        "brief": "Technical analysis indicates favorable trading conditions.",
+        "detailed": "Based on current market conditions and technical indicators.",
+        "market_sentiment": "NEUTRAL",
+        "trend_direction": "SIDEWAYS",
+        "key_indicators": [
+          "RSI",
+          "Moving Averages"
+        ]
+      },
+      "future_positions": [],
+      "historical_positions": [],
+      "has_notifications": true
+    },
+    "executionTime": 24323,
+    "success": true
+  }
+]

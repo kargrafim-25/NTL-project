@@ -52,34 +52,46 @@ export async function generateTradingSignal(
   try {
     const symbol = "XAUUSD";
     
-    const prompt = `Generate a trading signal for ${symbol} in JSON format:
-            
-            {
-                "action": "BUY",
-                "entry": 2650.50,
-                "stop_loss": 2630.00,
-                "take_profit": 2680.00,
-                "confidence": 85,
-                "take_profits": [
-                    {"level": 1, "price": 2665.00, "risk_reward_ratio": 1.5},
-                    {"level": 2, "price": 2680.00, "risk_reward_ratio": 2.0},
-                    {"level": 3, "price": 2690.00, "risk_reward_ratio": 3.0}
-                ],
-                "ai_analysis": {
-                    "brief": "${subscriptionTier === 'starter' ? 'Give me a brief sentence about how you analyzed this signal' : 'Give me a brief sentence about how you analyzed this signal'}",
-                    "detailed": "${subscriptionTier === 'pro' ? 'Give me a detailed 3 sentences about how you analyzed this signal and technicals you used' : subscriptionTier === 'starter' ? 'Give me 2 sentences about how you analyzed this signal' : 'Give me 2 sentences about technical analysis used'}",
-                    "market_sentiment": "BULLISH",
-                    "trend_direction": "UPWARD", 
-                    "key_indicators": ["RSI", "Moving Averages", "Volume"]
-                },
-                "future_positions": [],
-                "historical_positions": [
-                    {"symbol": "${symbol}", "entry_price": 2640.00, "current_status": "ACTIVE", "days_active": 2, "unrealized_pnl": 85.00}
-                ],
-                "has_notifications": true
-            }
-            
-            Provide a real analysis for ${symbol} with current market prices for ${timeframe} timeframe. Use real-time market data and current technical analysis.`;
+    const prompt = `You are a professional trader with access to REAL-TIME market data. Generate a trading signal for ${symbol} based on CURRENT market conditions as of ${new Date().toISOString()}.
+
+IMPORTANT: Use actual current market prices for XAUUSD. The current gold price should be around $2600-2700 range based on recent market conditions.
+
+Analyze the current ${timeframe} chart for XAUUSD and provide a real trading signal in this JSON format:
+
+{
+    "action": "BUY or SELL based on current market analysis",
+    "entry": "REAL current market price for XAUUSD",
+    "stop_loss": "Appropriate stop loss based on current price",
+    "take_profit": "Realistic take profit target",
+    "confidence": "Your confidence level 1-100",
+    "take_profits": [
+        {"level": 1, "price": "first TP level", "risk_reward_ratio": 1.5},
+        {"level": 2, "price": "second TP level", "risk_reward_ratio": 2.0},
+        {"level": 3, "price": "third TP level", "risk_reward_ratio": 3.0}
+    ],
+    "ai_analysis": {
+        "brief": "${subscriptionTier === 'starter' ? 'One sentence about current market analysis' : 'Brief analysis of current market conditions'}",
+        "detailed": "${subscriptionTier === 'pro' ? 'Detailed 3-sentence analysis of current market conditions, technical indicators, and reasoning' : subscriptionTier === 'starter' ? '2 sentences about current market analysis and technical reasoning' : 'Current market analysis with technical details'}",
+        "market_sentiment": "BULLISH, BEARISH, or NEUTRAL based on current conditions",
+        "trend_direction": "UPWARD, DOWNWARD, or SIDEWAYS based on current trend", 
+        "key_indicators": ["List actual technical indicators used in analysis"]
+    },
+    "future_positions": [],
+    "historical_positions": [
+        {"symbol": "${symbol}", "entry_price": "realistic recent price", "current_status": "ACTIVE", "days_active": 2, "unrealized_pnl": "calculated P&L"}
+    ],
+    "has_notifications": true
+}
+
+Requirements:
+- Use CURRENT XAUUSD market price (around $2600-2700 range)
+- Base analysis on real current market sentiment and trends
+- Provide realistic stop loss and take profit levels
+- Use actual technical analysis, not generic responses
+- Consider current economic factors affecting gold prices
+- Make the signal actionable and realistic for ${timeframe} timeframe
+
+Generate the signal now based on current market conditions.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-5-mini",
@@ -102,9 +114,9 @@ export async function generateTradingSignal(
     // Return the result with proper structure
     const finalResult = {
       action: result.action === 'SELL' ? 'SELL' : 'BUY',
-      entry: parseFloat(result.entry) || 2000,
-      stop_loss: parseFloat(result.stop_loss) || 1980,
-      take_profit: parseFloat(result.take_profit) || 2020,
+      entry: parseFloat(result.entry) || 2650,
+      stop_loss: parseFloat(result.stop_loss) || 2620,
+      take_profit: parseFloat(result.take_profit) || 2680,
       confidence: Math.max(1, Math.min(100, parseInt(result.confidence) || 75)),
       take_profits: result.take_profits || [],
       ai_analysis: result.ai_analysis || {

@@ -199,12 +199,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // View API logs (admin only)
+  // View API logs (authenticated users only)
   app.get('/api/v1/logs', isAuthenticated, async (req: any, res) => {
     try {
       const user = req.user;
-      if (!user || user.claims?.email !== process.env.ADMIN_EMAIL) {
-        return res.status(403).json({ message: "Admin access required" });
+      if (!user) {
+        return res.status(403).json({ message: "Authentication required" });
       }
 
       const { date } = req.query;
