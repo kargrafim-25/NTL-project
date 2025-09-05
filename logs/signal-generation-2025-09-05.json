@@ -32,5 +32,20 @@
     },
     "executionTime": 24323,
     "success": true
+  },
+  {
+    "timestamp": "2025-09-05T15:24:43.818Z",
+    "userId": "46304040",
+    "timeframe": "5M",
+    "subscriptionTier": "starter",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "5M",
+      "userTier": "starter"
+    },
+    "response": null,
+    "executionTime": 2669,
+    "success": false,
+    "error": "Cannot access real-time market data. Please try again later."
   }
 ]
