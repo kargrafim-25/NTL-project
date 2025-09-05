@@ -44,8 +44,7 @@ export default function TradingViewChart({ selectedTimeframe = '1H', onTimeframe
             Live Chart
           </CardTitle>
           <div className="flex items-center space-x-2">
-            <span className="text-2xl font-bold" data-testid="text-current-price">$2,045.60</span>
-            <span className="text-success text-sm" data-testid="text-price-change">↑ +0.12%</span>
+            <span className="text-sm text-muted-foreground">Live Chart</span>
           </div>
         </div>
       </CardHeader>

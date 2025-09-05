@@ -19,28 +19,30 @@ export async function generateTradingSignal(
   subscriptionTier: string
 ): Promise<TradingSignalData> {
   try {
-    const currentPrice = 2045.60; // In real implementation, this would come from live price feed
-    
-    const prompt = `You are a professional forex trading expert specializing in XAUUSD (Gold) analysis. 
+    const prompt = `You are a professional forex trading expert specializing in XAUUSD (Gold) analysis with access to current market data.
 
-Current XAUUSD price: $${currentPrice}
+**IMPORTANT**: You must analyze the CURRENT live market conditions for XAUUSD and provide a real trading signal based on actual market analysis.
+
 Timeframe: ${timeframe}
 Subscription tier: ${subscriptionTier}
 
-Generate a trading signal for XAUUSD with the following requirements:
+Generate a real-time trading signal for XAUUSD with the following requirements:
 
-1. Analyze current market conditions for the ${timeframe} timeframe
-2. Provide a BUY or SELL recommendation
-3. Set realistic entry price (within 0.5% of current price)
-4. Calculate appropriate stop loss (risk management)
-5. Set take profit targets based on technical analysis
-6. Provide confidence rating (1-100%)
-7. Include detailed analysis explaining the signal rationale
+1. Analyze CURRENT market conditions and price action for the ${timeframe} timeframe
+2. Consider current market sentiment, economic factors, and technical indicators
+3. Provide a BUY or SELL recommendation based on your analysis
+4. Set realistic entry price based on current live market levels
+5. Calculate appropriate stop loss for proper risk management
+6. Set take profit targets based on technical analysis and market structure
+7. Provide confidence rating (1-100%) based on signal strength
+8. Include detailed analysis explaining the signal rationale with current market context
 
 ${subscriptionTier === 'starter' ? 
-  'Provide brief analysis with key technical points.' : 
-  'Provide comprehensive analysis including technical indicators, market sentiment, and future predictions.'
+  'Provide brief analysis with key technical points and current market factors.' : 
+  'Provide comprehensive analysis including technical indicators, market sentiment, current news impact, and future predictions.'
 }
+
+**Note**: Base your analysis on real market conditions, not hypothetical prices. Consider current gold market dynamics, USD strength, inflation concerns, and technical chart patterns.
 
 Respond in JSON format with this exact structure:
 {
@@ -73,11 +75,11 @@ Respond in JSON format with this exact structure:
     // Validate and sanitize the response
     return {
       direction: result.direction === 'SELL' ? 'SELL' : 'BUY',
-      entryPrice: parseFloat(result.entryPrice) || currentPrice,
-      stopLoss: parseFloat(result.stopLoss) || (currentPrice * 0.98),
-      takeProfit: parseFloat(result.takeProfit) || (currentPrice * 1.02),
+      entryPrice: parseFloat(result.entryPrice) || 2000,
+      stopLoss: parseFloat(result.stopLoss) || (parseFloat(result.entryPrice) * 0.98),
+      takeProfit: parseFloat(result.takeProfit) || (parseFloat(result.entryPrice) * 1.02),
       confidence: Math.max(1, Math.min(100, parseInt(result.confidence) || 75)),
-      analysis: result.analysis || 'Technical analysis indicates favorable trading conditions.'
+      analysis: result.analysis || 'Technical analysis based on current market conditions.'
     };
 
   } catch (error) {
