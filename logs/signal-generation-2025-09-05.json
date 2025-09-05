@@ -47,5 +47,50 @@
     "executionTime": 2669,
     "success": false,
     "error": "Cannot access real-time market data. Please try again later."
+  },
+  {
+    "timestamp": "2025-09-05T15:37:58.848Z",
+    "userId": "46304040",
+    "timeframe": "5M",
+    "subscriptionTier": "starter",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "5M",
+      "userTier": "starter"
+    },
+    "response": null,
+    "executionTime": 4561,
+    "success": false,
+    "error": "Cannot analyze any signal now due to market conditions. Please try again later."
+  },
+  {
+    "timestamp": "2025-09-05T15:38:07.520Z",
+    "userId": "46304040",
+    "timeframe": "1H",
+    "subscriptionTier": "starter",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "1H",
+      "userTier": "starter"
+    },
+    "response": null,
+    "executionTime": 4904,
+    "success": false,
+    "error": "Cannot analyze any signal now due to market conditions. Please try again later."
+  },
+  {
+    "timestamp": "2025-09-05T15:38:50.375Z",
+    "userId": "46304040",
+    "timeframe": "15M",
+    "subscriptionTier": "starter",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "15M",
+      "userTier": "starter"
+    },
+    "response": null,
+    "executionTime": 7160,
+    "success": false,
+    "error": "Cannot analyze any signal now due to market conditions. Please try again later."
   }
 ]
