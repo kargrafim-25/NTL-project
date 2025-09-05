@@ -65,7 +65,6 @@ Respond in JSON format with this exact structure:
         },
       ],
       response_format: { type: "json_object" },
-      temperature: 0.7,
       max_completion_tokens: 1000,
     });
 
