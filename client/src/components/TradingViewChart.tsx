@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,32 @@ interface TradingViewChartProps {
   onTimeframeChange?: (timeframe: string) => void;
 }
 
+// Convert our timeframe format to TradingView chart intervals
+const getChartInterval = (timeframe: string) => {
+  switch (timeframe) {
+    case '15M': return '15';
+    case '30M': return '30';
+    case '1H': return '60';
+    case '4H': return '240';
+    case '1D': return 'D';
+    case '1W': return 'W';
+    default: return '60';
+  }
+};
+
 export default function TradingViewChart({ selectedTimeframe = '1H', onTimeframeChange }: TradingViewChartProps) {
   const [activeTimeframe, setActiveTimeframe] = useState(selectedTimeframe);
+
+  // Sync with external timeframe changes
+  useEffect(() => {
+    setActiveTimeframe(selectedTimeframe);
+  }, [selectedTimeframe]);
+
+  // Generate dynamic iframe URL based on active timeframe
+  const getTradingViewUrl = () => {
+    const interval = getChartInterval(activeTimeframe);
+    return `https://s.tradingview.com/widgetembed/?frameElementId=tradingview_widget&symbol=XAUUSD&interval=${interval}&hidesidetoolbar=1&hidetoptoolbar=1&symboledit=1&saveimage=1&toolbarbg=rgba(30,30,30,1)&studies=[]&theme=dark&style=1&timezone=Etc%2FUTC&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=en&utm_source=localhost&utm_medium=widget&utm_campaign=chart&utm_term=XAUUSD`;
+  };
   return (
     <Card className="chart-container" data-testid="card-trading-chart">
       <CardHeader>
@@ -25,45 +49,19 @@ export default function TradingViewChart({ selectedTimeframe = '1H', onTimeframe
         </div>
       </CardHeader>
       <CardContent>
-        {/* TradingView Chart Integration */}
-        <div className="h-96 bg-muted/5 rounded-lg flex items-center justify-center border border-border/50 relative overflow-hidden">
-          {/* Chart Placeholder - In production, integrate TradingView widget */}
-          <div className="text-center z-10">
-            <BarChart3 className="h-16 w-16 text-primary mb-4 mx-auto" />
-            <p className="text-muted-foreground font-medium">TradingView Chart Integration</p>
-            <p className="text-sm text-muted-foreground mt-2">Real-time XAUUSD price data</p>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="mt-4"
-              onClick={() => window.open('https://www.tradingview.com/chart/?symbol=XAUUSD', '_blank')}
-              data-testid="button-open-tradingview"
-            >
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Open in TradingView
-            </Button>
-          </div>
-          
-          {/* Animated Background Grid */}
-          <div className="absolute inset-0 opacity-10">
-            <svg className="w-full h-full" viewBox="0 0 400 300">
-              <defs>
-                <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" strokeWidth="0.5"/>
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#grid)" />
-              
-              {/* Animated price line */}
-              <polyline
-                fill="none"
-                stroke="hsl(var(--primary))"
-                strokeWidth="2"
-                points="50,150 100,120 150,140 200,100 250,130 300,90 350,110"
-                className="animate-pulse-slow"
-              />
-            </svg>
-          </div>
+        {/* TradingView Embedded Chart */}
+        <div className="h-96 rounded-lg overflow-hidden border border-border/50">
+          <iframe
+            key={activeTimeframe} // Force re-render when timeframe changes
+            src={getTradingViewUrl()}
+            width="100%"
+            height="100%"
+            frameBorder="0"
+            scrolling="no"
+            allowFullScreen={true}
+            data-testid="tradingview-chart"
+            className="rounded-lg"
+          ></iframe>
         </div>
 
         {/* Chart Controls */}

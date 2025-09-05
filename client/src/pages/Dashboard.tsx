@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import StatsCards from "@/components/StatsCards";
@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 export default function Dashboard() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading, user } = useAuth();
+  const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1H');
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -127,7 +128,10 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Signal Generation Panel */}
           <div className="lg:col-span-1">
-            <SignalGenerator />
+            <SignalGenerator 
+              selectedTimeframe={selectedTimeframe}
+              onTimeframeChange={setSelectedTimeframe}
+            />
             <div className="mt-6">
               <LatestSignal />
             </div>
@@ -135,7 +139,10 @@ export default function Dashboard() {
 
           {/* Chart and Analysis */}
           <div className="lg:col-span-2">
-            <TradingViewChart />
+            <TradingViewChart 
+              selectedTimeframe={selectedTimeframe}
+              onTimeframeChange={setSelectedTimeframe}
+            />
             <div className="mt-6">
               <SignalHistory />
             </div>

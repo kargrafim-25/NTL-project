@@ -18,8 +18,12 @@ const timeframes = [
   { value: '1W', label: '1W' },
 ];
 
-export default function SignalGenerator() {
-  const [selectedTimeframe, setSelectedTimeframe] = useState<'15M' | '30M' | '1H' | '4H' | '1D' | '1W'>('1H');
+interface SignalGeneratorProps {
+  selectedTimeframe?: string;
+  onTimeframeChange?: (timeframe: string) => void;
+}
+
+export default function SignalGenerator({ selectedTimeframe = '1H', onTimeframeChange }: SignalGeneratorProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -92,7 +96,7 @@ export default function SignalGenerator() {
   });
 
   const handleGenerateSignal = () => {
-    generateSignalMutation.mutate({ timeframe: selectedTimeframe });
+    generateSignalMutation.mutate({ timeframe: selectedTimeframe as '15M' | '30M' | '1H' | '4H' | '1D' | '1W' });
   };
 
   const handleFreeUpgrade = () => {
@@ -124,7 +128,7 @@ export default function SignalGenerator() {
                 key={timeframe.value}
                 variant={selectedTimeframe === timeframe.value ? "default" : "outline"}
                 size="sm"
-                onClick={() => setSelectedTimeframe(timeframe.value as any)}
+                onClick={() => onTimeframeChange?.(timeframe.value)}
                 className={`${
                   selectedTimeframe === timeframe.value
                     ? 'bg-primary text-primary-foreground'
