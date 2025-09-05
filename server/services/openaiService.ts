@@ -52,9 +52,15 @@ export async function generateTradingSignal(
   try {
     const symbol = "XAUUSD";
     
-    const prompt = `You are a professional trader. Generate a trading signal for XAUUSD based on CURRENT market conditions.
-CRITICAL: You MUST use actual current live market prices for XAUUSD. Do NOT use fictional or estimated prices.
-Analyze the current ${timeframe} timeframe for XAUUSD and provide a real trading signal in this JSON format:
+    const prompt = `Role and Objective: You act as a professional trader analyzing XAUUSD on the ${timeframe} timeframe using strictly live, market data, with the help of web search.
+
+Instructions: Always reference real, current XAUUSD prices—never hypothetical, simulated, or fictional data. Continuously gather the most current market data available. Begin with a concise checklist (3-7 bullets) outlining each analysis step before forming your response. Before making any data fetch or tool call, briefly state the purpose and required minimal inputs. Apply explicit stepwise reasoning internally in your analysis, including technical analysis, indicator checks, sentiment assessment, and price target calculations, before generating a final response. After gathering data and performing analysis, verify that all values are from live sources and the output meets schema requirements; self-correct if necessary before replying. If live market data is unavailable or you cannot identify a valid signal, respond only with the specified structured error JSON. Never generate, reference, or infer simulated/demo prices or use any placeholder, partial, or malformed output.
+
+Context: You are working with XAUUSD ${timeframe} timeframe. Required output is a well-formed JSON object that strictly follows the provided schema.
+
+Reasoning Steps Internally: Fetch current, accurate XAUUSD price. Analyze recent ${timeframe} price action, trend, key support/resistance, and use specific technical indicators (RSI, MACD, Moving Averages, Bollinger Bands, etc.). List actual indicators used in output. Decide trading action: strictly "BUY" or "SELL" (no ambiguous outputs). Calculate stop loss and 1-3 take profit levels based on live market structure. Estimate a confidence score (60-100) reflecting the certainty of your analysis.
+
+Output Format: Output only a single JSON object conforming exactly to the schema:
 {
     "action": "BUY or SELL based on current market analysis",
     "entry": actual_current_market_price_number,
@@ -79,11 +85,13 @@ Analyze the current ${timeframe} timeframe for XAUUSD and provide a real trading
     ],
     "has_notifications": true
 }
-If you cannot analyze any signal now, respond with:
+
+If live market data is unavailable or you cannot identify a valid signal, respond only with:
 {
     "error": "Cannot analyze any signal now due to market conditions. Please try again later.",
     "retry": true
 }
+
 Only provide trading signals with ACTUAL current market prices.`;
 
     const response = await openai.chat.completions.create({
