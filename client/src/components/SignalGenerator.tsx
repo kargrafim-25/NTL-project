@@ -10,6 +10,7 @@ import { Brain, Sparkles } from "lucide-react";
 import { GenerateSignalRequest, GenerateSignalResponse } from "@/types/trading";
 
 const timeframes = [
+  { value: '5M', label: '5M' },
   { value: '15M', label: '15M' },
   { value: '30M', label: '30M' },
   { value: '1H', label: '1H' },

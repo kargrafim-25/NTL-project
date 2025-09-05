@@ -47,7 +47,7 @@ export const users = pgTable("users", {
 
 export const signalDirectionEnum = pgEnum('signal_direction', ['BUY', 'SELL']);
 export const signalStatusEnum = pgEnum('signal_status', ['active', 'closed', 'stopped']);
-export const timeframeEnum = pgEnum('timeframe', ['15M', '30M', '1H', '4H', '1D', '1W']);
+export const timeframeEnum = pgEnum('timeframe', ['5M', '15M', '30M', '1H', '4H', '1D', '1W']);
 
 export const tradingSignals = pgTable("trading_signals", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

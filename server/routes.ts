@@ -8,7 +8,7 @@ import { insertSignalSchema } from "@shared/schema";
 import { z } from "zod";
 
 const generateSignalRequestSchema = z.object({
-  timeframe: z.enum(['15M', '30M', '1H', '4H', '1D', '1W']),
+  timeframe: z.enum(['5M', '15M', '30M', '1H', '4H', '1D', '1W']),
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {

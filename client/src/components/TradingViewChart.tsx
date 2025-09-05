@@ -11,6 +11,7 @@ interface TradingViewChartProps {
 // Convert our timeframe format to TradingView chart intervals
 const getChartInterval = (timeframe: string) => {
   switch (timeframe) {
+    case '5M': return '5';
     case '15M': return '15';
     case '30M': return '30';
     case '1H': return '60';
@@ -69,7 +70,7 @@ export default function TradingViewChart({ selectedTimeframe = '1H', onTimeframe
           <div className="flex items-center space-x-2">
             <span className="text-sm text-muted-foreground">Timeframe:</span>
             <div className="flex space-x-1">
-              {['15M', '30M', '1H', '4H', '1D', '1W'].map((tf) => (
+              {['5M', '15M', '30M', '1H', '4H', '1D', '1W'].map((tf) => (
                 <Button
                   key={tf}
                   variant={tf === activeTimeframe ? 'default' : 'ghost'}
