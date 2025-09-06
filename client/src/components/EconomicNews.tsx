@@ -35,13 +35,13 @@ export function EconomicNews({ className }: EconomicNewsProps) {
   const getImpactColor = (impact: string) => {
     switch (impact) {
       case 'high':
-        return 'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-sm';
+        return 'bg-red-500 text-white';
       case 'medium':
-        return 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm';
+        return 'bg-red-400 text-white';
       case 'low':
-        return 'bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-sm';
+        return 'bg-red-300 text-white';
       default:
-        return 'bg-gradient-to-r from-slate-500 to-gray-600 text-white shadow-sm';
+        return 'bg-gray-600 text-white';
     }
   };
 
@@ -61,7 +61,7 @@ export function EconomicNews({ className }: EconomicNewsProps) {
 
     if (isFirst) {
       return (
-        <Card className="border-l-4 border-l-gradient-to-b from-blue-500 to-indigo-600 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 shadow-md" data-testid={`news-card-${news.id}`}>
+        <Card className="border-l-4 border-l-red-500 bg-background" data-testid={`news-card-${news.id}`}>
           <CardHeader className="py-2">
             <div className="flex items-start justify-between">
               <div className="flex-1 min-w-0">
@@ -86,7 +86,7 @@ export function EconomicNews({ className }: EconomicNewsProps) {
     return (
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
-          <Card className="cursor-pointer hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-950/30 dark:hover:to-indigo-950/30 transition-all duration-200 border-l-2 border-l-gradient-to-b from-slate-400 to-gray-500 shadow-sm hover:shadow-md" data-testid={`news-card-${news.id}`}>
+          <Card className="cursor-pointer hover:bg-muted/30 transition-colors border-l-2 border-l-red-400" data-testid={`news-card-${news.id}`}>
             <CardHeader className="py-1 px-3">
               <div className="flex items-center justify-between">
                 <div className="flex-1 min-w-0">
@@ -107,7 +107,7 @@ export function EconomicNews({ className }: EconomicNewsProps) {
           </Card>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <Card className="mt-1 border-l-2 border-l-indigo-400 bg-gradient-to-r from-indigo-50/50 to-blue-50/50 dark:from-indigo-950/20 dark:to-blue-950/20 shadow-sm" data-testid={`news-details-${news.id}`}>
+          <Card className="mt-1 border-l-2 border-l-red-300 bg-background" data-testid={`news-details-${news.id}`}>
             <CardContent className="py-2 px-3">
               <p className="text-xs text-muted-foreground mb-1" data-testid={`news-description-${news.id}`}>
                 {news.description}
@@ -146,25 +146,25 @@ export function EconomicNews({ className }: EconomicNewsProps) {
   }
 
   return (
-    <Card className={`${className} border-2 border-gradient-to-r from-indigo-200 to-blue-200 dark:from-indigo-800 dark:to-blue-800 shadow-lg bg-gradient-to-r from-indigo-50/30 to-blue-50/30 dark:from-indigo-950/30 dark:to-blue-950/30`} data-testid="economic-news-container">
-      <CardHeader className="pb-2 bg-gradient-to-r from-indigo-100 to-blue-100 dark:from-indigo-900/50 dark:to-blue-900/50 rounded-t-lg border-b-2 border-indigo-200 dark:border-indigo-700">
+    <Card className={`${className} border border-border bg-background`} data-testid="economic-news-container">
+      <CardHeader className="pb-2 bg-background border-b border-border">
         <CardTitle className="flex items-center gap-2 text-sm">
-          <div className="p-1.5 rounded-full bg-gradient-to-r from-indigo-500 to-blue-600 text-white shadow-md">
+          <div className="p-1.5 rounded-full bg-red-500 text-white">
             <TrendingUp className="w-3 h-3" />
           </div>
-          <span className="bg-gradient-to-r from-indigo-700 to-blue-700 dark:from-indigo-300 dark:to-blue-300 bg-clip-text text-transparent font-semibold">
+          <span className="text-foreground font-semibold">
             Economic News
           </span>
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
         <Tabs defaultValue="upcoming" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 h-8 bg-gradient-to-r from-indigo-100 to-blue-100 dark:from-indigo-900/50 dark:to-blue-900/50 border border-indigo-200 dark:border-indigo-700">
-            <TabsTrigger value="upcoming" className="text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md" data-testid="tab-upcoming">
-              Upcoming ({upcomingNews.length})
+          <TabsList className="grid w-full grid-cols-2 h-8 bg-background border border-border">
+            <TabsTrigger value="upcoming" className="text-xs data-[state=active]:bg-red-500 data-[state=active]:text-white" data-testid="tab-upcoming">
+              Very soon ({upcomingNews.length})
             </TabsTrigger>
-            <TabsTrigger value="recent" className="text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md" data-testid="tab-recent">
-              Recent ({recentNews.length})
+            <TabsTrigger value="recent" className="text-xs data-[state=active]:bg-red-500 data-[state=active]:text-white" data-testid="tab-recent">
+              Upcoming ({recentNews.length})
             </TabsTrigger>
           </TabsList>
           
