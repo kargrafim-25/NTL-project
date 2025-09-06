@@ -9,11 +9,11 @@ import TradingViewChart from "@/components/TradingViewChart";
 import SignalHistory from "@/components/SignalHistory";
 import PremiumFeatures from "@/components/PremiumFeatures";
 import { EconomicNews } from "@/components/EconomicNews";
-import { TrendingUp, LogOut, Database } from "lucide-react";
+import { TrendingUp, Database } from "lucide-react";
 import logoUrl from '../assets/logo.png';
 import ChatbotTrigger from '@/components/ChatbotTrigger';
+import ProfileAvatar from '@/components/ProfileAvatar';
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 export default function Dashboard() {
   const { toast } = useToast();
@@ -40,27 +40,6 @@ export default function Dashboard() {
     window.location.href = "/api/logout";
   };
 
-  const getSubscriptionBadgeColor = (tier: string) => {
-    switch (tier) {
-      case 'pro':
-        return 'bg-gradient-to-r from-secondary to-accent text-white';
-      case 'starter':
-        return 'bg-primary text-primary-foreground';
-      default:
-        return 'bg-muted text-muted-foreground';
-    }
-  };
-
-  const getSubscriptionLabel = (tier: string) => {
-    switch (tier) {
-      case 'pro':
-        return 'Pro Trader';
-      case 'starter':
-        return 'Starter Trader';
-      default:
-        return 'Free User';
-    }
-  };
 
   if (isLoading) {
     return (
@@ -81,24 +60,30 @@ export default function Dashboard() {
       <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
+            {/* Logo and Title */}
+            <div className="flex items-center space-x-3">
               <img 
                 src={logoUrl} 
                 alt="Next Trading Labs Logo" 
-                className="w-10 h-10 object-contain rounded-lg"
+                className="w-8 h-8 sm:w-10 sm:h-10 object-contain rounded-lg"
                 data-testid="img-logo"
               />
-              <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              <div className="hidden sm:block">
+                <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                   Next Trading Labs
                 </h1>
-                <p className="text-xs text-muted-foreground">AI-Powered Trading Signals</p>
+                <p className="text-xs text-muted-foreground hidden md:block">AI-Powered Trading Signals</p>
+              </div>
+              <div className="sm:hidden">
+                <h1 className="text-base font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  NTL
+                </h1>
               </div>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               {/* Market Status */}
-              <div className={`flex items-center space-x-2 px-3 py-1 rounded-full ${
+              <div className={`flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-1 rounded-full ${
                 isMarketLoading 
                   ? 'bg-muted/20' 
                   : isMarketOpen 
@@ -112,49 +97,36 @@ export default function Dashboard() {
                       ? 'bg-success animate-pulse' 
                       : 'bg-destructive'
                 }`} data-testid="status-market"></div>
-                <span className={`text-sm font-medium ${
+                <span className={`text-xs sm:text-sm font-medium ${
                   isMarketLoading
                     ? 'text-muted-foreground'
                     : isMarketOpen 
                       ? 'text-success' 
                       : 'text-destructive'
                 }`}>
-                  {isMarketLoading ? 'Checking...' : isMarketOpen ? 'Market Open' : 'Market Closed'}
+                  <span className="hidden sm:inline">
+                    {isMarketLoading ? 'Checking...' : isMarketOpen ? 'Market Open' : 'Market Closed'}
+                  </span>
+                  <span className="sm:hidden">
+                    {isMarketLoading ? '...' : isMarketOpen ? 'Open' : 'Closed'}
+                  </span>
                 </span>
               </div>
-              
-              {/* User Plan Badge */}
-              {user && (
-                <Badge 
-                  className={`px-4 py-2 rounded-full font-semibold text-sm ${getSubscriptionBadgeColor(user.subscriptionTier)}`}
-                  data-testid="badge-subscription"
-                >
-                  {getSubscriptionLabel(user.subscriptionTier)}
-                </Badge>
-              )}
 
-              {/* Admin Logs Button */}
+              {/* Admin Logs Button - Hidden on mobile */}
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => window.location.href = '/admin/logs'}
-                className="text-muted-foreground hover:text-foreground"
+                className="hidden sm:flex text-muted-foreground hover:text-foreground"
                 data-testid="button-admin-logs"
                 title="View API Logs"
               >
                 <Database className="h-4 w-4" />
               </Button>
 
-              {/* Logout Button */}
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={handleLogout}
-                className="text-muted-foreground hover:text-foreground"
-                data-testid="button-logout"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
+              {/* Profile Avatar with dropdown */}
+              <ProfileAvatar user={user} onLogout={handleLogout} />
             </div>
           </div>
         </div>
