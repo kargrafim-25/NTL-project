@@ -33,9 +33,9 @@ Preferred communication style: Simple, everyday language.
 - **Credit System**: Daily/monthly credit limits based on subscription tiers with automatic resets
 - **Market Hours**: Validates trading hours using Casablanca timezone (Sunday 10PM - Friday 9PM)
 - **Subscription Tiers**:
-  - Free: 2 daily signals, basic features
-  - Starter: 50 daily signals, signal history, brief analysis
-  - Pro: Unlimited signals, Telegram access, MT5 EA discounts, detailed analysis
+  - Free: 2 daily signals, 10 monthly signals, basic features
+  - Starter: Unlimited daily signals, 60 monthly signals, Telegram access, 10% bot discounts, 20% indicator discounts, free first month
+  - Pro: Unlimited signals, Telegram access, 40% bot discounts, 50% indicator discounts, free first month
 
 ## AI Integration
 - **OpenAI GPT-5 Mini**: Generates real-time trading signals with technical analysis

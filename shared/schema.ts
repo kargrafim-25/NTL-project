@@ -39,7 +39,7 @@ export const users = pgTable("users", {
   dailyCredits: integer("daily_credits").default(0).notNull(),
   monthlyCredits: integer("monthly_credits").default(0).notNull(),
   maxDailyCredits: integer("max_daily_credits").default(2).notNull(),
-  maxMonthlyCredits: integer("max_monthly_credits").default(60).notNull(),
+  maxMonthlyCredits: integer("max_monthly_credits").default(10).notNull(),
   lastCreditReset: timestamp("last_credit_reset").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

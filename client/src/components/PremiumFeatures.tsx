@@ -67,13 +67,17 @@ export default function PremiumFeatures() {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground mb-4">
-            Get exclusive discounts on our automated trading robots for MetaTrader 5. 
-            Pro members save up to 40% on all EAs.
+            Get exclusive discounts on our automated trading robots and indicators for MetaTrader 5. 
+            Starter: 10% bots + 20% indicators, Pro: 40% bots + 50% indicators.
           </p>
           <div className="space-y-2 mb-4">
             <div className="flex items-center text-sm">
               <div className="w-2 h-2 bg-success rounded-full mr-3" />
-              40% off all Expert Advisors
+              Up to 40% off Expert Advisors
+            </div>
+            <div className="flex items-center text-sm">
+              <div className="w-2 h-2 bg-success rounded-full mr-3" />
+              Up to 50% off indicators
             </div>
             <div className="flex items-center text-sm">
               <div className="w-2 h-2 bg-success rounded-full mr-3" />
@@ -94,7 +98,7 @@ export default function PremiumFeatures() {
             data-testid="button-browse-ea"
           >
             <Bot className="mr-2 h-4 w-4" />
-            Browse EAs (40% Off)
+            Browse Marketplace
           </Button>
         </CardContent>
       </Card>

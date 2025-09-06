@@ -18,12 +18,12 @@ interface ChatbotProps {
 }
 
 const FAQ_RESPONSES = {
-  pricing: "We offer 3 plans: Free (basic AI confirmation), Starter Trader ($29/month - 50 daily signals), and Pro Trader ($79/month - unlimited signals + Telegram access). All plans include AI-powered market analysis.",
+  pricing: "We offer 3 plans: Free (2/day, 10/month), Starter Trader ($29/month - unlimited/day, 60/month, Telegram access, 10% bot discounts, 20% indicator discounts, free first month), and Pro Trader ($79/month - unlimited signals, Telegram access, 40% bot discounts, 50% indicator discounts, free first month).",
   signals: "Our AI generates real-time XAUUSD trading signals with entry points, stop losses, and take profit levels. Signals include technical analysis and confidence ratings to help you make informed decisions.",
   timeframes: "You can generate signals for multiple timeframes: 5M, 15M, 30M, 1H, 4H, 1D, and 1W. Different timeframes suit different trading strategies from scalping to swing trading.",
   accuracy: "Our signals include confidence ratings from 60-100%. We provide transparent performance tracking, but remember that trading involves risk and past performance doesn't guarantee future results.",
   support: "For technical issues, billing questions, or account help, you can contact our support team. Pro users also get access to our exclusive Telegram group for real-time discussions.",
-  subscription: "You can upgrade your plan anytime from your dashboard. Starter plan includes detailed analysis and signal history. Pro plan adds unlimited signals and Telegram community access.",
+  subscription: "You can upgrade your plan anytime. Starter: unlimited daily signals, 60/month, Telegram access, discounts, free first month. Pro: unlimited signals, Telegram access, higher discounts (40% bots, 50% indicators), free first month.",
   risk: "Trading involves substantial risk of loss. Our signals are for educational purposes and market analysis. Always use proper risk management and never invest more than you can afford to lose.",
   market_hours: "We generate signals during market hours (Sunday 10PM - Friday 9PM Casablanca time). Our AI monitors markets 24/7 during trading sessions to provide timely opportunities."
 };

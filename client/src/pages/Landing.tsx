@@ -162,15 +162,19 @@ export default function Landing() {
                 <ul className="space-y-3">
                   <li className="flex items-center">
                     <div className="w-2 h-2 bg-success rounded-full mr-3" />
+                    2 signals per day
+                  </li>
+                  <li className="flex items-center">
+                    <div className="w-2 h-2 bg-success rounded-full mr-3" />
+                    10 signals per month
+                  </li>
+                  <li className="flex items-center">
+                    <div className="w-2 h-2 bg-success rounded-full mr-3" />
                     Basic AI confirmation
                   </li>
                   <li className="flex items-center">
                     <div className="w-2 h-2 bg-success rounded-full mr-3" />
                     Market status updates
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-muted rounded-full mr-3" />
-                    Limited signal access
                   </li>
                 </ul>
                 <Button 
@@ -200,19 +204,27 @@ export default function Landing() {
                 <ul className="space-y-3">
                   <li className="flex items-center">
                     <div className="w-2 h-2 bg-success rounded-full mr-3" />
-                    Latest signals access
+                    Unlimited signals per day
                   </li>
                   <li className="flex items-center">
                     <div className="w-2 h-2 bg-success rounded-full mr-3" />
-                    Detailed AI analysis
+                    60 signals per month
                   </li>
                   <li className="flex items-center">
                     <div className="w-2 h-2 bg-success rounded-full mr-3" />
-                    50 daily signals
+                    Access to Telegram group
                   </li>
                   <li className="flex items-center">
                     <div className="w-2 h-2 bg-success rounded-full mr-3" />
-                    Signal history
+                    10% discount on bots
+                  </li>
+                  <li className="flex items-center">
+                    <div className="w-2 h-2 bg-success rounded-full mr-3" />
+                    20% discount on indicators
+                  </li>
+                  <li className="flex items-center">
+                    <div className="w-2 h-2 bg-success rounded-full mr-3" />
+                    Free first month
                   </li>
                 </ul>
                 <Button 
@@ -241,21 +253,25 @@ export default function Landing() {
                 <ul className="space-y-3">
                   <li className="flex items-center">
                     <div className="w-2 h-2 bg-success rounded-full mr-3" />
-                    Everything in Starter
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-2 h-2 bg-success rounded-full mr-3" />
                     Unlimited signals
                   </li>
                   <li className="flex items-center">
                     <div className="w-2 h-2 bg-success rounded-full mr-3" />
                     <Users className="h-4 w-4 mr-1 text-primary" />
-                    Telegram group access
+                    Access to Telegram group
                   </li>
                   <li className="flex items-center">
                     <div className="w-2 h-2 bg-success rounded-full mr-3" />
                     <Bot className="h-4 w-4 mr-1 text-secondary" />
-                    MT5 EA discounts (40% off)
+                    40% discount on bots
+                  </li>
+                  <li className="flex items-center">
+                    <div className="w-2 h-2 bg-success rounded-full mr-3" />
+                    50% discount on indicators
+                  </li>
+                  <li className="flex items-center">
+                    <div className="w-2 h-2 bg-success rounded-full mr-3" />
+                    Free first month
                   </li>
                 </ul>
                 <Button 
