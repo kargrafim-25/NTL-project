@@ -49,7 +49,7 @@ export default function Landing() {
             <Badge className="mb-4 bg-primary/20 text-primary border-primary/20" data-testid="badge-status">
               AI-Powered Trading Platform
             </Badge>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent leading-tight">
               Professional AI Trading Signals
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
@@ -63,8 +63,7 @@ export default function Landing() {
                 className="gradient-primary text-white font-semibold text-lg px-8 py-4 hover:shadow-lg hover:scale-105 transition-all duration-300 signal-indicator"
                 data-testid="button-get-started"
               >
-                <img src={logoUrl} alt="Logo" className="mr-2 h-5 w-5 object-contain" />
-                <Zap className="mr-1 h-5 w-5" />
+                <Zap className="mr-2 h-5 w-5" />
                 Start Trading Now
               </Button>
               <Button 
@@ -96,7 +95,7 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Card className="trading-card" data-testid="card-ai-signals">
               <CardHeader>
-                <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-white/90 border border-primary/20 rounded-lg flex items-center justify-center mb-4">
                   <img src={logoUrl} alt="Logo" className="h-6 w-6 object-contain" />
                 </div>
                 <CardTitle>AI-Powered Signals</CardTitle>
@@ -147,11 +146,11 @@ export default function Landing() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Free Tier */}
-            <Card className="trading-card relative" data-testid="card-plan-free">
+            <Card className="trading-card relative bg-muted/20 border-muted" data-testid="card-plan-free">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-2xl">Free</CardTitle>
-                  <Badge variant="secondary">Basic</Badge>
+                  <CardTitle className="text-2xl text-muted-foreground">Free</CardTitle>
+                  <Badge variant="secondary" className="bg-muted text-muted-foreground">Basic</Badge>
                 </div>
                 <div className="flex items-baseline">
                   <span className="text-4xl font-bold">$0</span>
@@ -174,7 +173,7 @@ export default function Landing() {
                   </li>
                 </ul>
                 <Button 
-                  className="w-full mt-6"
+                  className="w-full mt-6 border-muted text-muted-foreground hover:bg-muted/20"
                   variant="outline"
                   onClick={handleLogin}
                   data-testid="button-select-free"
