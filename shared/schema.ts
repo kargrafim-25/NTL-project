@@ -41,12 +41,16 @@ export const users = pgTable("users", {
   maxDailyCredits: integer("max_daily_credits").default(2).notNull(),
   maxMonthlyCredits: integer("max_monthly_credits").default(10).notNull(),
   lastCreditReset: timestamp("last_credit_reset").defaultNow(),
+  monthlyCompletionStreak: integer("monthly_completion_streak").default(0).notNull(),
+  lastNotificationDate: timestamp("last_notification_date"),
+  pendingDiscountCode: varchar("pending_discount_code"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const signalDirectionEnum = pgEnum('signal_direction', ['BUY', 'SELL']);
 export const signalStatusEnum = pgEnum('signal_status', ['fresh', 'active', 'closed', 'stopped']);
+export const userActionEnum = pgEnum('user_action', ['pending', 'successful', 'unsuccessful', 'didnt_take']);
 export const timeframeEnum = pgEnum('timeframe', ['5M', '15M', '30M', '1H', '4H', '1D', '1W']);
 export const newsImpactEnum = pgEnum('news_impact', ['low', 'medium', 'high']);
 export const newsCurrencyEnum = pgEnum('news_currency', ['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF']);
@@ -63,7 +67,9 @@ export const tradingSignals = pgTable("trading_signals", {
   confidence: integer("confidence").notNull(), // 1-100
   analysis: text("analysis"),
   status: signalStatusEnum("status").default("fresh").notNull(),
+  userAction: userActionEnum("user_action").default("pending").notNull(),
   pips: decimal("pips", { precision: 10, scale: 2 }),
+  lastNotified: timestamp("last_notified"),
   createdAt: timestamp("created_at").defaultNow(),
   closedAt: timestamp("closed_at"),
 });
