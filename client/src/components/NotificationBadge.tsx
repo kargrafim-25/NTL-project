@@ -90,7 +90,7 @@ export function NotificationBadge() {
 
   if (!isAuthenticated) return null;
 
-  const totalNotifications = (safeNotificationData?.pendingReviews || 0) + (safeNotificationData?.hasDiscount ? 1 : 0);
+  const totalNotifications = (safeNotificationData?.pendingReviews || 0) + (safeNotificationData?.hasDiscount && safeNotificationData?.discountPercentage > 0 ? 1 : 0);
 
   return (
     <>
@@ -141,7 +141,7 @@ export function NotificationBadge() {
             )}
 
             {/* Available Discount */}
-            {safeNotificationData?.hasDiscount && (
+            {safeNotificationData?.hasDiscount && safeNotificationData?.discountPercentage > 0 && (
               <div className="border-l-4 border-green-500 pl-4 py-2">
                 <div className="flex items-center justify-between">
                   <div>
