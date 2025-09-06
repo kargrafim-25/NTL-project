@@ -19,16 +19,16 @@ interface ChatbotProps {
 }
 
 const FAQ_RESPONSES = {
-  pricing: "We offer 3 plans:\n\n• Free: 2 signals/day, 10/month\n• Starter Trader ($29/month): Unlimited daily signals, 60/month, Telegram access, 10% MT5 EA discount, 20% indicators discount, free first month\n• Pro Trader ($79/month): Unlimited signals, Telegram access, 40% MT5 EA discount, 50% indicators discount, free first month",
-  signals: "Our AI-powered platform generates real-time XAUUSD (Gold) trading signals using OpenAI's GPT-5 Mini. Each signal includes:\n\n• Entry price and direction (BUY/SELL)\n• Stop Loss and Take Profit levels\n• Technical analysis reasoning\n• Confidence rating (60-100%)\n• Risk/reward ratio\n\nSignals are generated only during market hours with real market data - no mock or placeholder information.",
+  pricing: "We offer 3 plans:\n\n• Free: 2 signals/day, 10/month\n• Starter Trader ($29/month): Unlimited daily signals, 60/month, Telegram access, 10% MT5 EA discount, 20% TradingView indicators discount, free first month\n• Pro Trader ($79/month): Unlimited signals, Telegram access, 40% MT5 EA discount, 50% TradingView indicators discount, free first month",
+  signals: "Our AI-powered platform generates real-time XAUUSD (Gold) trading signals using Next Trading Labs AI technology. Each signal includes:\n\n• Entry price and direction (BUY/SELL)\n• Stop Loss and Take Profit levels\n• Technical analysis reasoning\n• Confidence rating (60-100%)\n• Risk/reward ratio\n\nSignals are generated only during market hours with real market data - no mock or placeholder information.",
   timeframes: "Available timeframes for signal generation:\n\n• 5M - Scalping (very short-term)\n• 15M - Day trading\n• 30M - Intraday trading\n• 1H - Short-term swing\n• 4H - Medium-term swing\n• 1D - Daily analysis\n• 1W - Weekly trends\n\nChoose timeframes that match your trading style and availability.",
   accuracy: "Our signals include confidence ratings from 60-100% based on technical analysis. We provide transparent performance tracking, but remember:\n\n• Trading involves substantial risk\n• Past performance doesn't guarantee future results\n• Always use proper risk management\n• Never invest more than you can afford to lose",
   support: "Need help? I can answer most questions about our platform. For complex issues, use our contact form and we'll get back to you quickly. Pro users also get access to our exclusive Telegram group for real-time discussions with trading experts.",
-  subscription: "Plan upgrades:\n\n• Starter Trader: Unlimited daily signals, 60/month limit, Telegram group access, MT5 EA discounts, free first month\n• Pro Trader: Unlimited signals (no monthly limit), enhanced Telegram access, higher MT5 EA discounts (40% vs 10%), free first month\n\nUpgrade anytime from your dashboard!",
+  subscription: "Plan upgrades:\n\n• Starter Trader: Unlimited daily signals, 60/month limit, Telegram group access, MT5 EA discounts, TradingView indicators discounts, free first month\n• Pro Trader: Unlimited signals (no monthly limit), enhanced Telegram access, higher MT5 EA discounts (40% vs 10%), higher TradingView indicators discounts (50% vs 20%), free first month\n\nUpgrade anytime from your dashboard!",
   risk: "⚠️ Important Risk Disclosure:\n\nTrading involves substantial risk of loss. Our signals are for educational purposes and market analysis. Key points:\n\n• Use proper risk management (stop losses)\n• Never risk more than you can afford to lose\n• Diversify your trading portfolio\n• Our signals are analysis tools, not guaranteed profits\n• Consider your experience level before trading",
   market_hours: "Market Hours (Casablanca timezone):\n• Open: Sunday 10:00 PM\n• Close: Friday 9:00 PM\n\nSignals are generated only during active trading hours. Our AI monitors real-time market data 24/7 during sessions to provide timely opportunities.",
-  features: "Next Trading Labs features:\n\n• AI-powered XAUUSD signals using GPT-5 Mini\n• Real-time TradingView chart integration\n• Economic news tracking (high-impact USD events)\n• Multiple timeframe analysis\n• Performance tracking and history\n• Mobile-responsive design\n• Telegram group access (paid plans)\n• MT5 EA marketplace discounts",
-  technology: "Our Technology Stack:\n\n• OpenAI GPT-5 Mini for signal generation\n• Real-time market data (no synthetic data)\n• TradingView charts integration\n• Secure user authentication\n• PostgreSQL database for reliability\n• Mobile-optimized interface\n• Economic calendar integration",
+  features: "Next Trading Labs features:\n\n• AI-powered XAUUSD signals using our proprietary technology\n• Real-time TradingView chart integration\n• Economic news tracking (high-impact USD events)\n• Multiple timeframe analysis\n• Performance tracking and history\n• Mobile-responsive design\n• Telegram group access (paid plans)\n• MT5 EA marketplace discounts",
+  technology: "Our Technology Stack:\n\n• Next Trading Labs AI for signal generation\n• Real-time market data (no synthetic data)\n• TradingView charts integration\n• Secure user authentication\n• PostgreSQL database for reliability\n• Mobile-optimized interface\n• Economic calendar integration",
   contact_form: "I'd be happy to help you get in touch with our team! Let me show you how to send us a detailed message for personalized support."
 };
 
@@ -76,7 +76,7 @@ export default function SupportChatbot({ isOpen, onClose }: ChatbotProps) {
     }
     
     // Signal-related queries
-    if (input.includes('signal') || input.includes('trade') || input.includes('analysis') || input.includes('ai') || input.includes('gpt') || input.includes('algorithm')) {
+    if (input.includes('signal') || input.includes('trade') || input.includes('analysis') || input.includes('ai') || input.includes('algorithm')) {
       return FAQ_RESPONSES.signals;
     }
     
@@ -116,7 +116,7 @@ export default function SupportChatbot({ isOpen, onClose }: ChatbotProps) {
     }
     
     // Technical queries
-    if (input.includes('openai') || input.includes('gpt-5') || input.includes('database') || input.includes('security') || input.includes('mobile') || input.includes('real-time')) {
+    if (input.includes('database') || input.includes('security') || input.includes('mobile') || input.includes('real-time') || input.includes('technology')) {
       return FAQ_RESPONSES.technology;
     }
     
