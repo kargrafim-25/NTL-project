@@ -36,6 +36,7 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   subscriptionTier: varchar("subscription_tier").default("free").notNull(), // free, starter, pro
+  subscriptionStartDate: timestamp("subscription_start_date").defaultNow(), // When user started current billing cycle
   dailyCredits: integer("daily_credits").default(0).notNull(),
   monthlyCredits: integer("monthly_credits").default(0).notNull(),
   maxDailyCredits: integer("max_daily_credits").default(2).notNull(),

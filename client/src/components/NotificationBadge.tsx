@@ -174,7 +174,7 @@ export function NotificationBadge() {
                       <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
                         <span className="text-white text-sm font-bold">🏆</span>
                       </div>
-                      <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">Monthly Challenge</span>
+                      <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">Billing Cycle Challenge</span>
                     </div>
                     {safeMonthlyStatus.completed && (
                       <div className="flex items-center gap-1 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">
@@ -204,7 +204,12 @@ export function NotificationBadge() {
                     {!safeMonthlyStatus.completed ? (
                       <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-2">
                         <p className="text-xs text-yellow-700 dark:text-yellow-300 font-medium text-center">
-                          🎁 Complete all reviews to earn a <span className="font-bold">6% discount</span> on your next bill!
+                          🎁 Complete all reviews before billing cycle ends to earn a <span className="font-bold">6% discount</span>!
+                          {safeMonthlyStatus.billingCycleEnd && (
+                            <span className="block mt-1 text-yellow-600 dark:text-yellow-400">
+                              Deadline: {new Date(safeMonthlyStatus.billingCycleEnd).toLocaleDateString()}
+                            </span>
+                          )}
                         </p>
                       </div>
                     ) : (

@@ -1,5 +1,5 @@
 import { storage } from '../storage';
-import { differenceInHours, differenceInDays, isToday, startOfMonth, endOfMonth } from 'date-fns';
+import { differenceInHours, differenceInDays, isToday, startOfMonth, endOfMonth, addMonths } from 'date-fns';
 
 export class NotificationService {
   
@@ -56,32 +56,44 @@ export class NotificationService {
     return `${prefix}${userIdShort}${monthStr}${yearStr}`;
   }
 
-  // Check if user completed all signal reviews for the current month
+  // Check if user completed all signal reviews for the current billing cycle
   async checkMonthlyCompletion(userId: string): Promise<{
     completed: boolean;
     totalSignals: number;
     reviewedSignals: number;
     discountCode?: string;
     discountPercentage: number;
+    billingCycleEnd?: Date;
   }> {
     const user = await storage.getUser(userId);
     if (!user) return { completed: false, totalSignals: 0, reviewedSignals: 0, discountPercentage: 0 };
 
     const now = new Date();
-    const monthStart = startOfMonth(now);
-    const monthEnd = endOfMonth(now);
+    
+    // Calculate billing cycle period based on subscription start date
+    const subscriptionStart = user.subscriptionStartDate || user.createdAt || now;
+    
+    // Find current billing cycle (subscription date to same date next month)
+    let billingCycleStart = new Date(subscriptionStart);
+    let billingCycleEnd = addMonths(billingCycleStart, 1);
+    
+    // Adjust to current billing cycle if we're past the first month
+    while (billingCycleEnd < now) {
+      billingCycleStart = new Date(billingCycleEnd);
+      billingCycleEnd = addMonths(billingCycleStart, 1);
+    }
 
-    // Get all signals closed in current month
+    // Get all signals closed in current billing cycle
     const signals = await storage.getUserSignals(userId);
-    const monthlySignals = signals.filter(signal => 
+    const billingCycleSignals = signals.filter(signal => 
       signal.status === 'closed' &&
       signal.closedAt &&
-      signal.closedAt >= monthStart &&
-      signal.closedAt <= monthEnd
+      signal.closedAt >= billingCycleStart &&
+      signal.closedAt < billingCycleEnd
     );
 
-    const totalSignals = monthlySignals.length;
-    const reviewedSignals = monthlySignals.filter(signal => 
+    const totalSignals = billingCycleSignals.length;
+    const reviewedSignals = billingCycleSignals.filter(signal => 
       signal.userAction !== 'pending'
     ).length;
 
@@ -96,7 +108,7 @@ export class NotificationService {
     // Generate discount code if completed and not already generated
     let discountCode;
     if (completed && !user.pendingDiscountCode) {
-      discountCode = this.generateDiscountCode(userId, now.getMonth() + 1, now.getFullYear());
+      discountCode = this.generateDiscountCode(userId, billingCycleStart.getMonth() + 1, billingCycleStart.getFullYear());
       await storage.updateUserDiscountCode(userId, discountCode);
     } else if (user.pendingDiscountCode) {
       discountCode = user.pendingDiscountCode;
@@ -107,7 +119,8 @@ export class NotificationService {
       totalSignals,
       reviewedSignals,
       discountCode,
-      discountPercentage
+      discountPercentage,
+      billingCycleEnd
     };
   }
 
