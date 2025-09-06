@@ -101,7 +101,7 @@ export function SignalReviewModal({ isOpen, onClose, pendingSignals }: SignalRev
 
         <div className="space-y-4">
           {/* Signal Details */}
-          <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800" data-testid="signal-details">
+          <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100" data-testid="signal-details">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 {currentSignal.direction === 'BUY' ? (
@@ -117,12 +117,12 @@ export function SignalReviewModal({ isOpen, onClose, pendingSignals }: SignalRev
             
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="text-gray-500">Entry Price:</span>
-                <p className="font-medium">${currentSignal.entryPrice}</p>
+                <span className="text-gray-500 dark:text-gray-400">Entry Price:</span>
+                <p className="font-medium text-gray-900 dark:text-gray-100">${currentSignal.entryPrice}</p>
               </div>
               <div>
-                <span className="text-gray-500">Closed:</span>
-                <p className="font-medium">
+                <span className="text-gray-500 dark:text-gray-400">Closed:</span>
+                <p className="font-medium text-gray-900 dark:text-gray-100">
                   {currentSignal.daysSinceClose === 0 ? 'Today' : 
                    currentSignal.daysSinceClose === 1 ? 'Yesterday' :
                    `${currentSignal.daysSinceClose} days ago`}

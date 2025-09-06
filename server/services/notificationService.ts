@@ -87,20 +87,10 @@ export class NotificationService {
 
     const completed = totalSignals > 0 && reviewedSignals === totalSignals;
 
-    // Calculate discount percentage based on subscription tier
+    // Calculate discount percentage - 6% for all tiers when completed
     let discountPercentage = 0;
     if (completed) {
-      switch (user.subscriptionTier) {
-        case 'free':
-          discountPercentage = 10;
-          break;
-        case 'starter':
-          discountPercentage = 15;
-          break;
-        case 'pro':
-          discountPercentage = 20;
-          break;
-      }
+      discountPercentage = 6; // 6% discount for all subscription tiers
     }
 
     // Generate discount code if completed and not already generated

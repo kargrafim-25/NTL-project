@@ -168,30 +168,53 @@ export function NotificationBadge() {
             {/* Monthly Progress */}
             {safeMonthlyStatus && safeMonthlyStatus.totalSignals > 0 && (
               <div className="border-t pt-3">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium">Monthly Challenge</span>
-                  {safeMonthlyStatus.completed && (
-                    <CheckCircle2 className="w-4 h-4 text-green-500" />
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs text-gray-500">
-                    <span>Signal reviews completed</span>
-                    <span>{safeMonthlyStatus.reviewedSignals}/{safeMonthlyStatus.totalSignals}</span>
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-700">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                        <span className="text-white text-sm font-bold">🏆</span>
+                      </div>
+                      <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">Monthly Challenge</span>
+                    </div>
+                    {safeMonthlyStatus.completed && (
+                      <div className="flex items-center gap-1 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">
+                        <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
+                        <span className="text-xs font-medium text-green-700 dark:text-green-300">Complete!</span>
+                      </div>
+                    )}
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full transition-all ${
-                        safeMonthlyStatus.completed ? 'bg-green-500' : 'bg-blue-500'
-                      }`}
-                      style={{ width: `${(safeMonthlyStatus.reviewedSignals / safeMonthlyStatus.totalSignals) * 100}%` }}
-                    />
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-gray-600 dark:text-gray-300 font-medium">Signal Reviews Progress</span>
+                      <span className="font-bold text-blue-600 dark:text-blue-400">{safeMonthlyStatus.reviewedSignals}/{safeMonthlyStatus.totalSignals}</span>
+                    </div>
+                    
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 shadow-inner">
+                      <div 
+                        className={`h-3 rounded-full transition-all duration-500 ${
+                          safeMonthlyStatus.completed 
+                            ? 'bg-gradient-to-r from-green-400 to-green-600 shadow-lg' 
+                            : 'bg-gradient-to-r from-blue-400 to-purple-500 shadow-md'
+                        }`}
+                        style={{ width: `${(safeMonthlyStatus.reviewedSignals / safeMonthlyStatus.totalSignals) * 100}%` }}
+                      />
+                    </div>
+                    
+                    {!safeMonthlyStatus.completed ? (
+                      <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-2">
+                        <p className="text-xs text-yellow-700 dark:text-yellow-300 font-medium text-center">
+                          🎁 Complete all reviews to earn a <span className="font-bold">6% discount</span> on your next bill!
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-2">
+                        <p className="text-xs text-green-700 dark:text-green-300 font-medium text-center">
+                          🎉 Challenge Complete! You've earned a <span className="font-bold">6% discount</span>!
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  {!safeMonthlyStatus.completed && (
-                    <p className="text-xs text-gray-500">
-                      Complete all reviews to earn a {safeMonthlyStatus.discountPercentage}% discount!
-                    </p>
-                  )}
                 </div>
               </div>
             )}
