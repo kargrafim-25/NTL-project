@@ -9,6 +9,7 @@ import SignalHistory from "@/components/SignalHistory";
 import PremiumFeatures from "@/components/PremiumFeatures";
 import { TrendingUp, LogOut, Database } from "lucide-react";
 import logoUrl from '../assets/logo.png';
+import ChatbotTrigger from '@/components/ChatbotTrigger';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -172,6 +173,9 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+      
+      {/* Support Chatbot */}
+      <ChatbotTrigger />
     </div>
   );
 }

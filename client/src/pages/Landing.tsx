@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Shield, Zap, Users, Crown, Bot } from "lucide-react";
 import logoUrl from '../assets/logo.png';
+import ChatbotTrigger from '@/components/ChatbotTrigger';
 
 export default function Landing() {
   const handleLogin = () => {
@@ -290,6 +291,9 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+      
+      {/* Support Chatbot */}
+      <ChatbotTrigger />
     </div>
   );
 }
