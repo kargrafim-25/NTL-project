@@ -67,8 +67,8 @@ export default function PremiumFeatures() {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground mb-4">
-            Get exclusive discounts on our automated trading MT5 EA and indicators for MetaTrader 5. 
-            Starter: 10% MT5 EA + 20% indicators, Pro: 40% MT5 EA + 50% indicators.
+            Get exclusive discounts on our automated trading MT5 EA and TradingView indicators. 
+            Starter: 10% MT5 EA + 20% TradingView indicators, Pro: 40% MT5 EA + 50% TradingView indicators.
           </p>
           <div className="space-y-2 mb-4">
             <div className="flex items-center text-sm">
@@ -77,7 +77,7 @@ export default function PremiumFeatures() {
             </div>
             <div className="flex items-center text-sm">
               <div className="w-2 h-2 bg-success rounded-full mr-3" />
-              Up to 50% off indicators
+              Up to 50% off TradingView indicators
             </div>
             <div className="flex items-center text-sm">
               <div className="w-2 h-2 bg-success rounded-full mr-3" />

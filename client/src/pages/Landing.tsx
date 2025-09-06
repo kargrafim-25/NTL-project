@@ -220,7 +220,7 @@ export default function Landing() {
                   </li>
                   <li className="flex items-center">
                     <div className="w-2 h-2 bg-success rounded-full mr-3" />
-                    20% discount on indicators
+                    20% discount on TradingView indicators
                   </li>
                   <li className="flex items-center">
                     <div className="w-2 h-2 bg-success rounded-full mr-3" />
@@ -267,7 +267,7 @@ export default function Landing() {
                   </li>
                   <li className="flex items-center">
                     <div className="w-2 h-2 bg-success rounded-full mr-3" />
-                    50% discount on indicators
+                    50% discount on TradingView indicators
                   </li>
                   <li className="flex items-center">
                     <div className="w-2 h-2 bg-success rounded-full mr-3" />
