@@ -129,7 +129,7 @@ export default function SupportChatbot({ isOpen, onClose }: ChatbotProps) {
 
   return (
     <div className="fixed bottom-4 right-4 z-50 w-80 h-96 max-h-[80vh]">
-      <Card className="h-full flex flex-col shadow-xl border-primary/20">
+      <Card className="h-full flex flex-col shadow-xl border-primary/20 overflow-hidden">
         <CardHeader className="p-4 pb-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -156,9 +156,9 @@ export default function SupportChatbot({ isOpen, onClose }: ChatbotProps) {
           </div>
         </CardHeader>
         
-        <CardContent className="flex-1 flex flex-col p-4 pt-2 space-y-3">
+        <CardContent className="flex-1 flex flex-col p-4 pt-2 space-y-3 min-h-0">
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto space-y-3 pr-2">
+          <div className="flex-1 overflow-y-auto space-y-3 pr-2 min-h-0 max-h-full">
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -166,7 +166,7 @@ export default function SupportChatbot({ isOpen, onClose }: ChatbotProps) {
               >
                 <div className={`max-w-[85%] ${message.isBot ? 'order-2' : ''}`}>
                   <div
-                    className={`px-3 py-2 rounded-lg text-sm ${
+                    className={`px-3 py-2 rounded-lg text-sm break-words whitespace-pre-wrap ${
                       message.isBot
                         ? 'bg-muted text-foreground'
                         : 'bg-primary text-primary-foreground'
