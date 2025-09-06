@@ -6,11 +6,23 @@ import { generateTradingSignal } from "./services/openaiService";
 import { apiLogger } from "./utils/apiLogger";
 import { isMarketOpen } from "./services/marketService";
 import { insertSignalSchema, insertNewsSchema } from "@shared/schema";
+import { getSignalStatus } from "./signalLifecycle";
 import { z } from "zod";
 
 const generateSignalRequestSchema = z.object({
   timeframe: z.enum(['5M', '15M', '30M', '1H', '4H', '1D', '1W']),
 });
+
+// Helper function to apply lifecycle status to signals
+function applyLifecycleStatus(signals: any[]) {
+  return signals.map(signal => {
+    const currentStatus = getSignalStatus(signal.createdAt, signal.timeframe);
+    return {
+      ...signal,
+      status: currentStatus
+    };
+  });
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -123,7 +135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         takeProfit: signalData.take_profit.toString(),
         confidence: signalData.confidence,
         analysis: `${signalData.ai_analysis.brief} ${signalData.ai_analysis.detailed}`,
-        status: "active",
+        status: "fresh",
       });
 
       // Update user credits (except for pro users)
@@ -162,7 +174,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const signals = await storage.getUserSignals(userId, 50);
-      res.json(signals);
+      const signalsWithLifecycle = applyLifecycleStatus(signals);
+      res.json(signalsWithLifecycle);
 
     } catch (error) {
       console.error("Error fetching signals:", error);
@@ -191,7 +204,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const signals = await storage.getUserSignals(userId, 1);
       const latestSignal = signals[0] || null;
       
-      res.json(latestSignal);
+      if (latestSignal) {
+        const signalWithLifecycle = applyLifecycleStatus([latestSignal])[0];
+        res.json(signalWithLifecycle);
+      } else {
+        res.json(null);
+      }
 
     } catch (error) {
       console.error("Error fetching latest signal:", error);
