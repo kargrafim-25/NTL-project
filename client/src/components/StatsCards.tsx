@@ -54,7 +54,7 @@ export default function StatsCards() {
   const credits = getCreditsDisplay();
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       {/* Credit Usage with Plan Display */}
       <Card className="trading-card" data-testid="card-credits">
         <CardContent className="p-6">
@@ -120,25 +120,6 @@ export default function StatsCards() {
         </CardContent>
       </Card>
 
-      {/* Account Status */}
-      <Card className="trading-card" data-testid="card-account-status">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-muted-foreground">Account</h3>
-            <Crown className="h-4 w-4 text-secondary" />
-          </div>
-          <div className="text-sm font-medium text-secondary" data-testid="text-account-tier">
-            {user?.subscriptionTier === 'pro' ? 'Pro Trader' : 
-             user?.subscriptionTier === 'starter' ? 'Starter Trader' : 'Free User'}
-          </div>
-          {getAccountFeatures().map((feature, index) => (
-            <div key={index} className="text-xs text-muted-foreground mt-1">
-              <span className="mr-1">{feature.icon}</span>
-              {feature.text}
-            </div>
-          ))}
-        </CardContent>
-      </Card>
     </div>
   );
 }
