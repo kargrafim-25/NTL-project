@@ -232,7 +232,11 @@ export function NotificationBadge() {
       <SignalReviewModal
         isOpen={isReviewModalOpen}
         onClose={() => setIsReviewModalOpen(false)}
-        pendingSignals={safePendingReviews?.pendingSignals || []}
+        pendingSignals={(safePendingReviews?.pendingSignals || []).map((signal: any) => ({
+          ...signal,
+          stopLoss: signal.stopLoss || '0.00',
+          takeProfit: signal.takeProfit || '0.00'
+        }))}
       />
     </>
   );

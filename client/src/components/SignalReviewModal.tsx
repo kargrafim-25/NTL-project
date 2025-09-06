@@ -21,6 +21,8 @@ interface SignalReviewModalProps {
     pair: string;
     direction: string;
     entryPrice: string;
+    stopLoss: string;
+    takeProfit: string;
     timeframe: string;
     closedAt: Date;
     daysSinceClose: number;
@@ -110,7 +112,15 @@ export function SignalReviewModal({ isOpen, onClose, pendingSignals }: SignalRev
                   <TrendingDown className="w-4 h-4 text-red-500" />
                 )}
                 <span className="font-semibold">{currentSignal.pair}</span>
-                <Badge variant="outline">{currentSignal.direction}</Badge>
+                <Badge 
+                  variant="outline" 
+                  className={currentSignal.direction === 'BUY' 
+                    ? 'bg-green-100 text-green-700 border-green-300 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700' 
+                    : 'bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700'
+                  }
+                >
+                  {currentSignal.direction}
+                </Badge>
               </div>
               <Badge variant="secondary">{currentSignal.timeframe}</Badge>
             </div>
@@ -119,6 +129,14 @@ export function SignalReviewModal({ isOpen, onClose, pendingSignals }: SignalRev
               <div>
                 <span className="text-gray-500 dark:text-gray-400">Entry Price:</span>
                 <p className="font-medium text-gray-900 dark:text-gray-100">${currentSignal.entryPrice}</p>
+              </div>
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">Take Profit:</span>
+                <p className="font-medium text-green-600 dark:text-green-400">${currentSignal.takeProfit}</p>
+              </div>
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">Stop Loss:</span>
+                <p className="font-medium text-red-600 dark:text-red-400">${currentSignal.stopLoss}</p>
               </div>
               <div>
                 <span className="text-gray-500 dark:text-gray-400">Closed:</span>
