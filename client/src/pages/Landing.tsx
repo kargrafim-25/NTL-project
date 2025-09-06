@@ -216,7 +216,7 @@ export default function Landing() {
                   </li>
                   <li className="flex items-center">
                     <div className="w-2 h-2 bg-success rounded-full mr-3" />
-                    10% discount on bots
+                    10% discount on MT5 EA
                   </li>
                   <li className="flex items-center">
                     <div className="w-2 h-2 bg-success rounded-full mr-3" />
@@ -263,7 +263,7 @@ export default function Landing() {
                   <li className="flex items-center">
                     <div className="w-2 h-2 bg-success rounded-full mr-3" />
                     <Bot className="h-4 w-4 mr-1 text-secondary" />
-                    40% discount on bots
+                    40% discount on MT5 EA
                   </li>
                   <li className="flex items-center">
                     <div className="w-2 h-2 bg-success rounded-full mr-3" />
