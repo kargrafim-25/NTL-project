@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Clock, AlertTriangle, TrendingUp, Calendar, ChevronDown, ChevronUp } from "lucide-react";
+import { Clock, AlertTriangle, TrendingUp, Calendar, ChevronDown, ChevronUp, BookOpen } from "lucide-react";
 import { format, formatDistanceToNow, isPast } from "date-fns";
 import type { EconomicNews } from "@shared/schema";
 
@@ -56,89 +56,78 @@ export function EconomicNews({ className }: EconomicNewsProps) {
     }
   };
 
-  const CompactNewsCard = ({ news, isUpcoming = false, isFirst = false }: { news: EconomicNews; isUpcoming?: boolean; isFirst?: boolean }) => {
-    const [isOpen, setIsOpen] = useState(isFirst);
+  const getTimeAgo = (dateString: string) => {
+    const now = new Date();
+    const eventTime = new Date(dateString);
+    const diffInMinutes = Math.floor((now.getTime() - eventTime.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+  };
 
-    if (isFirst) {
-      return (
-        <Card className="border-l-4 border-l-red-500 bg-background" data-testid={`news-card-${news.id}`}>
-          <CardHeader className="py-2">
-            <div className="flex items-start justify-between">
-              <div className="flex-1 min-w-0">
-                <CardTitle className="text-xs font-medium leading-tight truncate" data-testid={`news-title-${news.id}`}>
-                  {news.title}
-                </CardTitle>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs text-muted-foreground" data-testid={`news-time-${news.id}`}>
-                    {format(new Date(news.eventTime), 'MMM dd, HH:mm')}
-                  </span>
-                  <Badge className={`${getImpactColor(news.impact)} text-xs h-4`} data-testid={`news-impact-${news.id}`}>
-                    {getImpactIcon(news.impact)}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
-      );
+  const getImpactBgColor = (impact: string) => {
+    switch (impact) {
+      case 'high':
+        return 'bg-red-500/10 border-red-500/20';
+      case 'medium':
+        return 'bg-red-400/10 border-red-400/20';
+      case 'low':
+        return 'bg-red-300/10 border-red-300/20';
+      default:
+        return 'bg-muted/10 border-muted/20';
     }
-
-    return (
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger asChild>
-          <Card className="cursor-pointer hover:bg-muted/30 transition-colors border-l-2 border-l-red-400" data-testid={`news-card-${news.id}`}>
-            <CardHeader className="py-1 px-3">
-              <div className="flex items-center justify-between">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs font-medium truncate" data-testid={`news-title-${news.id}`}>
-                      {news.title}
-                    </span>
-                    <Badge className={`${getImpactColor(news.impact)} text-xs h-3 px-1`} data-testid={`news-impact-${news.id}`}>
-                      {getImpactIcon(news.impact)}
-                    </Badge>
-                  </div>
-                </div>
-                <Button variant="ghost" size="sm" className="h-4 w-4 p-0" data-testid={`news-expand-${news.id}`}>
-                  {isOpen ? <ChevronUp className="w-2 h-2" /> : <ChevronDown className="w-2 h-2" />}
-                </Button>
-              </div>
-            </CardHeader>
-          </Card>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <Card className="mt-1 border-l-2 border-l-red-300 bg-background" data-testid={`news-details-${news.id}`}>
-            <CardContent className="py-2 px-3">
-              <p className="text-xs text-muted-foreground mb-1" data-testid={`news-description-${news.id}`}>
-                {news.description}
-              </p>
-              <div className="text-xs text-muted-foreground">
-                {format(new Date(news.eventTime), 'MMM dd, HH:mm')} • {news.currency}
-              </div>
-            </CardContent>
-          </Card>
-        </CollapsibleContent>
-      </Collapsible>
-    );
   };
 
   if (loadingRecent && loadingUpcoming) {
     return (
-      <Card className={className}>
+      <Card className="trading-card" data-testid="economic-news-container">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5" />
+          <CardTitle className="flex items-center">
+            <BookOpen className="mr-2 h-5 w-5 text-red-500" />
             Economic News
           </CardTitle>
-          <CardDescription>
-            High-impact USD news events affecting XAUUSD
-          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="animate-pulse space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-            ))}
+          <div className="space-y-4 animate-pulse">
+            <div className="h-12 bg-muted/20 rounded-lg"></div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="h-8 bg-muted/20 rounded"></div>
+              <div className="h-8 bg-muted/20 rounded"></div>
+            </div>
+            <div className="h-16 bg-muted/20 rounded-lg"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Get the most recent/important news item
+  const featuredNews = upcomingNews.length > 0 ? upcomingNews[0] : recentNews[0];
+
+  if (!featuredNews) {
+    return (
+      <Card className="trading-card" data-testid="economic-news-container">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <BookOpen className="mr-2 h-5 w-5 text-muted-foreground" />
+            Economic News
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8">
+            <div className="w-16 h-16 mx-auto mb-4 bg-muted/20 rounded-full flex items-center justify-center">
+              <Calendar className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">No News Available</h3>
+            <p className="text-sm text-muted-foreground">
+              No high-impact USD events scheduled at this time.
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -146,64 +135,73 @@ export function EconomicNews({ className }: EconomicNewsProps) {
   }
 
   return (
-    <Card className={`${className} border border-border bg-background`} data-testid="economic-news-container">
-      <CardHeader className="pb-2 bg-background border-b border-border">
-        <CardTitle className="flex items-center gap-2 text-sm">
-          <div className="p-1.5 rounded-full bg-red-500 text-white">
-            <TrendingUp className="w-3 h-3" />
-          </div>
-          <span className="text-foreground font-semibold">
-            Economic News
-          </span>
+    <Card className="trading-card" data-testid="economic-news-container">
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <BookOpen className="mr-2 h-5 w-5 text-red-500" />
+          Economic News
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-0">
-        <Tabs defaultValue="upcoming" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 h-8 bg-background border border-border">
-            <TabsTrigger value="upcoming" className="text-xs data-[state=active]:bg-red-500 data-[state=active]:text-white" data-testid="tab-upcoming">
-              Very soon ({upcomingNews.length})
-            </TabsTrigger>
-            <TabsTrigger value="recent" className="text-xs data-[state=active]:bg-red-500 data-[state=active]:text-white" data-testid="tab-recent">
-              Upcoming ({recentNews.length})
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="upcoming" className="mt-2 space-y-1" data-testid="upcoming-news-list">
-            {upcomingNews.length === 0 ? (
-              <div className="text-center py-3 text-muted-foreground">
-                <Calendar className="w-4 h-4 mx-auto mb-1 opacity-50" />
-                <p className="text-xs">No upcoming USD events</p>
-              </div>
-            ) : (
-              upcomingNews.slice(0, 3).map((news, index) => 
-                <CompactNewsCard 
-                  key={news.id} 
-                  news={news} 
-                  isUpcoming={true} 
-                  isFirst={index === 0} 
-                />
-              )
-            )}
-          </TabsContent>
-          
-          <TabsContent value="recent" className="mt-2 space-y-1" data-testid="recent-news-list">
-            {recentNews.length === 0 ? (
-              <div className="text-center py-3 text-muted-foreground">
-                <Clock className="w-4 h-4 mx-auto mb-1 opacity-50" />
-                <p className="text-xs">No recent USD events</p>
-              </div>
-            ) : (
-              recentNews.slice(0, 3).map((news, index) => 
-                <CompactNewsCard 
-                  key={news.id} 
-                  news={news} 
-                  isUpcoming={false} 
-                  isFirst={index === 0} 
-                />
-              )
-            )}
-          </TabsContent>
-        </Tabs>
+      <CardContent className="space-y-4">
+        <div className={`flex items-center justify-between p-3 rounded-lg border ${getImpactBgColor(featuredNews.impact)}`}>
+          <span className="font-semibold text-red-500" data-testid="text-news-title">
+            {featuredNews.title}
+          </span>
+          <div className="flex items-center text-xs text-muted-foreground">
+            <Clock className="h-3 w-3 mr-1" />
+            <span data-testid="text-news-time">{format(new Date(featuredNews.eventTime), 'MMM dd, HH:mm')}</span>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="text-muted-foreground">Currency:</span>
+            <div className="font-semibold" data-testid="text-news-currency">{featuredNews.currency}</div>
+          </div>
+          <div>
+            <span className="text-muted-foreground">Impact:</span>
+            <div className="font-semibold">
+              <Badge className={getImpactColor(featuredNews.impact)} data-testid="text-news-impact">
+                {featuredNews.impact.toUpperCase()}
+              </Badge>
+            </div>
+          </div>
+          {featuredNews.previousValue && (
+            <div>
+              <span className="text-muted-foreground">Previous:</span>
+              <div className="font-semibold text-muted-foreground" data-testid="text-news-previous">{featuredNews.previousValue}</div>
+            </div>
+          )}
+          {featuredNews.forecastValue && (
+            <div>
+              <span className="text-muted-foreground">Forecast:</span>
+              <div className="font-semibold text-red-500" data-testid="text-news-forecast">{featuredNews.forecastValue}</div>
+            </div>
+          )}
+        </div>
+        
+        {featuredNews.description && (
+          <div className="p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+            <div className="text-sm font-medium text-red-500 mb-2">Event Details:</div>
+            <p className="text-xs text-muted-foreground" data-testid="text-news-description">
+              {featuredNews.description}
+            </p>
+          </div>
+        )}
+
+        {/* Additional News Count */}
+        <div className="flex items-center justify-between">
+          <Badge 
+            variant="outline" 
+            className="border-red-500/30 text-red-500"
+            data-testid="badge-news-count"
+          >
+            {upcomingNews.length + recentNews.length} USD Events
+          </Badge>
+          <div className="text-xs text-muted-foreground">
+            High-impact events only
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
