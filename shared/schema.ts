@@ -48,6 +48,8 @@ export const users = pgTable("users", {
 export const signalDirectionEnum = pgEnum('signal_direction', ['BUY', 'SELL']);
 export const signalStatusEnum = pgEnum('signal_status', ['active', 'closed', 'stopped']);
 export const timeframeEnum = pgEnum('timeframe', ['5M', '15M', '30M', '1H', '4H', '1D', '1W']);
+export const newsImpactEnum = pgEnum('news_impact', ['low', 'medium', 'high']);
+export const newsCurrencyEnum = pgEnum('news_currency', ['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF']);
 
 export const tradingSignals = pgTable("trading_signals", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -66,6 +68,23 @@ export const tradingSignals = pgTable("trading_signals", {
   closedAt: timestamp("closed_at"),
 });
 
+export const economicNews = pgTable("economic_news", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  currency: newsCurrencyEnum("currency").notNull(),
+  impact: newsImpactEnum("impact").notNull(),
+  eventTime: timestamp("event_time").notNull(),
+  actualValue: varchar("actual_value"),
+  forecastValue: varchar("forecast_value"),
+  previousValue: varchar("previous_value"),
+  source: varchar("source").default("manual").notNull(),
+  sourceUrl: varchar("source_url"),
+  isArchived: boolean("is_archived").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const usersRelations = relations(users, ({ many }) => ({
   signals: many(tradingSignals),
 }));
@@ -81,6 +100,8 @@ export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type TradingSignal = typeof tradingSignals.$inferSelect;
 export type InsertTradingSignal = typeof tradingSignals.$inferInsert;
+export type EconomicNews = typeof economicNews.$inferSelect;
+export type InsertEconomicNews = typeof economicNews.$inferInsert;
 
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
@@ -95,5 +116,12 @@ export const insertSignalSchema = createInsertSchema(tradingSignals).omit({
   closedAt: true,
 });
 
+export const insertNewsSchema = createInsertSchema(economicNews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertSignal = z.infer<typeof insertSignalSchema>;
+export type InsertNews = z.infer<typeof insertNewsSchema>;
