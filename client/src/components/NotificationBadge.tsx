@@ -204,11 +204,28 @@ export function NotificationBadge() {
                     {!safeMonthlyStatus.completed ? (
                       <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-2">
                         <p className="text-xs text-yellow-700 dark:text-yellow-300 font-medium text-center">
-                          🎁 Complete all reviews before billing cycle ends to earn a <span className="font-bold">6% discount</span>!
-                          {safeMonthlyStatus.billingCycleEnd && (
-                            <span className="block mt-1 text-yellow-600 dark:text-yellow-400">
-                              Deadline: {new Date(safeMonthlyStatus.billingCycleEnd).toLocaleDateString()}
-                            </span>
+                          {safeMonthlyStatus.allSignalsReviewed ? (
+                            <>
+                              ✅ All signals reviewed! 
+                              {safeMonthlyStatus.daysUntilBillingCycleEnd <= 1 ? (
+                                <span className="block mt-1 text-green-600 dark:text-green-400 font-bold">
+                                  🎁 6% discount available within final day!
+                                </span>
+                              ) : (
+                                <span className="block mt-1 text-blue-600 dark:text-blue-400">
+                                  Discount available in final day ({safeMonthlyStatus.daysUntilBillingCycleEnd} days left)
+                                </span>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              🎁 Complete all reviews to earn a <span className="font-bold">6% discount</span> in the final day!
+                              {safeMonthlyStatus.billingCycleEnd && (
+                                <span className="block mt-1 text-yellow-600 dark:text-yellow-400">
+                                  Deadline: {new Date(safeMonthlyStatus.billingCycleEnd).toLocaleDateString()}
+                                </span>
+                              )}
+                            </>
                           )}
                         </p>
                       </div>

@@ -1,5 +1,5 @@
 import { storage } from '../storage';
-import { differenceInHours, differenceInDays, isToday, startOfMonth, endOfMonth, addMonths } from 'date-fns';
+import { differenceInHours, differenceInDays, isToday, startOfMonth, endOfMonth, addMonths, differenceInCalendarDays } from 'date-fns';
 
 export class NotificationService {
   
@@ -59,14 +59,23 @@ export class NotificationService {
   // Check if user completed all signal reviews for the current billing cycle
   async checkMonthlyCompletion(userId: string): Promise<{
     completed: boolean;
+    allSignalsReviewed: boolean;
     totalSignals: number;
     reviewedSignals: number;
     discountCode?: string;
     discountPercentage: number;
     billingCycleEnd?: Date;
+    daysUntilBillingCycleEnd: number;
   }> {
     const user = await storage.getUser(userId);
-    if (!user) return { completed: false, totalSignals: 0, reviewedSignals: 0, discountPercentage: 0 };
+    if (!user) return { 
+      completed: false, 
+      allSignalsReviewed: false, 
+      totalSignals: 0, 
+      reviewedSignals: 0, 
+      discountPercentage: 0, 
+      daysUntilBillingCycleEnd: 999 
+    };
 
     const now = new Date();
     
@@ -97,7 +106,16 @@ export class NotificationService {
       signal.userAction !== 'pending'
     ).length;
 
-    const completed = totalSignals > 0 && reviewedSignals === totalSignals;
+    const allSignalsReviewed = totalSignals > 0 && reviewedSignals === totalSignals;
+    
+    // Check if we're within 1 day of billing cycle end
+    const daysUntilBillingCycleEnd = differenceInCalendarDays(billingCycleEnd, now);
+    const isWithinLastDay = daysUntilBillingCycleEnd <= 1 && daysUntilBillingCycleEnd >= 0;
+    
+    // Discount is only available when both conditions are met:
+    // 1. All signals are reviewed
+    // 2. We're within the last day of the billing cycle
+    const completed = allSignalsReviewed && isWithinLastDay;
 
     // Calculate discount percentage - 6% for all tiers when completed
     let discountPercentage = 0;
@@ -116,11 +134,13 @@ export class NotificationService {
 
     return {
       completed,
+      allSignalsReviewed,
       totalSignals,
       reviewedSignals,
       discountCode,
       discountPercentage,
-      billingCycleEnd
+      billingCycleEnd,
+      daysUntilBillingCycleEnd
     };
   }
 
