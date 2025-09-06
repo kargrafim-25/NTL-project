@@ -1,10 +1,13 @@
 import {
   users,
   tradingSignals,
+  economicNews,
   type User,
   type UpsertUser,
   type TradingSignal,
   type InsertTradingSignal,
+  type EconomicNews,
+  type InsertEconomicNews,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte } from "drizzle-orm";
@@ -25,6 +28,12 @@ export interface IStorage {
   getUserSignals(userId: string, limit?: number): Promise<TradingSignal[]>;
   getRecentSignals(userId: string, hours?: number): Promise<TradingSignal[]>;
   updateSignalStatus(signalId: string, status: 'active' | 'closed' | 'stopped', pips?: number): Promise<void>;
+  
+  // News operations
+  createNews(news: InsertEconomicNews): Promise<EconomicNews>;
+  getRecentNews(limit?: number, currency?: string, impact?: string): Promise<EconomicNews[]>;
+  getUpcomingNews(limit?: number, currency?: string, impact?: string): Promise<EconomicNews[]>;
+  archiveOldNews(daysOld: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -123,6 +132,64 @@ export class DatabaseStorage implements IStorage {
       .update(tradingSignals)
       .set(updateData)
       .where(eq(tradingSignals.id, signalId));
+  }
+
+  // News operations
+  async createNews(news: InsertEconomicNews): Promise<EconomicNews> {
+    const [newsItem] = await db
+      .insert(economicNews)
+      .values(news)
+      .returning();
+    return newsItem;
+  }
+
+  async getRecentNews(limit: number = 10, currency?: string, impact?: string): Promise<EconomicNews[]> {
+    let query = db
+      .select()
+      .from(economicNews)
+      .where(
+        and(
+          eq(economicNews.isArchived, false),
+          gte(economicNews.eventTime, new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)) // Last 7 days
+        )
+      )
+      .orderBy(desc(economicNews.eventTime))
+      .limit(limit);
+
+    return query;
+  }
+
+  async getUpcomingNews(limit: number = 10, currency?: string, impact?: string): Promise<EconomicNews[]> {
+    let query = db
+      .select()
+      .from(economicNews)
+      .where(
+        and(
+          eq(economicNews.isArchived, false),
+          gte(economicNews.eventTime, new Date()) // Future events only
+        )
+      )
+      .orderBy(economicNews.eventTime) // Ascending for upcoming events
+      .limit(limit);
+
+    return query;
+  }
+
+  async archiveOldNews(daysOld: number = 30): Promise<void> {
+    const cutoffDate = new Date(Date.now() - daysOld * 24 * 60 * 60 * 1000);
+    
+    await db
+      .update(economicNews)
+      .set({ 
+        isArchived: true,
+        updatedAt: new Date() 
+      })
+      .where(
+        and(
+          eq(economicNews.isArchived, false),
+          gte(cutoffDate, economicNews.eventTime)
+        )
+      );
   }
 }
 

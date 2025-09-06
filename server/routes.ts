@@ -5,7 +5,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { generateTradingSignal } from "./services/openaiService";
 import { apiLogger } from "./utils/apiLogger";
 import { isMarketOpen } from "./services/marketService";
-import { insertSignalSchema } from "@shared/schema";
+import { insertSignalSchema, insertNewsSchema } from "@shared/schema";
 import { z } from "zod";
 
 const generateSignalRequestSchema = z.object({
@@ -249,6 +249,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'error',
         message: error.message 
       });
+    }
+  });
+
+  // News endpoints
+  app.get('/api/v1/news/recent', async (req, res) => {
+    try {
+      const { limit = '10', currency = 'USD', impact = 'high' } = req.query;
+      
+      const news = await storage.getRecentNews(
+        parseInt(limit as string),
+        currency as string,
+        impact as string
+      );
+      
+      res.json(news);
+    } catch (error) {
+      console.error("Error fetching recent news:", error);
+      res.status(500).json({ message: "Failed to fetch recent news" });
+    }
+  });
+
+  app.get('/api/v1/news/upcoming', async (req, res) => {
+    try {
+      const { limit = '10', currency = 'USD', impact = 'high' } = req.query;
+      
+      const news = await storage.getUpcomingNews(
+        parseInt(limit as string),
+        currency as string,
+        impact as string
+      );
+      
+      res.json(news);
+    } catch (error) {
+      console.error("Error fetching upcoming news:", error);
+      res.status(500).json({ message: "Failed to fetch upcoming news" });
+    }
+  });
+
+  app.post('/api/v1/news', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user || user.subscriptionTier === 'free') {
+        return res.status(403).json({ 
+          message: "News management requires a paid subscription" 
+        });
+      }
+
+      // Validate request body
+      const newsData = insertNewsSchema.parse(req.body);
+      
+      const news = await storage.createNews(newsData);
+      res.status(201).json(news);
+      
+    } catch (error) {
+      console.error("Error creating news:", error);
+      res.status(500).json({ message: "Failed to create news item" });
     }
   });
 
