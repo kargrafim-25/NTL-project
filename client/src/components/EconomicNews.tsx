@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Clock, AlertTriangle, TrendingUp, Calendar, ChevronDown, ChevronUp, BookOpen } from "lucide-react";
+import { Clock, AlertTriangle, TrendingUp, Calendar, ChevronDown, ChevronUp, BookOpen, ExternalLink } from "lucide-react";
 import { format, formatDistanceToNow, isPast } from "date-fns";
 import type { EconomicNews } from "@shared/schema";
 
@@ -144,10 +144,25 @@ export function EconomicNews({ className }: EconomicNewsProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className={`flex items-center justify-between p-3 rounded-lg border ${getImpactBgColor(featuredNews.impact)}`}>
-          <span className="font-semibold text-red-500" data-testid="text-news-title">
-            {featuredNews.title}
-          </span>
-          <div className="flex items-center text-xs text-muted-foreground">
+          <div className="flex-1 min-w-0">
+            {featuredNews.sourceUrl ? (
+              <a 
+                href={featuredNews.sourceUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="font-semibold text-red-500 hover:text-red-600 dark:hover:text-red-400 transition-colors flex items-center gap-1 group"
+                data-testid="link-news-title"
+              >
+                <span className="truncate">{featuredNews.title}</span>
+                <ExternalLink className="h-3 w-3 opacity-60 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+              </a>
+            ) : (
+              <span className="font-semibold text-red-500" data-testid="text-news-title">
+                {featuredNews.title}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center text-xs text-muted-foreground ml-2">
             <Clock className="h-3 w-3 mr-1" />
             <span data-testid="text-news-time">{format(new Date(featuredNews.eventTime), 'MMM dd, HH:mm')}</span>
           </div>
