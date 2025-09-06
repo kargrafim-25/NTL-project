@@ -10,7 +10,7 @@ import {
   type InsertEconomicNews,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, gte } from "drizzle-orm";
+import { eq, desc, and, gte, or } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -27,7 +27,9 @@ export interface IStorage {
   createSignal(signal: InsertTradingSignal): Promise<TradingSignal>;
   getUserSignals(userId: string, limit?: number): Promise<TradingSignal[]>;
   getRecentSignals(userId: string, hours?: number): Promise<TradingSignal[]>;
-  updateSignalStatus(signalId: string, status: 'active' | 'closed' | 'stopped', pips?: number): Promise<void>;
+  updateSignalStatus(signalId: string, status: 'fresh' | 'active' | 'closed' | 'stopped', pips?: number): Promise<void>;
+  getLatestSignal(userId: string): Promise<TradingSignal | undefined>;
+  getAllActiveSignals(): Promise<TradingSignal[]>;
   
   // News operations
   createNews(news: InsertEconomicNews): Promise<EconomicNews>;
@@ -114,13 +116,13 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(tradingSignals.createdAt));
   }
 
-  async updateSignalStatus(signalId: string, status: 'active' | 'closed' | 'stopped', pips?: number): Promise<void> {
+  async updateSignalStatus(signalId: string, status: 'fresh' | 'active' | 'closed' | 'stopped', pips?: number): Promise<void> {
     const updateData: any = { 
       status,
       updatedAt: new Date() 
     };
     
-    if (status !== 'active') {
+    if (status === 'closed' || status === 'stopped') {
       updateData.closedAt = new Date();
     }
     
@@ -132,6 +134,29 @@ export class DatabaseStorage implements IStorage {
       .update(tradingSignals)
       .set(updateData)
       .where(eq(tradingSignals.id, signalId));
+  }
+
+  async getLatestSignal(userId: string): Promise<TradingSignal | undefined> {
+    const [signal] = await db
+      .select()
+      .from(tradingSignals)
+      .where(eq(tradingSignals.userId, userId))
+      .orderBy(desc(tradingSignals.createdAt))
+      .limit(1);
+    return signal;
+  }
+
+  async getAllActiveSignals(): Promise<TradingSignal[]> {
+    return await db
+      .select()
+      .from(tradingSignals)
+      .where(
+        or(
+          eq(tradingSignals.status, 'fresh'),
+          eq(tradingSignals.status, 'active')
+        )
+      )
+      .orderBy(desc(tradingSignals.createdAt));
   }
 
   // News operations
@@ -187,7 +212,7 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(economicNews.isArchived, false),
-          gte(cutoffDate, economicNews.eventTime)
+          gte(economicNews.eventTime, cutoffDate)
         )
       );
   }
