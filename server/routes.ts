@@ -310,6 +310,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Contact form submission endpoint
+  app.post('/api/v1/contact', async (req, res) => {
+    try {
+      const { name, email, subject, message } = req.body;
+      
+      if (!name || !email || !message) {
+        return res.status(400).json({ 
+          message: "Name, email, and message are required" 
+        });
+      }
+
+      // Here you would typically send an email to your support team
+      // For now, we'll just log it and return success
+      console.log("Contact form submission:", {
+        name,
+        email,
+        subject: subject || "No subject",
+        message,
+        timestamp: new Date().toISOString()
+      });
+
+      // TODO: Integrate with email service (e.g., SendGrid, Nodemailer)
+      // await sendEmailToSupport({ name, email, subject, message });
+
+      res.status(200).json({ 
+        message: "Contact form submitted successfully",
+        success: true 
+      });
+      
+    } catch (error) {
+      console.error("Error submitting contact form:", error);
+      res.status(500).json({ message: "Failed to submit contact form" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
