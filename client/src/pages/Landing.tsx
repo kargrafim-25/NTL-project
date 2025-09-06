@@ -63,7 +63,8 @@ export default function Landing() {
                 className="gradient-primary text-white font-semibold text-lg px-8 py-4 hover:shadow-lg hover:scale-105 transition-all duration-300 signal-indicator"
                 data-testid="button-get-started"
               >
-                <Zap className="mr-2 h-5 w-5" />
+                <img src={logoUrl} alt="Logo" className="mr-2 h-5 w-5 object-contain" />
+                <Zap className="mr-1 h-5 w-5" />
                 Start Trading Now
               </Button>
               <Button 
@@ -96,7 +97,7 @@ export default function Landing() {
             <Card className="trading-card" data-testid="card-ai-signals">
               <CardHeader>
                 <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center mb-4">
-                  <Bot className="h-6 w-6 text-primary-foreground" />
+                  <img src={logoUrl} alt="Logo" className="h-6 w-6 object-contain" />
                 </div>
                 <CardTitle>AI-Powered Signals</CardTitle>
                 <CardDescription>
@@ -274,9 +275,12 @@ export default function Landing() {
       <footer className="border-t border-border bg-card/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex items-center justify-center space-x-4 mb-8">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-              <TrendingUp className="text-primary-foreground text-lg" />
-            </div>
+            <img 
+              src={logoUrl} 
+              alt="Next Trading Labs Logo" 
+              className="w-8 h-8 object-contain rounded-lg"
+              data-testid="img-logo-footer"
+            />
             <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Next Trading Labs
             </span>

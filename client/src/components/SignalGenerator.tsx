@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { Brain, Sparkles } from "lucide-react";
+import logoUrl from '../assets/logo.png';
 import { GenerateSignalRequest, GenerateSignalResponse } from "@/types/trading";
 
 const timeframes = [
@@ -159,7 +160,8 @@ export default function SignalGenerator({ selectedTimeframe = '1H', onTimeframeC
                 </>
               ) : (
                 <>
-                  <Brain className="mr-2 h-5 w-5" />
+                  <img src={logoUrl} alt="Logo" className="mr-2 h-5 w-5 object-contain" />
+                  <Brain className="mr-1 h-5 w-5" />
                   Get AI Confirmation
                 </>
               )}
@@ -178,7 +180,8 @@ export default function SignalGenerator({ selectedTimeframe = '1H', onTimeframeC
                 </>
               ) : (
                 <>
-                  <Brain className="mr-2 h-5 w-5" />
+                  <img src={logoUrl} alt="Logo" className="mr-2 h-5 w-5 object-contain" />
+                  <Brain className="mr-1 h-5 w-5" />
                   Generate AI Signal
                 </>
               )}
