@@ -25,10 +25,19 @@ export default function StatsCards() {
 
   const getSuccessRate = () => {
     if (!signals.length) return '0.0';
-    const closedSignals = signals.filter((s: any) => s.status === 'closed');
-    if (!closedSignals.length) return '0.0';
-    const profitable = closedSignals.filter((s: any) => parseFloat(s.pips || '0') > 0);
-    return ((profitable.length / closedSignals.length) * 100).toFixed(1);
+    
+    // Only count trades that user actually took (not 'pending' or 'didnt_take')
+    const takenTrades = signals.filter((s: any) => 
+      s.status === 'closed' && 
+      s.userAction && 
+      ['successful', 'unsuccessful'].includes(s.userAction)
+    );
+    
+    if (!takenTrades.length) return '0.0';
+    
+    // Count successful trades
+    const successfulTrades = takenTrades.filter((s: any) => s.userAction === 'successful');
+    return ((successfulTrades.length / takenTrades.length) * 100).toFixed(1);
   };
 
   const getTodaySignalsCount = () => {

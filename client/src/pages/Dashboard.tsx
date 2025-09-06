@@ -13,6 +13,7 @@ import { TrendingUp, Database } from "lucide-react";
 import logoUrl from '../assets/logo.png';
 import ChatbotTrigger from '@/components/ChatbotTrigger';
 import ProfileAvatar from '@/components/ProfileAvatar';
+import { NotificationBadge } from '@/components/NotificationBadge';
 import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
@@ -124,6 +125,9 @@ export default function Dashboard() {
               >
                 <Database className="h-4 w-4" />
               </Button>
+
+              {/* Notification Badge */}
+              <NotificationBadge />
 
               {/* Profile Avatar with dropdown */}
               <ProfileAvatar user={user} onLogout={handleLogout} />
