@@ -8,6 +8,7 @@ import LatestSignal from "@/components/LatestSignal";
 import TradingViewChart from "@/components/TradingViewChart";
 import SignalHistory from "@/components/SignalHistory";
 import PremiumFeatures from "@/components/PremiumFeatures";
+import { EconomicNews } from "@/components/EconomicNews";
 import { TrendingUp, LogOut, Database } from "lucide-react";
 import logoUrl from '../assets/logo.png';
 import ChatbotTrigger from '@/components/ChatbotTrigger';
@@ -173,6 +174,9 @@ export default function Dashboard() {
             />
             <div className="mt-6">
               <LatestSignal />
+            </div>
+            <div className="mt-6">
+              <EconomicNews />
             </div>
           </div>
 
