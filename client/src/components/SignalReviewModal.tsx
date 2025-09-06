@@ -82,6 +82,8 @@ export function SignalReviewModal({ isOpen, onClose, pendingSignals }: SignalRev
   if (!pendingSignals.length) return null;
 
   const currentSignal = pendingSignals[currentSignalIndex];
+  
+  if (!currentSignal) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -106,44 +108,44 @@ export function SignalReviewModal({ isOpen, onClose, pendingSignals }: SignalRev
           <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100" data-testid="signal-details">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                {currentSignal.direction === 'BUY' ? (
+                {currentSignal?.direction === 'BUY' ? (
                   <TrendingUp className="w-4 h-4 text-green-500" />
                 ) : (
                   <TrendingDown className="w-4 h-4 text-red-500" />
                 )}
-                <span className="font-semibold">{currentSignal.pair}</span>
+                <span className="font-semibold">{currentSignal?.pair || 'XAUUSD'}</span>
                 <Badge 
                   variant="outline" 
-                  className={currentSignal.direction === 'BUY' 
+                  className={currentSignal?.direction === 'BUY' 
                     ? 'bg-green-100 text-green-700 border-green-300 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700' 
                     : 'bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700'
                   }
                 >
-                  {currentSignal.direction}
+                  {currentSignal?.direction || 'BUY'}
                 </Badge>
               </div>
-              <Badge variant="secondary">{currentSignal.timeframe}</Badge>
+              <Badge variant="secondary">{currentSignal?.timeframe || '1H'}</Badge>
             </div>
             
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-gray-500 dark:text-gray-400">Entry Price:</span>
-                <p className="font-medium text-gray-900 dark:text-gray-100">${currentSignal.entryPrice}</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">${currentSignal?.entryPrice || '0.00'}</p>
               </div>
               <div>
                 <span className="text-gray-500 dark:text-gray-400">Take Profit:</span>
-                <p className="font-medium text-green-600 dark:text-green-400">${currentSignal.takeProfit}</p>
+                <p className="font-medium text-green-600 dark:text-green-400">${currentSignal?.takeProfit || '0.00'}</p>
               </div>
               <div>
                 <span className="text-gray-500 dark:text-gray-400">Stop Loss:</span>
-                <p className="font-medium text-red-600 dark:text-red-400">${currentSignal.stopLoss}</p>
+                <p className="font-medium text-red-600 dark:text-red-400">${currentSignal?.stopLoss || '0.00'}</p>
               </div>
               <div>
                 <span className="text-gray-500 dark:text-gray-400">Closed:</span>
                 <p className="font-medium text-gray-900 dark:text-gray-100">
-                  {currentSignal.daysSinceClose === 0 ? 'Today' : 
-                   currentSignal.daysSinceClose === 1 ? 'Yesterday' :
-                   `${currentSignal.daysSinceClose} days ago`}
+                  {currentSignal?.daysSinceClose === 0 ? 'Today' : 
+                   currentSignal?.daysSinceClose === 1 ? 'Yesterday' :
+                   `${currentSignal?.daysSinceClose || 0} days ago`}
                 </p>
               </div>
             </div>
