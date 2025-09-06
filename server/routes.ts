@@ -7,6 +7,7 @@ import { apiLogger } from "./utils/apiLogger";
 import { isMarketOpen } from "./services/marketService";
 import { insertSignalSchema, insertNewsSchema } from "@shared/schema";
 import { getSignalStatus } from "./signalLifecycle";
+import { notificationService } from "./services/notificationService";
 import { z } from "zod";
 
 const generateSignalRequestSchema = z.object({
@@ -214,6 +215,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching latest signal:", error);
       res.status(500).json({ message: "Failed to fetch latest signal" });
+    }
+  });
+
+  // Notification routes
+  
+  // Get pending signal reviews for user notification
+  app.get('/api/v1/notifications/pending-reviews', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const pendingData = await notificationService.checkPendingSignalReviews(userId);
+      res.json(pendingData);
+    } catch (error) {
+      console.error("Error fetching pending reviews:", error);
+      res.status(500).json({ message: "Failed to fetch pending reviews" });
+    }
+  });
+
+  // Update signal user action
+  app.patch('/api/v1/signals/:signalId/action', isAuthenticated, async (req: any, res) => {
+    try {
+      const { signalId } = req.params;
+      const { action } = req.body;
+      
+      if (!['successful', 'unsuccessful', 'didnt_take'].includes(action)) {
+        return res.status(400).json({ message: "Invalid action. Must be 'successful', 'unsuccessful', or 'didnt_take'" });
+      }
+
+      await storage.updateSignalUserAction(signalId, action);
+      
+      // Mark notification as sent for this user
+      const userId = req.user.claims.sub;
+      await notificationService.markNotificationSent(userId);
+      
+      res.json({ message: "Signal action updated successfully" });
+    } catch (error) {
+      console.error("Error updating signal action:", error);
+      res.status(500).json({ message: "Failed to update signal action" });
+    }
+  });
+
+  // Get notification count for badge
+  app.get('/api/v1/notifications/count', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const notificationData = await notificationService.getNotificationCount(userId);
+      res.json(notificationData);
+    } catch (error) {
+      console.error("Error fetching notification count:", error);
+      res.status(500).json({ message: "Failed to fetch notification count" });
+    }
+  });
+
+  // Get monthly completion status
+  app.get('/api/v1/notifications/monthly-status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const monthlyData = await notificationService.checkMonthlyCompletion(userId);
+      res.json(monthlyData);
+    } catch (error) {
+      console.error("Error fetching monthly status:", error);
+      res.status(500).json({ message: "Failed to fetch monthly status" });
+    }
+  });
+
+  // Claim discount code
+  app.post('/api/v1/notifications/claim-discount', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.pendingDiscountCode) {
+        return res.status(404).json({ message: "No discount code available" });
+      }
+
+      // Clear the discount code (user has claimed it)
+      await storage.updateUserDiscountCode(userId, '');
+      
+      res.json({ 
+        message: "Discount code claimed successfully",
+        discountCode: user.pendingDiscountCode
+      });
+    } catch (error) {
+      console.error("Error claiming discount:", error);
+      res.status(500).json({ message: "Failed to claim discount code" });
     }
   });
 
