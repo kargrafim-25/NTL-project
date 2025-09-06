@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useMarketStatus } from "@/hooks/useMarketStatus";
 import StatsCards from "@/components/StatsCards";
 import SignalGenerator from "@/components/SignalGenerator";
 import LatestSignal from "@/components/LatestSignal";
@@ -16,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 export default function Dashboard() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading, user } = useAuth();
+  const { isOpen: isMarketOpen, isLoading: isMarketLoading } = useMarketStatus();
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1H');
 
   // Redirect to home if not authenticated
@@ -95,9 +97,29 @@ export default function Dashboard() {
             
             <div className="flex items-center space-x-4">
               {/* Market Status */}
-              <div className="flex items-center space-x-2 px-3 py-1 bg-success/20 rounded-full">
-                <div className="w-2 h-2 bg-success rounded-full animate-pulse" data-testid="status-market"></div>
-                <span className="text-success text-sm font-medium">Market Open</span>
+              <div className={`flex items-center space-x-2 px-3 py-1 rounded-full ${
+                isMarketLoading 
+                  ? 'bg-muted/20' 
+                  : isMarketOpen 
+                    ? 'bg-success/20' 
+                    : 'bg-destructive/20'
+              }`}>
+                <div className={`w-2 h-2 rounded-full ${
+                  isMarketLoading
+                    ? 'bg-muted animate-pulse'
+                    : isMarketOpen 
+                      ? 'bg-success animate-pulse' 
+                      : 'bg-destructive'
+                }`} data-testid="status-market"></div>
+                <span className={`text-sm font-medium ${
+                  isMarketLoading
+                    ? 'text-muted-foreground'
+                    : isMarketOpen 
+                      ? 'text-success' 
+                      : 'text-destructive'
+                }`}>
+                  {isMarketLoading ? 'Checking...' : isMarketOpen ? 'Market Open' : 'Market Closed'}
+                </span>
               </div>
               
               {/* User Plan Badge */}
