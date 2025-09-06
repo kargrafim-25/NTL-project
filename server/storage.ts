@@ -28,6 +28,9 @@ export interface IStorage {
   getUserSignals(userId: string, limit?: number): Promise<TradingSignal[]>;
   getRecentSignals(userId: string, hours?: number): Promise<TradingSignal[]>;
   updateSignalStatus(signalId: string, status: 'fresh' | 'active' | 'closed' | 'stopped', pips?: number): Promise<void>;
+  updateSignalUserAction(signalId: string, userAction: 'successful' | 'unsuccessful' | 'didnt_take'): Promise<void>;
+  updateUserNotificationDate(userId: string): Promise<void>;
+  updateUserDiscountCode(userId: string, discountCode: string): Promise<void>;
   getLatestSignal(userId: string): Promise<TradingSignal | undefined>;
   getAllActiveSignals(): Promise<TradingSignal[]>;
   
@@ -157,6 +160,36 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(desc(tradingSignals.createdAt));
+  }
+
+  async updateSignalUserAction(signalId: string, userAction: 'successful' | 'unsuccessful' | 'didnt_take'): Promise<void> {
+    await db
+      .update(tradingSignals)
+      .set({ 
+        userAction,
+        updatedAt: new Date() 
+      })
+      .where(eq(tradingSignals.id, signalId));
+  }
+
+  async updateUserNotificationDate(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        lastNotificationDate: new Date(),
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async updateUserDiscountCode(userId: string, discountCode: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        pendingDiscountCode: discountCode,
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, userId));
   }
 
   // News operations
