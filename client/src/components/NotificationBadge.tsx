@@ -38,24 +38,29 @@ export function NotificationBadge() {
     refetchInterval: 60000, // Check every minute
   });
 
+  // Type assertions for data safety
+  const safeNotificationData = notificationData as any || {};
+  const safePendingReviews = pendingReviews as any || {};
+  const safeMonthlyStatus = monthlyStatus as any || {};
+
   // Auto-open review modal if there are pending reviews and user hasn't been notified today
   useEffect(() => {
-    if (pendingReviews?.shouldNotify && pendingReviews?.pendingSignals?.length > 0) {
+    if (safePendingReviews?.shouldNotify && safePendingReviews?.pendingSignals?.length > 0) {
       setIsReviewModalOpen(true);
     }
-  }, [pendingReviews]);
+  }, [safePendingReviews]);
 
   // Show discount popup when user completes monthly challenge
   useEffect(() => {
-    if (monthlyStatus?.completed && monthlyStatus?.discountCode && !showDiscountPopup) {
+    if (safeMonthlyStatus?.completed && safeMonthlyStatus?.discountCode && !showDiscountPopup) {
       setShowDiscountPopup(true);
       toast({
         title: "🎉 Monthly Challenge Complete!",
-        description: `You've earned a ${monthlyStatus.discountPercentage}% discount for next month!`,
+        description: `You've earned a ${safeMonthlyStatus.discountPercentage}% discount for next month!`,
         duration: 8000,
       });
     }
-  }, [monthlyStatus, showDiscountPopup, toast]);
+  }, [safeMonthlyStatus, showDiscountPopup, toast]);
 
   const handleClaimDiscount = async () => {
     try {
@@ -85,7 +90,7 @@ export function NotificationBadge() {
 
   if (!isAuthenticated) return null;
 
-  const totalNotifications = (notificationData?.pendingReviews || 0) + (notificationData?.hasDiscount ? 1 : 0);
+  const totalNotifications = (safeNotificationData?.pendingReviews || 0) + (safeNotificationData?.hasDiscount ? 1 : 0);
 
   return (
     <>
@@ -115,13 +120,13 @@ export function NotificationBadge() {
             <h3 className="font-semibold text-sm">Notifications</h3>
             
             {/* Pending Reviews */}
-            {notificationData?.pendingReviews > 0 && (
+            {safeNotificationData?.pendingReviews > 0 && (
               <div className="border-l-4 border-orange-500 pl-4 py-2">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium text-sm">Signal Reviews Needed</p>
                     <p className="text-xs text-gray-500">
-                      {notificationData.pendingReviews} closed signal{notificationData.pendingReviews !== 1 ? 's' : ''} need your input
+                      {safeNotificationData.pendingReviews} closed signal{safeNotificationData.pendingReviews !== 1 ? 's' : ''} need your input
                     </p>
                   </div>
                   <Button 
@@ -136,7 +141,7 @@ export function NotificationBadge() {
             )}
 
             {/* Available Discount */}
-            {notificationData?.hasDiscount && (
+            {safeNotificationData?.hasDiscount && (
               <div className="border-l-4 border-green-500 pl-4 py-2">
                 <div className="flex items-center justify-between">
                   <div>
@@ -145,7 +150,7 @@ export function NotificationBadge() {
                       Discount Available!
                     </p>
                     <p className="text-xs text-gray-500">
-                      {notificationData.discountPercentage}% off your next bill
+                      {safeNotificationData.discountPercentage}% off your next bill
                     </p>
                   </div>
                   <Button 
@@ -161,37 +166,37 @@ export function NotificationBadge() {
             )}
 
             {/* Monthly Progress */}
-            {monthlyStatus && monthlyStatus.totalSignals > 0 && (
+            {safeMonthlyStatus && safeMonthlyStatus.totalSignals > 0 && (
               <div className="border-t pt-3">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium">Monthly Challenge</span>
-                  {monthlyStatus.completed && (
+                  {safeMonthlyStatus.completed && (
                     <CheckCircle2 className="w-4 h-4 text-green-500" />
                   )}
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs text-gray-500">
                     <span>Signal reviews completed</span>
-                    <span>{monthlyStatus.reviewedSignals}/{monthlyStatus.totalSignals}</span>
+                    <span>{safeMonthlyStatus.reviewedSignals}/{safeMonthlyStatus.totalSignals}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                       className={`h-2 rounded-full transition-all ${
-                        monthlyStatus.completed ? 'bg-green-500' : 'bg-blue-500'
+                        safeMonthlyStatus.completed ? 'bg-green-500' : 'bg-blue-500'
                       }`}
-                      style={{ width: `${(monthlyStatus.reviewedSignals / monthlyStatus.totalSignals) * 100}%` }}
+                      style={{ width: `${(safeMonthlyStatus.reviewedSignals / safeMonthlyStatus.totalSignals) * 100}%` }}
                     />
                   </div>
-                  {!monthlyStatus.completed && (
+                  {!safeMonthlyStatus.completed && (
                     <p className="text-xs text-gray-500">
-                      Complete all reviews to earn a {monthlyStatus.discountPercentage}% discount!
+                      Complete all reviews to earn a {safeMonthlyStatus.discountPercentage}% discount!
                     </p>
                   )}
                 </div>
               </div>
             )}
 
-            {totalNotifications === 0 && !monthlyStatus?.totalSignals && (
+            {totalNotifications === 0 && !safeMonthlyStatus?.totalSignals && (
               <p className="text-sm text-gray-500 text-center py-4">
                 No notifications at the moment
               </p>
@@ -204,7 +209,7 @@ export function NotificationBadge() {
       <SignalReviewModal
         isOpen={isReviewModalOpen}
         onClose={() => setIsReviewModalOpen(false)}
-        pendingSignals={pendingReviews?.pendingSignals || []}
+        pendingSignals={safePendingReviews?.pendingSignals || []}
       />
     </>
   );

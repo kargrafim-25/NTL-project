@@ -35,11 +35,13 @@ export function SignalReviewModal({ isOpen, onClose, pendingSignals }: SignalRev
 
   const updateActionMutation = useMutation({
     mutationFn: async ({ signalId, action }: { signalId: string; action: string }) => {
-      await apiRequest(`/api/v1/signals/${signalId}/action`, {
+      const response = await fetch(`/api/v1/signals/${signalId}/action`, {
         method: 'PATCH',
         body: JSON.stringify({ action }),
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
       });
+      if (!response.ok) throw new Error('Failed to update signal');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/v1/notifications/pending-reviews'] });
