@@ -8,6 +8,7 @@ import { isMarketOpen } from "./services/marketService";
 import { insertSignalSchema, insertNewsSchema } from "@shared/schema";
 import { getSignalStatus } from "./signalLifecycle";
 import { notificationService } from "./services/notificationService";
+import { forexFactoryService } from "./services/forexFactoryService";
 import { z } from "zod";
 
 const generateSignalRequestSchema = z.object({
@@ -350,43 +351,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("GPT-5 debug error:", error);
       res.status(500).json({ 
         status: 'error',
-        message: error.message 
+        message: error instanceof Error ? error.message : 'Unknown error' 
       });
     }
   });
 
-  // News endpoints
+  // News endpoints - Now powered by ForexFactory live data
   app.get('/api/v1/news/recent', async (req, res) => {
     try {
-      const { limit = '10', currency = 'USD', impact = 'high' } = req.query;
+      const { limit = '10' } = req.query;
       
-      const news = await storage.getRecentNews(
-        parseInt(limit as string),
-        currency as string,
-        impact as string
+      const news = await forexFactoryService.getRecentNews(
+        parseInt(limit as string)
       );
+      
+      // Add logging for debugging
+      console.log(`[ForexFactory] Fetched ${news.length} recent news items`);
       
       res.json(news);
     } catch (error) {
-      console.error("Error fetching recent news:", error);
+      console.error("Error fetching recent news from ForexFactory:", error);
       res.status(500).json({ message: "Failed to fetch recent news" });
     }
   });
 
   app.get('/api/v1/news/upcoming', async (req, res) => {
     try {
-      const { limit = '10', currency = 'USD', impact = 'high' } = req.query;
+      const { limit = '10' } = req.query;
       
-      const news = await storage.getUpcomingNews(
-        parseInt(limit as string),
-        currency as string,
-        impact as string
+      const news = await forexFactoryService.getUpcomingNews(
+        parseInt(limit as string)
       );
+      
+      // Add logging for debugging
+      console.log(`[ForexFactory] Fetched ${news.length} upcoming news items`);
       
       res.json(news);
     } catch (error) {
-      console.error("Error fetching upcoming news:", error);
+      console.error("Error fetching upcoming news from ForexFactory:", error);
       res.status(500).json({ message: "Failed to fetch upcoming news" });
+    }
+  });
+
+  // ForexFactory cache management endpoint (admin only)
+  app.post('/api/v1/news/refresh-cache', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.user;
+      if (!user || user.claims?.email !== process.env.ADMIN_EMAIL) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      // Clear ForexFactory cache to force refresh
+      forexFactoryService.clearCache();
+      
+      res.json({ 
+        message: "ForexFactory cache cleared successfully",
+        timestamp: new Date().toISOString()
+      });
+      
+    } catch (error) {
+      console.error("Error clearing ForexFactory cache:", error);
+      res.status(500).json({ message: "Failed to clear cache" });
     }
   });
 
