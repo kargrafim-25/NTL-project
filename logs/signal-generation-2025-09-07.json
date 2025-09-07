@@ -43,5 +43,20 @@
     "executionTime": 3959,
     "success": false,
     "error": "Cannot analyze any signal now due to market conditions. Please try again later."
+  },
+  {
+    "timestamp": "2025-09-07T22:18:44.593Z",
+    "userId": "46304040",
+    "timeframe": "1H",
+    "subscriptionTier": "pro",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "1H",
+      "userTier": "pro"
+    },
+    "response": null,
+    "executionTime": 3342,
+    "success": false,
+    "error": "Cannot analyze any signal now due to market conditions. Please try again later."
   }
 ]
