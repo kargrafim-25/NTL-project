@@ -17,19 +17,23 @@ export function EconomicNews({ className }: EconomicNewsProps) {
   const { data: recentNews = [], isLoading: loadingRecent } = useQuery({
     queryKey: ['/api/v1/news/recent'],
     queryFn: async () => {
-      const response = await fetch('/api/v1/news/recent?limit=5&currency=USD&impact=high');
+      const response = await fetch('/api/v1/news/recent?limit=8');
       if (!response.ok) throw new Error('Failed to fetch recent news');
       return response.json() as Promise<EconomicNews[]>;
     },
+    refetchInterval: 5 * 60 * 1000, // Auto-refresh every 5 minutes
+    staleTime: 4 * 60 * 1000, // Consider data stale after 4 minutes
   });
 
   const { data: upcomingNews = [], isLoading: loadingUpcoming } = useQuery({
     queryKey: ['/api/v1/news/upcoming'],
     queryFn: async () => {
-      const response = await fetch('/api/v1/news/upcoming?limit=5&currency=USD&impact=high');
+      const response = await fetch('/api/v1/news/upcoming?limit=8');
       if (!response.ok) throw new Error('Failed to fetch upcoming news');
       return response.json() as Promise<EconomicNews[]>;
     },
+    refetchInterval: 5 * 60 * 1000, // Auto-refresh every 5 minutes  
+    staleTime: 4 * 60 * 1000, // Consider data stale after 4 minutes
   });
 
   const getImpactColor = (impact: string) => {
@@ -206,13 +210,24 @@ export function EconomicNews({ className }: EconomicNewsProps) {
 
         {/* Additional News Count */}
         <div className="flex items-center justify-between">
-          <Badge 
-            variant="outline" 
-            className="border-red-500/30 text-red-500"
-            data-testid="badge-news-count"
+          <a 
+            href="https://www.forexfactory.com/calendar?week=this&currency=USD"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group"
+            data-testid="link-forexfactory-events"
           >
-            {upcomingNews.length + recentNews.length} USD Events
-          </Badge>
+            <Badge 
+              variant="outline" 
+              className="border-red-500/30 text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer group-hover:border-red-500/50"
+              data-testid="badge-news-count"
+            >
+              <span className="flex items-center gap-1">
+                {upcomingNews.length + recentNews.length} USD Events
+                <ExternalLink className="h-3 w-3 opacity-60 group-hover:opacity-100 transition-opacity" />
+              </span>
+            </Badge>
+          </a>
           <div className="text-xs text-muted-foreground">
             High-impact events only
           </div>
