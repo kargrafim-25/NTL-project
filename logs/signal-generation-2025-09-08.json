@@ -182,5 +182,68 @@
     },
     "executionTime": 62110,
     "success": true
+  },
+  {
+    "timestamp": "2025-09-08T21:20:37.493Z",
+    "userId": "46304040",
+    "timeframe": "5M",
+    "subscriptionTier": "pro",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "5M",
+      "userTier": "pro"
+    },
+    "response": {
+      "action": "BUY",
+      "entry": 3586.75,
+      "stop_loss": 3556.75,
+      "take_profit": 3631.75,
+      "confidence": 78,
+      "take_profits": [
+        {
+          "level": 1,
+          "price": 3631.75,
+          "risk_reward_ratio": 1.5
+        },
+        {
+          "level": 2,
+          "price": 3646.75,
+          "risk_reward_ratio": 2
+        },
+        {
+          "level": 3,
+          "price": 3676.75,
+          "risk_reward_ratio": 3
+        }
+      ],
+      "ai_analysis": {
+        "brief": "Short-term 5M structure favors a long bias as price trades near session highs with bullish momentum and rising volume on the latest candles, aligned with a positive intraday moving average slope and expanding Bollinger Bands indicating continuation potential. ([advfn.com](https://www.advfn.com/stock-market/PM/XAUUSD/stock-price?utm_source=openai))",
+        "detailed": "Price is currently trading around 3586.75 on the 5-minute chart and has formed higher highs and higher lows over the last several pullbacks, with the 20-EMA above the 50-EMA signaling short-term bullish alignment. RSI on 5M sits in bullish territory but not yet overbought, MACD histogram is positive and widening which supports continuation higher, and Bollinger Bands are expanding after a squeeze indicating increased volatility. Key horizontal support sits near 3556.75 (recent intraday swing low) with immediate resistance clustered between 3630-3650; a buy above current price with a tight stop below 3556.75 targets the indicated R:R levels. ([advfn.com](https://www.advfn.com/stock-market/PM/XAUUSD/stock-price?utm_source=openai), [ft.com](https://www.ft.com/content/05c798a8-6178-4c14-b155-d977ad4b69e9?utm_source=openai))",
+        "market_sentiment": "BULLISH",
+        "trend_direction": "UPWARD",
+        "key_indicators": [
+          "RSI (5M)",
+          "MACD (5M)",
+          "EMA 20",
+          "EMA 50",
+          "Bollinger Bands",
+          "Volume Profile",
+          "Horizontal Support/Resistance"
+        ]
+      },
+      "future_positions": [],
+      "historical_positions": [
+        {
+          "symbol": "XAUUSD",
+          "entry_price": 3536.75,
+          "current_status": "ACTIVE",
+          "days_active": 2,
+          "unrealized_pnl": 50
+        }
+      ],
+      "has_notifications": true
+    },
+    "executionTime": 64045,
+    "success": true
   }
 ]
