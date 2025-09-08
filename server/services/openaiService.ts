@@ -54,34 +54,28 @@ export async function generateTradingSignal(
     
     const prompt = `You are a professional XAUUSD trading analyst. Please analyze the current XAUUSD market on the ${timeframe} timeframe and provide a trading signal.
 
-Start by searching for the current XAUUSD price and recent market data. Then perform a comprehensive technical analysis including:
+Search for current XAUUSD price and recent market data. Perform comprehensive technical analysis including current price, support/resistance levels, RSI, MACD, moving averages, Bollinger Bands, market sentiment, and volume analysis.
 
-• Current XAUUSD price and recent price action
-• Key support and resistance levels on the ${timeframe} chart
-• Technical indicators: RSI, MACD, Moving Averages, Bollinger Bands
-• Market sentiment and trend analysis
-• Volume analysis and market momentum
+Based on your analysis, determine BUY or SELL action and calculate entry, stop loss, and ${subscriptionTier === 'pro' ? '3 take profit levels' : 'take profit levels'}. Provide confidence score 60-100.
 
-Based on your analysis, determine whether to BUY or SELL XAUUSD and calculate appropriate entry, stop loss, and take profit levels. Provide a confidence score between 60-100 based on signal strength.
+IMPORTANT: Provide ONLY clean market analysis text without any website links, URLs, or external resource references. Keep analysis professional and focused on trading insights only.
 
-Return your analysis in this exact JSON format:
+Return analysis in exact JSON format:
 {
     "action": "BUY or SELL",
-    "entry": current_market_price,
-    "stop_loss": calculated_stop_loss,
-    "take_profit": primary_take_profit,
+    "entry": current_market_price_number,
+    "stop_loss": calculated_stop_loss_number,
+    "take_profit": primary_take_profit_number,
     "confidence": confidence_score_60_to_100,
     "take_profits": [
-        {"level": 1, "price": first_tp_level, "risk_reward_ratio": 1.5},
-        {"level": 2, "price": second_tp_level, "risk_reward_ratio": 2.0},
-        {"level": 3, "price": third_tp_level, "risk_reward_ratio": 3.0}
+        {"level": 1, "price": first_tp_level, "risk_reward_ratio": 1.5}${subscriptionTier === 'pro' ? ',\n        {"level": 2, "price": second_tp_level, "risk_reward_ratio": 2.0},\n        {"level": 3, "price": third_tp_level, "risk_reward_ratio": 3.0}' : ''}
     ],
     "ai_analysis": {
-        "brief": "${subscriptionTier === 'starter' ? 'One sentence market summary' : 'Brief market analysis summary'}",
-        "detailed": "${subscriptionTier === 'pro' ? 'Detailed 3-sentence technical analysis with indicators and reasoning' : subscriptionTier === 'starter' ? '2 sentences about market conditions and trade setup' : 'Current market analysis with technical details'}",
+        "brief": "${subscriptionTier === 'starter' ? 'One sentence market summary without any links' : 'Brief market analysis summary without any links'}",
+        "detailed": "${subscriptionTier === 'pro' ? 'Detailed 3-sentence technical analysis with indicators and reasoning, no links' : subscriptionTier === 'starter' ? '2 sentences about market conditions and trade setup, no links' : 'Current market analysis with technical details, no links'}",
         "market_sentiment": "BULLISH, BEARISH, or NEUTRAL",
         "trend_direction": "UPWARD, DOWNWARD, or SIDEWAYS", 
-        "key_indicators": ["List of technical indicators analyzed"]
+        "key_indicators": ["List of technical indicators used in analysis"]
     },
     "future_positions": [],
     "historical_positions": [
