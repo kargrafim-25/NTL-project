@@ -58,7 +58,7 @@ Search for current XAUUSD price and recent market data. Perform comprehensive te
 
 Based on your analysis, determine BUY or SELL action and calculate entry, stop loss, and ${subscriptionTier === 'pro' ? '3 take profit levels' : 'take profit levels'}. Provide confidence score 60-100.
 
-IMPORTANT: Provide ONLY clean market analysis text without any website links, URLs, or external resource references. Keep analysis professional and focused on trading insights only.
+CRITICAL REQUIREMENT: Your analysis must contain ZERO website links, URLs, citations, or references to external sources. Do NOT include any text in brackets like [website.com] or (website.com). Provide pure technical analysis text ONLY. No sources, no links, no references whatsoever.
 
 Return analysis in exact JSON format:
 {
@@ -71,8 +71,8 @@ Return analysis in exact JSON format:
         {"level": 1, "price": first_tp_level, "risk_reward_ratio": 1.5}${subscriptionTier === 'pro' ? ',\n        {"level": 2, "price": second_tp_level, "risk_reward_ratio": 2.0},\n        {"level": 3, "price": third_tp_level, "risk_reward_ratio": 3.0}' : ''}
     ],
     "ai_analysis": {
-        "brief": "${subscriptionTier === 'starter' ? 'One sentence market summary without any links' : 'Brief market analysis summary without any links'}",
-        "detailed": "${subscriptionTier === 'pro' ? 'Detailed 3-sentence technical analysis with indicators and reasoning, no links' : subscriptionTier === 'starter' ? '2 sentences about market conditions and trade setup, no links' : 'Current market analysis with technical details, no links'}",
+        "brief": "${subscriptionTier === 'starter' ? 'One sentence pure technical analysis with NO website links, citations, or brackets' : 'Brief technical analysis with NO website links, citations, or brackets'}",
+        "detailed": "${subscriptionTier === 'pro' ? 'Detailed 3-sentence pure technical analysis - NO links, NO citations, NO brackets, NO references' : subscriptionTier === 'starter' ? '2 sentences pure technical analysis - NO links, NO citations, NO brackets' : 'Pure technical analysis with NO links, NO citations, NO brackets'}",
         "market_sentiment": "BULLISH, BEARISH, or NEUTRAL",
         "trend_direction": "UPWARD, DOWNWARD, or SIDEWAYS", 
         "key_indicators": ["List of technical indicators used in analysis"]

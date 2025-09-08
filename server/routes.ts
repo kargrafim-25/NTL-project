@@ -19,10 +19,6 @@ const generateSignalRequestSchema = z.object({
 function applyLifecycleStatus(signals: any[]) {
   return signals.map(signal => {
     const currentStatus = getSignalStatus(signal.createdAt, signal.timeframe);
-    
-    // Debug logging to identify the issue
-    console.log(`[DEBUG] Signal ${signal.id}: stored status = ${signal.status}, calculated status = ${currentStatus}, createdAt = ${signal.createdAt}, timeframe = ${signal.timeframe}`);
-    
     return {
       ...signal,
       status: currentStatus
@@ -140,7 +136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         stopLoss: signalData.stop_loss.toString(),
         takeProfit: signalData.take_profit.toString(),
         confidence: signalData.confidence,
-        analysis: `${signalData.ai_analysis.brief} ${signalData.ai_analysis.detailed}`,
+        analysis: `${signalData.ai_analysis.brief} ${signalData.ai_analysis.detailed}`.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, ''),
         status: "fresh",
       });
 
