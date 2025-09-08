@@ -52,70 +52,53 @@ export async function generateTradingSignal(
   try {
     const symbol = "XAUUSD";
     
-    const prompt = `Role and Objective: You act as a professional trader analyzing XAUUSD on the ${timeframe} timeframe using strictly live, market data, with the help of web search.
+    const prompt = `You are a professional XAUUSD trading analyst. Please analyze the current XAUUSD market on the ${timeframe} timeframe and provide a trading signal.
 
-Instructions: Always reference real, current XAUUSD prices—never hypothetical, simulated, or fictional data. Continuously gather the most current market data available. Begin with a concise checklist (3-7 bullets) outlining each analysis step before forming your response. Before making any data fetch or tool call, briefly state the purpose and required minimal inputs. Apply explicit stepwise reasoning internally in your analysis, including technical analysis, indicator checks, sentiment assessment, and price target calculations, before generating a final response. After gathering data and performing analysis, verify that all values are from live sources and the output meets schema requirements; self-correct if necessary before replying. If live market data is unavailable or you cannot identify a valid signal, respond only with the specified structured error JSON. Never generate, reference, or infer simulated/demo prices or use any placeholder, partial, or malformed output.
+Start by searching for the current XAUUSD price and recent market data. Then perform a comprehensive technical analysis including:
 
-Context: You are working with XAUUSD ${timeframe} timeframe. Required output is a well-formed JSON object that strictly follows the provided schema.
+• Current XAUUSD price and recent price action
+• Key support and resistance levels on the ${timeframe} chart
+• Technical indicators: RSI, MACD, Moving Averages, Bollinger Bands
+• Market sentiment and trend analysis
+• Volume analysis and market momentum
 
-Reasoning Steps Internally: Fetch current, accurate XAUUSD price. Analyze recent ${timeframe} price action, trend, key support/resistance, and use specific technical indicators (RSI, MACD, Moving Averages, Bollinger Bands, etc.). List actual indicators used in output. Decide trading action: strictly "BUY" or "SELL" (no ambiguous outputs). Calculate stop loss and 1-3 take profit levels based on live market structure. Estimate a confidence score (60-100) reflecting the certainty of your analysis.
+Based on your analysis, determine whether to BUY or SELL XAUUSD and calculate appropriate entry, stop loss, and take profit levels. Provide a confidence score between 60-100 based on signal strength.
 
-Output Format: Output only a single JSON object conforming exactly to the schema:
+Return your analysis in this exact JSON format:
 {
-    "action": "BUY or SELL based on current market analysis",
-    "entry": actual_current_market_price_number,
-    "stop_loss": calculated_stop_loss_based_on_current_price,
-    "take_profit": calculated_take_profit_based_on_current_price,
-    "confidence": confidence_level_60_to_100,
+    "action": "BUY or SELL",
+    "entry": current_market_price,
+    "stop_loss": calculated_stop_loss,
+    "take_profit": primary_take_profit,
+    "confidence": confidence_score_60_to_100,
     "take_profits": [
-        {"level": 1, "price": calculated_tp1, "risk_reward_ratio": 1.5},
-        {"level": 2, "price": calculated_tp2, "risk_reward_ratio": 2.0},
-        {"level": 3, "price": calculated_tp3, "risk_reward_ratio": 3.0}
+        {"level": 1, "price": first_tp_level, "risk_reward_ratio": 1.5},
+        {"level": 2, "price": second_tp_level, "risk_reward_ratio": 2.0},
+        {"level": 3, "price": third_tp_level, "risk_reward_ratio": 3.0}
     ],
     "ai_analysis": {
-        "brief": "${subscriptionTier === 'starter' ? 'One sentence about current market analysis' : 'Brief analysis of current market conditions'}",
-        "detailed": "${subscriptionTier === 'pro' ? 'Detailed 3-sentence analysis of current market conditions, technical indicators, and reasoning' : subscriptionTier === 'starter' ? '2 sentences about current market analysis and technical reasoning' : 'Current market analysis with technical details'}",
-        "market_sentiment": "BULLISH, BEARISH, or NEUTRAL based on current conditions",
-        "trend_direction": "UPWARD, DOWNWARD, or SIDEWAYS based on current trend", 
-        "key_indicators": ["List actual technical indicators used in analysis"]
+        "brief": "${subscriptionTier === 'starter' ? 'One sentence market summary' : 'Brief market analysis summary'}",
+        "detailed": "${subscriptionTier === 'pro' ? 'Detailed 3-sentence technical analysis with indicators and reasoning' : subscriptionTier === 'starter' ? '2 sentences about market conditions and trade setup' : 'Current market analysis with technical details'}",
+        "market_sentiment": "BULLISH, BEARISH, or NEUTRAL",
+        "trend_direction": "UPWARD, DOWNWARD, or SIDEWAYS", 
+        "key_indicators": ["List of technical indicators analyzed"]
     },
     "future_positions": [],
     "historical_positions": [
-        {"symbol": "XAUUSD", "entry_price": recent_realistic_price, "current_status": "ACTIVE", "days_active": 2, "unrealized_pnl": calculated_pnl}
+        {"symbol": "XAUUSD", "entry_price": realistic_recent_price, "current_status": "ACTIVE", "days_active": 2, "unrealized_pnl": calculated_pnl}
     ],
     "has_notifications": true
-}
+}`;
 
-If live market data is unavailable or you cannot identify a valid signal, respond only with:
-{
-    "error": "Cannot analyze any signal now due to market conditions. Please try again later.",
-    "retry": true
-}
-
-Only provide trading signals with ACTUAL current market prices.`;
-
-    const response = await openai.chat.completions.create({
+    const response = await openai.responses.create({
       model: "gpt-5-mini",
-      messages: [
-        {
-          role: "system",
-          content: "You are an expert XAUUSD trading analyst with access to real-time market data. Always respond with valid JSON only using current market conditions."
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
+      tools: [
+        { type: "web_search" },
       ],
-      response_format: { type: "json_object" },
-      max_completion_tokens: 1500,
+      input: prompt,
     });
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
-
-    // Check if AI returned an error (can't access real-time data)
-    if (result.error || result.retry) {
-      throw new Error(result.error || "AI cannot access real-time market data. Please retry.");
-    }
+    const result = JSON.parse(response.output_text || '{}');
 
     // Validate that we have actual numeric prices (no fallbacks)
     const entryPrice = parseFloat(result.entry);
@@ -133,7 +116,7 @@ Only provide trading signals with ACTUAL current market prices.`;
     }
 
     // Return validated result with no fallbacks
-    const finalResult = {
+    const finalResult: TradingSignalData = {
       action: result.action === 'SELL' ? 'SELL' : 'BUY',
       entry: entryPrice,
       stop_loss: stopLoss,
@@ -176,6 +159,8 @@ Only provide trading signals with ACTUAL current market prices.`;
   } catch (error) {
     console.error("OpenAI API error:", error);
     
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
     // Log failed API call
     const executionTime = Date.now() - startTime;
     logEntry = {
@@ -191,11 +176,11 @@ Only provide trading signals with ACTUAL current market prices.`;
       response: null,
       executionTime,
       success: false,
-      error: error.message
+      error: errorMessage
     };
 
     await apiLogger.logSignalGeneration(logEntry);
     
-    throw new Error(`Failed to generate trading signal: ${error.message}`);
+    throw new Error(`Failed to generate trading signal: ${errorMessage}`);
   }
 }
