@@ -135,8 +135,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         entryPrice: signalData.entry.toString(),
         stopLoss: signalData.stop_loss.toString(),
         takeProfit: signalData.take_profit.toString(),
+        takeProfits: signalData.take_profits || [], // Store takeProfits in database
         confidence: signalData.confidence,
-        analysis: `${signalData.ai_analysis.brief} ${signalData.ai_analysis.detailed}`.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, ''),
+        analysis: `${signalData.ai_analysis.brief} ${signalData.ai_analysis.detailed}`
+          .replace(/\[.*?\]/g, '') // Remove [text]
+          .replace(/\(.*?\.com.*?\)/g, '') // Remove (website.com links)
+          .replace(/\([^)]*https?[^)]*\)/g, '') // Remove any (links with http)
+          .replace(/\([^)]*www\.[^)]*\)/g, '') // Remove any (www.links)
+          .trim(),
         status: "fresh",
       });
 

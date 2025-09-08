@@ -120,5 +120,67 @@
     },
     "executionTime": 63715,
     "success": true
+  },
+  {
+    "timestamp": "2025-09-08T21:10:38.376Z",
+    "userId": "46304040",
+    "timeframe": "5M",
+    "subscriptionTier": "pro",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "5M",
+      "userTier": "pro"
+    },
+    "response": {
+      "action": "BUY",
+      "entry": 3635.91,
+      "stop_loss": 3610.91,
+      "take_profit": 3673.41,
+      "confidence": 78,
+      "take_profits": [
+        {
+          "level": 1,
+          "price": 3673.41,
+          "risk_reward_ratio": 1.5
+        },
+        {
+          "level": 2,
+          "price": 3685.91,
+          "risk_reward_ratio": 2
+        },
+        {
+          "level": 3,
+          "price": 3710.91,
+          "risk_reward_ratio": 3
+        }
+      ],
+      "ai_analysis": {
+        "brief": "Short-term bias is bullish on the 5-minute chart: price is trading above short-term moving averages with positive momentum and expanding volatility bands, suggesting push higher continuation. ([investing.com](https://www.investing.com/currencies/xau-usd), [tipranks.com](https://www.tipranks.com/commodities/cm%3Axauusd/technical-analysis?utm_source=openai))",
+        "detailed": "Price is making higher intraday highs and is trading above the 20/50 EMAs on the 5-minute timeframe, indicating an upward short-term trend. RSI is in the mid-60s showing bullish momentum without being overbought while MACD histogram is positive, supporting further upside; Bollinger Bands have widened which aligns with increased volatility and directional expansion. Immediate support sits near 3610-3620 (recent consolidation low) and immediate resistance is the intraday high around 3646 with upside targets at the calculated take-profit levels. ([tipranks.com](https://www.tipranks.com/commodities/cm%3Axauusd/technical-analysis?utm_source=openai), [investing.com](https://www.investing.com/currencies/xau-usd), [falcontrading.app](https://falcontrading.app/signals/XAUUSD-RSI?utm_source=openai), [thetimes.co.uk](https://www.thetimes.co.uk/article/gold-price-new-high-record-3600-dollars-vkktb07fr?utm_source=openai))",
+        "market_sentiment": "BULLISH",
+        "trend_direction": "UPWARD",
+        "key_indicators": [
+          "RSI (14)",
+          "MACD (12,26,9)",
+          "EMA 20/50/200",
+          "Bollinger Bands (20,2)",
+          "Volume (intraday)",
+          "ATR"
+        ]
+      },
+      "future_positions": [],
+      "historical_positions": [
+        {
+          "symbol": "XAUUSD",
+          "entry_price": 3580,
+          "current_status": "ACTIVE",
+          "days_active": 2,
+          "unrealized_pnl": 55.91
+        }
+      ],
+      "has_notifications": true
+    },
+    "executionTime": 62110,
+    "success": true
   }
 ]

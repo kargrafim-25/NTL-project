@@ -1,3 +1,9 @@
+export interface TakeProfitLevel {
+  level: number;
+  price: number;
+  risk_reward_ratio: number;
+}
+
 export interface TradingSignal {
   id: string;
   userId: string;
@@ -7,9 +13,10 @@ export interface TradingSignal {
   entryPrice: string;
   stopLoss: string;
   takeProfit: string;
+  takeProfits?: TakeProfitLevel[];
   confidence: number;
   analysis: string | null;
-  status: 'active' | 'closed' | 'stopped';
+  status: 'fresh' | 'active' | 'closed' | 'stopped';
   pips: string | null;
   createdAt: string;
   closedAt: string | null;

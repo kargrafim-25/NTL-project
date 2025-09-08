@@ -148,6 +148,25 @@ export default function LatestSignal() {
           </div>
         </div>
         
+        {/* Pro Users: Show All 3 Take Profit Levels */}
+        {user?.subscriptionTier === 'pro' && latestSignal.takeProfits && latestSignal.takeProfits.length > 1 && (
+          <div className="space-y-2">
+            <div className="text-sm font-medium text-primary">Take Profit Levels:</div>
+            <div className="grid grid-cols-1 gap-2">
+              {latestSignal.takeProfits.map((tp, index) => (
+                <div key={tp.level} className="flex items-center justify-between p-2 bg-success/10 rounded border border-success/20">
+                  <span className="text-sm text-muted-foreground">
+                    TP{tp.level} ({tp.risk_reward_ratio}R):
+                  </span>
+                  <span className="text-sm font-semibold text-success" data-testid={`text-tp-level-${tp.level}`}>
+                    ${typeof tp.price === 'number' ? tp.price.toFixed(2) : tp.price}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
         {latestSignal.analysis && (
           <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
             <div className="text-sm font-medium text-primary mb-2">AI Analysis:</div>
@@ -160,11 +179,12 @@ export default function LatestSignal() {
         {/* Status Badge */}
         <div className="flex items-center justify-between">
           <Badge 
-            variant={latestSignal.status === 'active' ? 'default' : 'secondary'}
-            className={latestSignal.status === 'active' ? 'bg-warning text-black' : ''}
+            variant={latestSignal.status === 'active' || latestSignal.status === 'fresh' ? 'default' : 'secondary'}
+            className={latestSignal.status === 'active' ? 'bg-warning text-black' : latestSignal.status === 'fresh' ? 'bg-success text-white' : ''}
             data-testid="badge-signal-status"
           >
             {latestSignal.status === 'active' ? 'Active' : 
+             latestSignal.status === 'fresh' ? 'Fresh' :
              latestSignal.status === 'closed' ? 'Closed' : 'Stopped'}
           </Badge>
           

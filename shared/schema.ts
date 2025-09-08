@@ -65,6 +65,7 @@ export const tradingSignals = pgTable("trading_signals", {
   entryPrice: decimal("entry_price", { precision: 10, scale: 2 }).notNull(),
   stopLoss: decimal("stop_loss", { precision: 10, scale: 2 }).notNull(),
   takeProfit: decimal("take_profit", { precision: 10, scale: 2 }).notNull(),
+  takeProfits: jsonb("take_profits"), // Store take profit levels as JSON
   confidence: integer("confidence").notNull(), // 1-100
   analysis: text("analysis"),
   status: signalStatusEnum("status").default("fresh").notNull(),
