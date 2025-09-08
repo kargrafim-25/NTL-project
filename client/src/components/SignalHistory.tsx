@@ -30,6 +30,7 @@ export default function SignalHistory() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'fresh':
       case 'active':
         return 'text-warning';
       case 'closed':
@@ -43,6 +44,7 @@ export default function SignalHistory() {
 
   const getStatusBgColor = (status: string) => {
     switch (status) {
+      case 'fresh':
       case 'active':
         return 'bg-warning/5 border-warning/10';
       case 'closed':
@@ -145,45 +147,65 @@ export default function SignalHistory() {
           {recentSignals.map((signal) => (
             <div 
               key={signal.id} 
-              className={`flex items-center justify-between p-3 rounded-lg border ${getStatusBgColor(signal.status)}`}
+              className={`p-3 rounded-lg border ${getStatusBgColor(signal.status)}`}
               data-testid={`signal-item-${signal.id}`}
             >
-              <div className="flex items-center space-x-3">
-                <div className={`w-3 h-3 rounded-full ${signal.status === 'active' ? 'animate-pulse' : ''}`} 
-                     style={{ backgroundColor: signal.status === 'active' ? 'hsl(var(--warning))' : 
-                                               signal.status === 'closed' ? 'hsl(var(--success))' : 
-                                               'hsl(var(--error))' }} />
-                <div>
-                  <div className="font-medium">
-                    <span className={getDirectionColor(signal.direction)} data-testid={`text-signal-${signal.id}-direction`}>
-                      {signal.pair} {signal.direction}
-                    </span>
+              {/* Main signal info row */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className={`w-3 h-3 rounded-full ${(signal.status === 'active' || signal.status === 'fresh') ? 'animate-pulse' : ''}`} 
+                       style={{ backgroundColor: (signal.status === 'active' || signal.status === 'fresh') ? 'hsl(var(--warning))' : 
+                                                 signal.status === 'closed' ? 'hsl(var(--success))' : 
+                                                 'hsl(var(--error))' }} />
+                  <div>
+                    <div className="font-medium">
+                      <span className={getDirectionColor(signal.direction)} data-testid={`text-signal-${signal.id}-direction`}>
+                        {signal.pair} {signal.direction}
+                      </span>
+                    </div>
+                    <div className="text-xs text-muted-foreground flex items-center">
+                      <Clock className="h-3 w-3 mr-1" />
+                      <span data-testid={`text-signal-${signal.id}-timeframe`}>{signal.timeframe}</span>
+                      <span className="mx-1">•</span>
+                      <span data-testid={`text-signal-${signal.id}-time`}>{getTimeAgo(signal.createdAt)}</span>
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground flex items-center">
-                    <Clock className="h-3 w-3 mr-1" />
-                    <span data-testid={`text-signal-${signal.id}-timeframe`}>{signal.timeframe}</span>
-                    <span className="mx-1">•</span>
-                    <span data-testid={`text-signal-${signal.id}-time`}>{getTimeAgo(signal.createdAt)}</span>
+                </div>
+                
+                <div className="text-right">
+                  {signal.pips ? (
+                    <div className={`font-semibold ${parseFloat(signal.pips) >= 0 ? 'text-success' : 'text-error'}`} 
+                         data-testid={`text-signal-${signal.id}-pips`}>
+                      {parseFloat(signal.pips) >= 0 ? '+' : ''}{signal.pips} pips
+                    </div>
+                  ) : (
+                    <div className={`font-semibold ${getStatusColor(signal.status)}`} data-testid={`text-signal-${signal.id}-status`}>
+                      {(signal.status === 'active' || signal.status === 'fresh') ? 'Running' : 
+                       signal.status === 'closed' ? 'Closed' : 'Stopped'}
+                    </div>
+                  )}
+                  <div className="text-xs text-muted-foreground">
+                    Entry: ${signal.entryPrice}
                   </div>
                 </div>
               </div>
-              
-              <div className="text-right">
-                {signal.pips ? (
-                  <div className={`font-semibold ${parseFloat(signal.pips) >= 0 ? 'text-success' : 'text-error'}`} 
-                       data-testid={`text-signal-${signal.id}-pips`}>
-                    {parseFloat(signal.pips) >= 0 ? '+' : ''}{signal.pips} pips
+
+              {/* Pro Users: Show Take Profit Levels */}
+              {user?.subscriptionTier === 'pro' && signal.takeProfits && signal.takeProfits.length > 1 && (
+                <div className="mt-3 pt-2 border-t border-border/50">
+                  <div className="grid grid-cols-3 gap-2">
+                    {signal.takeProfits.map((tp) => (
+                      <div key={tp.level} className="text-center p-1 bg-success/5 rounded border border-success/10">
+                        <div className="text-xs text-muted-foreground">TP{tp.level}</div>
+                        <div className="text-xs font-semibold text-success" data-testid={`text-signal-${signal.id}-tp-${tp.level}`}>
+                          ${typeof tp.price === 'number' ? tp.price.toFixed(2) : tp.price}
+                        </div>
+                        <div className="text-xs text-muted-foreground">{tp.risk_reward_ratio}R</div>
+                      </div>
+                    ))}
                   </div>
-                ) : (
-                  <div className={`font-semibold ${getStatusColor(signal.status)}`} data-testid={`text-signal-${signal.id}-status`}>
-                    {signal.status === 'active' ? 'Running' : 
-                     signal.status === 'closed' ? 'Closed' : 'Stopped'}
-                  </div>
-                )}
-                <div className="text-xs text-muted-foreground">
-                  Entry: ${signal.entryPrice}
                 </div>
-              </div>
+              )}
             </div>
           ))}
         </div>
