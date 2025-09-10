@@ -1,0 +1,65 @@
+[
+  {
+    "timestamp": "2025-09-09T21:32:34.588Z",
+    "userId": "46304040",
+    "timeframe": "15M",
+    "subscriptionTier": "pro",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "15M",
+      "userTier": "pro"
+    },
+    "response": {
+      "action": "BUY",
+      "entry": 3586,
+      "stop_loss": 3560,
+      "take_profit": 3625,
+      "confidence": 75,
+      "take_profits": [
+        {
+          "level": 1,
+          "price": 3625,
+          "risk_reward_ratio": 1.5
+        },
+        {
+          "level": 2,
+          "price": 3638,
+          "risk_reward_ratio": 2
+        },
+        {
+          "level": 3,
+          "price": 3664,
+          "risk_reward_ratio": 3
+        }
+      ],
+      "ai_analysis": {
+        "brief": "15-minute technicals favor a short-term bullish setup: price is trading above the short-term moving averages with momentum indicators positive and intraday support around 3560 and near-term resistance clustered 3625–3665. ([advfn.com](https://www.advfn.com/stock-market/PM/XAUUSD/stock-price?utm_source=openai), [reuters.com](https://www.reuters.com/world/india/gold-extends-record-rally-fed-rate-cut-bets-dent-dollar-yields-2025-09-09/?utm_source=openai))",
+        "detailed": "Price action on the 15-minute chart shows a bullish bias as candles have been making higher lows while riding the 20-period EMA; RSI sits in bullish territory without being overbought, MACD histogram has turned positive supporting upward momentum. Bollinger Bands are widening on the latest push which indicates increased volatility and continuation risk toward the upper band; volume has expanded on upticks and contracted on pullbacks, confirming directional conviction. Key short-term support is at 3560 (recent swing low) and immediate resistance around 3625 with a secondary resistance band 3645–3665 where profit-taking is likely.",
+        "market_sentiment": "BULLISH",
+        "trend_direction": "UPWARD",
+        "key_indicators": [
+          "RSI (15M)",
+          "MACD (15M)",
+          "20 EMA (15M)",
+          "50 SMA (15M)",
+          "Bollinger Bands (20,2)",
+          "Volume (15M)",
+          "Support/Resistance levels"
+        ]
+      },
+      "future_positions": [],
+      "historical_positions": [
+        {
+          "symbol": "XAUUSD",
+          "entry_price": 3550,
+          "current_status": "ACTIVE",
+          "days_active": 2,
+          "unrealized_pnl": 36
+        }
+      ],
+      "has_notifications": true
+    },
+    "executionTime": 42484,
+    "success": true
+  }
+]

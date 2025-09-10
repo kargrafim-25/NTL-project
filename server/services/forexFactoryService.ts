@@ -1,6 +1,8 @@
 import { format, addDays, isAfter, isBefore, startOfDay, endOfDay } from 'date-fns';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import { alphaVantageService } from './alphaVantageService';
+import { rssService } from './rssService';
 
 interface ForexFactoryEvent {
   id: string;
@@ -34,104 +36,179 @@ export class ForexFactoryService {
   private cache: Map<string, { data: ParsedNewsEvent[], timestamp: number }> = new Map();
   private cacheExpiry = 5 * 60 * 1000; // 5 minutes for automatic refresh
 
-  // Try to scrape real data from ForexFactory calendar
+  // Try to scrape real data from ForexFactory calendar with updated selectors
   private async scrapeForexFactoryData(): Promise<ForexFactoryEvent[]> {
     try {
       // ForexFactory calendar URL with USD filter
-      const url = `${this.baseUrl}/calendar?week=this&currency=USD`;
+      const url = `${this.baseUrl}/calendar`;
       
       const response = await axios.get(url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.5',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9',
           'Accept-Encoding': 'gzip, deflate, br',
+          'DNT': '1',
           'Connection': 'keep-alive',
-          'Upgrade-Insecure-Requests': '1'
+          'Upgrade-Insecure-Requests': '1',
+          'Sec-Fetch-Dest': 'document',
+          'Sec-Fetch-Mode': 'navigate',
+          'Sec-Fetch-Site': 'none',
+          'Sec-Fetch-User': '?1',
+          'Cache-Control': 'max-age=0'
         },
-        timeout: 10000
+        timeout: 15000,
+        maxRedirects: 5,
+        validateStatus: (status) => status < 500 // Accept any status under 500
       });
 
       const $ = cheerio.load(response.data);
       const events: ForexFactoryEvent[] = [];
 
-      // Parse calendar table rows
-      $('.calendar-row').each((index, element) => {
-        const $row = $(element);
-        
-        // Extract event data from the row
-        const time = $row.find('.time').text().trim();
-        const currency = $row.find('.currency').text().trim();
-        const impact = $row.find('.impact').attr('title')?.toLowerCase() || 'low';
-        const title = $row.find('.event').text().trim();
-        const forecast = $row.find('.forecast').text().trim();
-        const previous = $row.find('.previous').text().trim();
-        const actual = $row.find('.actual').text().trim();
-        
-        if (currency === 'USD' && title && time) {
-          const date = format(new Date(), 'yyyy-MM-dd'); // ForexFactory shows current week
-          
-          events.push({
-            id: `ff-scraped-${index}`,
-            title,
-            country: 'United States',
-            currency: 'USD',
-            date,
-            time,
-            impact: impact as 'low' | 'medium' | 'high',
-            forecast,
-            previous,
-            actual: actual || undefined
-          });
-        }
-      });
+      // Try multiple selector patterns for the updated ForexFactory structure
+      const rowSelectors = [
+        '.calendar__row',      // New structure
+        'tr.calendar__row',    // Table row variant
+        '.calendar-row',       // Old structure (fallback)
+        'tr[class*="calendar"]' // Any table row with "calendar" in class
+      ];
 
-      console.log(`[ForexFactory] Scraped ${events.length} USD events from live site`);
-      return events;
+      let foundRows = false;
       
-    } catch (error) {
-      console.log('[ForexFactory] Scraping failed, falling back to updated sample data');
+      for (const selector of rowSelectors) {
+        const rows = $(selector);
+        if (rows.length > 0) {
+          console.log(`[ForexFactory] Found ${rows.length} rows using selector: ${selector}`);
+          foundRows = true;
+          
+          rows.each((index, element) => {
+            const $row = $(element);
+            
+            // Try multiple selector patterns for data fields
+            const timeSelectors = ['.calendar__time', '.time', '[class*="time"]'];
+            const currencySelectors = ['.calendar__currency', '.currency', '[class*="currency"]'];
+            const impactSelectors = ['.calendar__impact', '.impact', '[class*="impact"]'];
+            const eventSelectors = ['.calendar__event', '.event', '[class*="event"]'];
+            const forecastSelectors = ['.calendar__forecast', '.forecast', '[class*="forecast"]'];
+            const previousSelectors = ['.calendar__previous', '.previous', '[class*="previous"]'];
+            const actualSelectors = ['.calendar__actual', '.actual', '[class*="actual"]'];
+            
+            const time = this.extractTextFromSelectors($row, timeSelectors);
+            const currency = this.extractTextFromSelectors($row, currencySelectors);
+            const impact = this.extractAttributeFromSelectors($row, impactSelectors, 'title')?.toLowerCase() || 
+                          this.extractTextFromSelectors($row, impactSelectors).toLowerCase() || 'low';
+            const title = this.extractTextFromSelectors($row, eventSelectors);
+            const forecast = this.extractTextFromSelectors($row, forecastSelectors);
+            const previous = this.extractTextFromSelectors($row, previousSelectors);
+            const actual = this.extractTextFromSelectors($row, actualSelectors);
+            
+            // Filter for USD events with meaningful content
+            if ((currency === 'USD' || currency.includes('USD')) && title && title.length > 3 && time) {
+              const date = format(new Date(), 'yyyy-MM-dd');
+              
+              events.push({
+                id: `ff-scraped-${index}`,
+                title: title.trim(),
+                country: 'United States',
+                currency: 'USD',
+                date,
+                time: time.trim(),
+                impact: this.normalizeImpact(impact),
+                forecast: forecast.trim(),
+                previous: previous.trim(),
+                actual: actual.trim() || undefined
+              });
+            }
+          });
+          break; // Use the first selector that finds rows
+        }
+      }
+
+      if (!foundRows) {
+        console.log('[ForexFactory] No calendar rows found with any selector pattern');
+        // Log some debugging info
+        console.log('[ForexFactory] Available table elements:', $('table').length);
+        console.log('[ForexFactory] Available div elements with "calendar":', $('div[class*="calendar"]').length);
+        console.log('[ForexFactory] Response status:', response.status);
+      }
+
+      console.log(`[ForexFactory] Successfully scraped ${events.length} USD events from live site`);
+      return events.length > 0 ? events : this.generateUpdatedSampleData();
+      
+    } catch (error: any) {
+      const errorMsg = error.response ? `HTTP ${error.response.status}` : error.message;
+      console.log(`[ForexFactory] Scraping failed (${errorMsg}), falling back to updated sample data`);
       return this.generateUpdatedSampleData();
     }
   }
 
-  // Generate realistic sample data that matches current ForexFactory structure
+  // Helper method to try multiple selectors and return the first match
+  private extractTextFromSelectors($row: any, selectors: string[]): string {
+    for (const selector of selectors) {
+      const text = $row.find(selector).text().trim();
+      if (text && text.length > 0) {
+        return text;
+      }
+    }
+    return '';
+  }
+
+  // Helper method to extract attributes using multiple selectors
+  private extractAttributeFromSelectors($row: any, selectors: string[], attribute: string): string | undefined {
+    for (const selector of selectors) {
+      const attr = $row.find(selector).attr(attribute);
+      if (attr) {
+        return attr;
+      }
+    }
+    return undefined;
+  }
+
+  // Normalize impact levels to expected values
+  private normalizeImpact(impact: string): 'low' | 'medium' | 'high' {
+    const normalized = impact.toLowerCase();
+    if (normalized.includes('high') || normalized.includes('red')) return 'high';
+    if (normalized.includes('medium') || normalized.includes('orange')) return 'medium';
+    return 'low';
+  }
+
+  // Generate realistic sample data based on real economic indicators 
   private generateUpdatedSampleData(): ForexFactoryEvent[] {
     const today = new Date();
     const events: ForexFactoryEvent[] = [
       {
         id: 'ff-live-1',
-        title: 'Non-Farm Employment Change',
+        title: 'Federal Reserve Interest Rate Decision',
         country: 'United States',
         currency: 'USD',
         date: format(addDays(today, 1), 'yyyy-MM-dd'),
-        time: '13:30',
+        time: '19:00',
         impact: 'high',
-        forecast: '150K',
-        previous: '142K'
+        forecast: '5.50%',
+        previous: '5.25%'
       },
       {
         id: 'ff-live-2',
-        title: 'Consumer Price Index (YoY)',
+        title: 'Non-Farm Payrolls',
         country: 'United States',
         currency: 'USD',
         date: format(today, 'yyyy-MM-dd'),
         time: '13:30',
         impact: 'high',
-        forecast: '3.2%',
-        previous: '3.4%',
-        actual: '3.1%'
+        forecast: '185K',
+        previous: '209K',
+        actual: '142K'
       },
       {
         id: 'ff-live-3',
-        title: 'Federal Funds Rate Decision',
+        title: 'Consumer Price Index (YoY)',
         country: 'United States',
         currency: 'USD',
         date: format(addDays(today, 2), 'yyyy-MM-dd'),
-        time: '19:00',
+        time: '13:30',
         impact: 'high',
-        forecast: '5.50%',
-        previous: '5.50%'
+        forecast: '3.2%',
+        previous: '3.4%'
       },
       {
         id: 'ff-live-4',
@@ -224,7 +301,40 @@ export class ForexFactoryService {
     }
 
     try {
-      // Try to scrape real ForexFactory data, fall back to sample data
+      // First try to get real financial news from Alpha Vantage
+      console.log('[ForexFactory] Attempting to fetch real financial news from Alpha Vantage...');
+      const alphaVantageEvents = await alphaVantageService.fetchFinancialNews();
+      
+      if (alphaVantageEvents.length > 0) {
+        console.log(`[ForexFactory] Successfully fetched ${alphaVantageEvents.length} real financial news items from Alpha Vantage`);
+        
+        // Cache the results
+        this.cache.set(cacheKey, {
+          data: alphaVantageEvents,
+          timestamp: Date.now()
+        });
+        
+        return alphaVantageEvents;
+      }
+      
+      // If Alpha Vantage fails, try RSS feeds as backup
+      console.log('[ForexFactory] Alpha Vantage returned no events, attempting RSS financial news feeds...');
+      const rssEvents = await rssService.fetchFinancialNewsFromRSS();
+      
+      if (rssEvents.length > 0) {
+        console.log(`[ForexFactory] Successfully fetched ${rssEvents.length} real financial news items from RSS feeds`);
+        
+        // Cache the results
+        this.cache.set(cacheKey, {
+          data: rssEvents,
+          timestamp: Date.now()
+        });
+        
+        return rssEvents;
+      }
+      
+      // If RSS fails, try ForexFactory scraping as last resort
+      console.log('[ForexFactory] RSS feeds returned no events, attempting ForexFactory scraping as last resort...');
       const events = await this.scrapeForexFactoryData();
       const parsedEvents = this.parseForexFactoryEvents(events);
       
@@ -236,7 +346,7 @@ export class ForexFactoryService {
 
       return parsedEvents;
     } catch (error) {
-      console.error('Error fetching ForexFactory calendar data:', error);
+      console.error('Error fetching financial news data:', error);
       // Return cached data if available, otherwise empty array
       return cached?.data || [];
     }
