@@ -111,10 +111,11 @@ export function EconomicNews({ className }: EconomicNewsProps) {
     );
   }
 
-  // Get the most recent/important news item
-  const featuredNews = upcomingNews.length > 0 ? upcomingNews[0] : recentNews[0];
+  // Show all simultaneous events in the current time group
+  const activeTimeGroup = upcomingNews.length > 0 ? upcomingNews : recentNews;
+  const isUpcoming = upcomingNews.length > 0;
 
-  if (!featuredNews) {
+  if (activeTimeGroup.length === 0) {
     return (
       <Card className="trading-card" data-testid="economic-news-container">
         <CardHeader>
@@ -143,73 +144,83 @@ export function EconomicNews({ className }: EconomicNewsProps) {
       <CardHeader>
         <CardTitle className="flex items-center">
           <BookOpen className="mr-2 h-5 w-5 text-red-500" />
-          Economic News
+          Economic News {isUpcoming ? '(Upcoming)' : '(Recent)'}
         </CardTitle>
+        {activeTimeGroup.length > 1 && (
+          <p className="text-sm text-muted-foreground mt-1">
+            {activeTimeGroup.length} simultaneous events at {format(new Date(activeTimeGroup[0].eventTime), 'MMM dd, HH:mm')}
+          </p>
+        )}
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className={`flex items-center justify-between p-3 rounded-lg border ${getImpactBgColor(featuredNews.impact)}`}>
-          <div className="flex-1 min-w-0">
-            {featuredNews.sourceUrl ? (
-              <a 
-                href={featuredNews.sourceUrl} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="font-semibold text-red-500 hover:text-red-600 dark:hover:text-red-400 transition-colors flex items-center gap-1 group"
-                data-testid="link-news-title"
-              >
-                <span className="truncate">{featuredNews.title}</span>
-                <ExternalLink className="h-3 w-3 opacity-60 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-              </a>
-            ) : (
-              <span className="font-semibold text-red-500" data-testid="text-news-title">
-                {featuredNews.title}
-              </span>
-            )}
-          </div>
-          <div className="flex items-center text-xs text-muted-foreground ml-2">
-            <Clock className="h-3 w-3 mr-1" />
-            <span data-testid="text-news-time">{format(new Date(featuredNews.eventTime), 'MMM dd, HH:mm')}</span>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-muted-foreground">Currency:</span>
-            <div className="font-semibold" data-testid="text-news-currency">{featuredNews.currency}</div>
-          </div>
-          <div>
-            <span className="text-muted-foreground">Impact:</span>
-            <div className="font-semibold">
-              <Badge className={getImpactColor(featuredNews.impact)} data-testid="text-news-impact">
-                {featuredNews.impact.toUpperCase()}
+      <CardContent className="space-y-3">
+        {activeTimeGroup.map((newsItem, index) => (
+          <div key={newsItem.id} className={`p-3 rounded-lg border ${getImpactBgColor(newsItem.impact)} ${index > 0 ? 'mt-3' : ''}`}>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex-1 min-w-0">
+                {newsItem.sourceUrl ? (
+                  <a 
+                    href={newsItem.sourceUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="font-semibold text-red-500 hover:text-red-600 dark:hover:text-red-400 transition-colors flex items-center gap-1 group"
+                    data-testid={`link-news-title-${index}`}
+                  >
+                    <span className="truncate">{newsItem.title}</span>
+                    <ExternalLink className="h-3 w-3 opacity-60 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                  </a>
+                ) : (
+                  <span className="font-semibold text-red-500" data-testid={`text-news-title-${index}`}>
+                    {newsItem.title}
+                  </span>
+                )}
+              </div>
+              <Badge className={getImpactColor(newsItem.impact)} data-testid={`text-news-impact-${index}`}>
+                {newsItem.impact.toUpperCase()}
               </Badge>
             </div>
-          </div>
-          {featuredNews.previousValue && (
-            <div>
-              <span className="text-muted-foreground">Previous:</span>
-              <div className="font-semibold text-muted-foreground" data-testid="text-news-previous">{featuredNews.previousValue}</div>
+            
+            <div className="grid grid-cols-3 gap-3 text-xs">
+              <div>
+                <span className="text-muted-foreground">Currency:</span>
+                <div className="font-semibold" data-testid={`text-news-currency-${index}`}>{newsItem.currency}</div>
+              </div>
+              {newsItem.previousValue && (
+                <div>
+                  <span className="text-muted-foreground">Previous:</span>
+                  <div className="font-semibold text-muted-foreground" data-testid={`text-news-previous-${index}`}>{newsItem.previousValue}</div>
+                </div>
+              )}
+              {newsItem.forecastValue && (
+                <div>
+                  <span className="text-muted-foreground">Forecast:</span>
+                  <div className="font-semibold text-red-500" data-testid={`text-news-forecast-${index}`}>{newsItem.forecastValue}</div>
+                </div>
+              )}
+              {newsItem.actualValue && (
+                <div>
+                  <span className="text-muted-foreground">Actual:</span>
+                  <div className="font-semibold text-green-500" data-testid={`text-news-actual-${index}`}>{newsItem.actualValue}</div>
+                </div>
+              )}
             </div>
-          )}
-          {featuredNews.forecastValue && (
-            <div>
-              <span className="text-muted-foreground">Forecast:</span>
-              <div className="font-semibold text-red-500" data-testid="text-news-forecast">{featuredNews.forecastValue}</div>
-            </div>
-          )}
-        </div>
-        
-        {featuredNews.description && (
-          <div className="p-3 bg-red-500/10 rounded-lg border border-red-500/20">
-            <div className="text-sm font-medium text-red-500 mb-2">Event Details:</div>
-            <p className="text-xs text-muted-foreground" data-testid="text-news-description">
-              {featuredNews.description}
-            </p>
+            
+            {newsItem.description && (
+              <div className="mt-2 text-xs text-muted-foreground" data-testid={`text-news-description-${index}`}>
+                {newsItem.description}
+              </div>
+            )}
           </div>
-        )}
+        ))}
 
-        {/* Additional News Count */}
-        <div className="flex items-center justify-between">
+        {/* Time and Links */}
+        <div className="flex items-center justify-between pt-2 border-t border-border">
+          <div className="flex items-center text-xs text-muted-foreground">
+            <Clock className="h-3 w-3 mr-1" />
+            <span data-testid="text-news-time">{format(new Date(activeTimeGroup[0].eventTime), 'MMM dd, HH:mm')}</span>
+            {activeTimeGroup.length > 1 && (
+              <span className="ml-2">• {activeTimeGroup.length} events</span>
+            )}
+          </div>
           <a 
             href="https://www.forexfactory.com/calendar?week=this&currency=USD"
             target="_blank"
@@ -223,14 +234,11 @@ export function EconomicNews({ className }: EconomicNewsProps) {
               data-testid="badge-news-count"
             >
               <span className="flex items-center gap-1">
-                {upcomingNews.length + recentNews.length} USD Events
+                View Calendar
                 <ExternalLink className="h-3 w-3 opacity-60 group-hover:opacity-100 transition-opacity" />
               </span>
             </Badge>
           </a>
-          <div className="text-xs text-muted-foreground">
-            High-impact events only
-          </div>
         </div>
       </CardContent>
     </Card>
