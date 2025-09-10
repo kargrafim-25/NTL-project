@@ -1,0 +1,66 @@
+[
+  {
+    "timestamp": "2025-09-10T21:23:58.685Z",
+    "userId": "46304040",
+    "timeframe": "5M",
+    "subscriptionTier": "pro",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "5M",
+      "userTier": "pro"
+    },
+    "response": {
+      "action": "BUY",
+      "entry": 3642.93,
+      "stop_loss": 3590,
+      "take_profit": 3722.33,
+      "confidence": 78,
+      "take_profits": [
+        {
+          "level": 1,
+          "price": 3722.33,
+          "risk_reward_ratio": 1.5
+        },
+        {
+          "level": 2,
+          "price": 3748.79,
+          "risk_reward_ratio": 2
+        },
+        {
+          "level": 3,
+          "price": 3801.72,
+          "risk_reward_ratio": 3
+        }
+      ],
+      "ai_analysis": {
+        "brief": "5-minute chart shows a bullish impulse into fresh highs with momentum indicators positive but short-term overbought, so trade with a tight stop and layered profit taking.",
+        "detailed": "Price on the 5-minute timeframe is trending higher and trading above short-term moving averages while riding the upper Bollinger Band. RSI is elevated indicating overbought short-term conditions while MACD remains bullish with a positive histogram, suggesting continuation is more likely than an immediate reversal. Volume has expanded during the push higher and immediate technical support is clustered around 3600 to 3590 with resistance at the recent high near 3674, so a controlled buy with stop below 3590 and scaled targets above recent highs is the preferred plan.",
+        "market_sentiment": "BULLISH",
+        "trend_direction": "UPWARD",
+        "key_indicators": [
+          "RSI 14",
+          "MACD (fast/slow/signal)",
+          "EMA 20",
+          "EMA 50",
+          "SMA 200",
+          "Bollinger Bands 20,2",
+          "Volume",
+          "Support and Resistance (price action)"
+        ]
+      },
+      "future_positions": [],
+      "historical_positions": [
+        {
+          "symbol": "XAUUSD",
+          "entry_price": 3586.64,
+          "current_status": "ACTIVE",
+          "days_active": 2,
+          "unrealized_pnl": 56.29
+        }
+      ],
+      "has_notifications": true
+    },
+    "executionTime": 49031,
+    "success": true
+  }
+]

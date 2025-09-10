@@ -8,6 +8,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { Brain, Sparkles } from "lucide-react";
 import logoUrl from '../assets/logo.png';
+import AILoadingAnimation from './AILoadingAnimation';
 import { GenerateSignalRequest, GenerateSignalResponse } from "@/types/trading";
 
 const timeframes = [
@@ -154,10 +155,7 @@ export default function SignalGenerator({ selectedTimeframe = '1H', onTimeframeC
               data-testid="button-get-basic-confirmation"
             >
               {isGenerating ? (
-                <>
-                  <div className="w-5 h-5 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  Analyzing...
-                </>
+                <AILoadingAnimation message="Generating AI trading signal..." />
               ) : (
                 <>
                   <img src={logoUrl} alt="Logo" className="mr-2 h-5 w-5 object-contain" />
@@ -174,10 +172,7 @@ export default function SignalGenerator({ selectedTimeframe = '1H', onTimeframeC
               data-testid="button-generate-signal"
             >
               {isGenerating ? (
-                <>
-                  <div className="w-5 h-5 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  Generating...
-                </>
+                <AILoadingAnimation message="Generating AI trading signal..." />
               ) : (
                 <>
                   <img src={logoUrl} alt="Logo" className="mr-2 h-5 w-5 object-contain" />
