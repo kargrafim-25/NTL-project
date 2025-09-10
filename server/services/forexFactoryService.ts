@@ -363,10 +363,36 @@ export class ForexFactoryService {
       return daysDiff >= 0 && daysDiff <= 7;
     });
 
-    // Sort by event time (most recent first) and limit
-    return recentEvents
-      .sort((a, b) => new Date(b.eventTime).getTime() - new Date(a.eventTime).getTime())
-      .slice(0, limit);
+    // Group events by exact time (to show simultaneous events together)
+    const timeGroups = new Map<number, ParsedNewsEvent[]>();
+    recentEvents.forEach(event => {
+      const timestamp = new Date(event.eventTime).getTime();
+      if (!timeGroups.has(timestamp)) {
+        timeGroups.set(timestamp, []);
+      }
+      timeGroups.get(timestamp)!.push(event);
+    });
+
+    // Sort time groups by timestamp (most recent first)
+    const sortedTimeGroups = Array.from(timeGroups.entries())
+      .sort((a, b) => b[0] - a[0]); // Sort by timestamp descending
+
+    // Collect COMPLETE time groups only - never split simultaneous events
+    const result: ParsedNewsEvent[] = [];
+    for (const [timestamp, events] of sortedTimeGroups) {
+      // ALWAYS include the complete time group, even if it exceeds the limit
+      // because simultaneous events must stay together
+      result.push(...events);
+      
+      // If we have enough events and there are more groups, we can stop
+      // (but we've already committed to this complete group)
+      if (result.length >= limit && sortedTimeGroups.length > 1) {
+        break;
+      }
+    }
+
+    console.log(`[ForexFactory] Grouped recent news into ${sortedTimeGroups.length} time slots, returning ${result.length} items`);
+    return result;
   }
 
   async getUpcomingNews(limit: number = 5): Promise<ParsedNewsEvent[]> {
@@ -380,11 +406,38 @@ export class ForexFactoryService {
       return daysDiff >= 0 && daysDiff <= 7;
     });
 
-    // If we have actual upcoming events (like economic calendar), return them
+    // If we have actual upcoming events (like economic calendar), group by time and return complete groups
     if (upcomingEvents.length > 0) {
-      return upcomingEvents
-        .sort((a, b) => new Date(a.eventTime).getTime() - new Date(b.eventTime).getTime())
-        .slice(0, limit);
+      // Group by exact time for simultaneous events
+      const timeGroups = new Map<number, ParsedNewsEvent[]>();
+      upcomingEvents.forEach(event => {
+        const timestamp = new Date(event.eventTime).getTime();
+        if (!timeGroups.has(timestamp)) {
+          timeGroups.set(timestamp, []);
+        }
+        timeGroups.get(timestamp)!.push(event);
+      });
+
+      // Sort time groups by timestamp (earliest first for upcoming)
+      const sortedTimeGroups = Array.from(timeGroups.entries())
+        .sort((a, b) => a[0] - b[0]); // Sort by timestamp ascending
+
+      // Return complete time groups only - never split a simultaneous group
+      const result: ParsedNewsEvent[] = [];
+      for (const [timestamp, events] of sortedTimeGroups) {
+        // If adding this entire group would exceed the limit, still add it
+        // because we never split simultaneous events
+        result.push(...events);
+        
+        // If we have enough events and there are more groups, we can stop
+        // (but we've already committed to this complete group)
+        if (result.length >= limit && sortedTimeGroups.length > 1) {
+          break;
+        }
+      }
+
+      console.log(`[ForexFactory] Grouped ${upcomingEvents.length} upcoming events into ${sortedTimeGroups.length} time slots, returning ${result.length} items`);
+      return result;
     }
 
     // If no upcoming events (e.g., using news data from Alpha Vantage), 
@@ -396,15 +449,47 @@ export class ForexFactoryService {
       return daysDiff <= 2 && (event.impact === 'high' || event.impact === 'medium');
     });
 
-    // Sort by impact and recency
-    return recentHighImpactNews
+    // Group by exact time for simultaneous events
+    const timeGroups = new Map<number, ParsedNewsEvent[]>();
+    recentHighImpactNews.forEach(event => {
+      const timestamp = new Date(event.eventTime).getTime();
+      if (!timeGroups.has(timestamp)) {
+        timeGroups.set(timestamp, []);
+      }
+      timeGroups.get(timestamp)!.push(event);
+    });
+
+    // Sort time groups by timestamp (most recent first) and impact
+    const sortedTimeGroups = Array.from(timeGroups.entries())
       .sort((a, b) => {
-        const impactScore = { high: 3, medium: 2, low: 1 };
-        const impactDiff = impactScore[b.impact] - impactScore[a.impact];
-        if (impactDiff !== 0) return impactDiff;
-        return new Date(b.eventTime).getTime() - new Date(a.eventTime).getTime();
-      })
-      .slice(0, limit);
+        // First sort by time (most recent first)
+        const timeDiff = b[0] - a[0];
+        if (timeDiff !== 0) return timeDiff;
+        
+        // If same time, sort by highest impact within the group
+        const getMaxImpact = (events: ParsedNewsEvent[]) => {
+          const impactScore = { high: 3, medium: 2, low: 1 };
+          return Math.max(...events.map(e => impactScore[e.impact]));
+        };
+        return getMaxImpact(b[1]) - getMaxImpact(a[1]);
+      });
+
+    // Collect COMPLETE time groups only - never split simultaneous events
+    const result: ParsedNewsEvent[] = [];
+    for (const [timestamp, events] of sortedTimeGroups) {
+      // ALWAYS include the complete time group, even if it exceeds the limit
+      // because simultaneous events must stay together
+      result.push(...events);
+      
+      // If we have enough events and there are more groups, we can stop
+      // (but we've already committed to this complete group)
+      if (result.length >= limit && sortedTimeGroups.length > 1) {
+        break;
+      }
+    }
+
+    console.log(`[ForexFactory] Grouped upcoming news into ${sortedTimeGroups.length} time slots, returning ${result.length} items`);
+    return result;
   }
 
   // Clear cache manually if needed
