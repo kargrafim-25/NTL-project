@@ -63,26 +63,46 @@ export class AlphaVantageService {
     }
 
     try {
-      // Simple approach based on Alpha Vantage example - get general financial news
-      const url = `${this.baseUrl}?function=NEWS_SENTIMENT&apikey=${this.apiKey}`;
-      
-      console.log('[AlphaVantage] Fetching financial news from API...');
-      
-      const response = await axios.get<AlphaVantageNewsResponse>(url, {
-        timeout: 15000,
-        headers: {
-          'User-Agent': 'Next Trading Labs/1.0',
-          'Accept': 'application/json'
-        }
-      });
+      // Try multiple approaches to get more relevant economic/financial news
+      const approaches = [
+        // 1. Focus on USD-related tickers and topics
+        `function=NEWS_SENTIMENT&tickers=DXY,USD&topics=financial_markets,economy_macro&limit=50&apikey=${this.apiKey}`,
+        // 2. Just financial markets and macro economy topics
+        `function=NEWS_SENTIMENT&topics=financial_markets,economy_macro&limit=50&apikey=${this.apiKey}`,
+        // 3. Focus on major USD pairs and economic indicators
+        `function=NEWS_SENTIMENT&tickers=EURUSD,GBPUSD,USDJPY&topics=economy_macro&limit=50&apikey=${this.apiKey}`,
+        // 4. Fallback to general financial news
+        `function=NEWS_SENTIMENT&limit=50&apikey=${this.apiKey}`
+      ];
 
-      if (response.data && response.data.feed && Array.isArray(response.data.feed)) {
-        console.log(`[AlphaVantage] Successfully fetched ${response.data.feed.length} news items from API`);
-        return response.data.feed;
-      } else {
-        console.log('[AlphaVantage] Invalid response format from API', response.data);
-        return [];
+      for (let i = 0; i < approaches.length; i++) {
+        try {
+          const url = `${this.baseUrl}?${approaches[i]}`;
+          console.log(`[AlphaVantage] Trying approach ${i + 1}/4 for USD-focused news...`);
+          
+          const response = await axios.get<AlphaVantageNewsResponse>(url, {
+            timeout: 15000,
+            headers: {
+              'User-Agent': 'Next Trading Labs/1.0',
+              'Accept': 'application/json'
+            }
+          });
+
+          if (response.data && response.data.feed && Array.isArray(response.data.feed) && response.data.feed.length > 0) {
+            console.log(`[AlphaVantage] Approach ${i + 1} successful: ${response.data.feed.length} news items`);
+            return response.data.feed;
+          } else {
+            console.log(`[AlphaVantage] Approach ${i + 1} returned no valid data, trying next...`);
+            continue;
+          }
+        } catch (approachError) {
+          console.log(`[AlphaVantage] Approach ${i + 1} failed, trying next...`);
+          continue;
+        }
       }
+
+      console.log('[AlphaVantage] All approaches failed');
+      return [];
 
     } catch (error: any) {
       const errorMsg = error.response?.status === 429 ? 'Rate limit exceeded' : 
@@ -141,27 +161,52 @@ export class AlphaVantageService {
         sourceUrl: item.url || 'https://www.alphavantage.co'
       };
     }).filter(event => {
-      // Filter for USD-important financial news only
+      // Filter for USD-important financial news only - much more strict
       const title = event.title.toLowerCase();
       const description = event.description.toLowerCase();
       const content = (title + ' ' + description);
       
-      // USD-important keywords only
-      const usdImportantKeywords = [
-        'fed', 'federal reserve', 'jerome powell', 'fomc', 'interest rate',
-        'inflation', 'cpi', 'pce', 'core inflation',
-        'unemployment', 'nonfarm payroll', 'jobs report', 'employment',
-        'gdp', 'retail sales', 'consumer confidence', 'ism',
-        'dollar', 'usd', 'dxy', 'dollar index',
-        'treasury', 'yield', '10-year', 'bond market',
-        'us economy', 'united states', 'american economy',
-        'wall street', 'nasdaq', 'dow jones', 's&p 500',
-        'oil prices', 'wti', 'crude oil' // Oil affects USD
+      // Exclude clearly non-financial content but allow some corporate financial news
+      const excludeKeywords = [
+        'software recognized', 'award', 'winner', 'best companies', 'ranking on time',
+        'appointment', 'hired as ceo', 'leadership change', 
+        'product launch', 'new product', 'feature update', 'app version',
+        'drug shows', 'pharmaceutical', 'medical device', 'healthcare',
+        'lawsuit', 'legal action', 'investigation', 'fraud',
+        'gaming', 'video game', 'entertainment', 'movie', 'sport',
+        'real estate', 'property', 'housing market'
       ];
       
-      return usdImportantKeywords.some(keyword => 
-        content.includes(keyword)
-      );
+      const hasExcludeKeywords = excludeKeywords.some(keyword => content.includes(keyword));
+      if (hasExcludeKeywords) {
+        console.log(`[AlphaVantage] Excluding news: ${event.title.substring(0, 50)}...`);
+        return false;
+      }
+      
+      // Include broader USD-relevant financial and economic keywords
+      const usdCriticalKeywords = [
+        'federal reserve', 'fed ', 'fed.', 'fomc', 'jerome powell', 'janet yellen',
+        'interest rate', 'rate cut', 'rate hike', 'monetary policy', 'central bank',
+        'inflation', 'cpi', 'pce', 'consumer price', 'price index',
+        'unemployment', 'nonfarm payroll', 'jobs report', 'employment', 'labor market',
+        'gdp', 'gross domestic product', 'economic growth', 'recession',
+        'dollar', 'usd', 'dxy', 'currency', 'exchange rate',
+        'treasury', 'yield', 'bond', 'government bonds',
+        'us economy', 'american economy', 'united states', 'economic data',
+        'wall street', 'dow jones', 'nasdaq', 's&p 500', 'stock market',
+        'oil', 'crude', 'energy', 'commodity', 'gold prices',
+        'retail sales', 'consumer confidence', 'manufacturing', 'ism',
+        'trade', 'tariff', 'import', 'export', 'trade deficit'
+      ];
+      
+      const hasUsdKeywords = usdCriticalKeywords.some(keyword => content.includes(keyword));
+      if (hasUsdKeywords) {
+        console.log(`[AlphaVantage] Including USD news: ${event.title.substring(0, 50)}...`);
+        return true;
+      }
+      
+      console.log(`[AlphaVantage] Filtering out: ${event.title.substring(0, 50)}...`);
+      return false;
     });
   }
 
