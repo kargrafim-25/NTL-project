@@ -62,74 +62,48 @@ export class AlphaVantageService {
       return [];
     }
 
-    // Try multiple approaches in cascade
-    const timeFrom = format(subDays(new Date(), 7), 'yyyyMMdd') + 'T0000';
-    
-    const approaches = [
-      // 1. Valid topics with time window
-      `function=NEWS_SENTIMENT&topics=financial_markets,economy_macro&time_from=${timeFrom}&sort=LATEST&limit=50&apikey=${this.apiKey}`,
-      // 2. Just financial markets topic
-      `function=NEWS_SENTIMENT&topics=financial_markets&time_from=${timeFrom}&sort=LATEST&limit=50&apikey=${this.apiKey}`,
-      // 3. No topics, just time window
-      `function=NEWS_SENTIMENT&time_from=${timeFrom}&sort=LATEST&limit=50&apikey=${this.apiKey}`,
-      // 4. Broader time window (30 days)
-      `function=NEWS_SENTIMENT&time_from=${format(subDays(new Date(), 30), 'yyyyMMdd')}T0000&sort=LATEST&limit=50&apikey=${this.apiKey}`,
-      // 5. No filters at all
-      `function=NEWS_SENTIMENT&sort=LATEST&limit=50&apikey=${this.apiKey}`
-    ];
-
-    for (let i = 0; i < approaches.length; i++) {
-      try {
-        const url = `${this.baseUrl}?${approaches[i]}`;
-        console.log(`[AlphaVantage] Trying approach ${i + 1}/5: ${approaches[i].split('&')[0]}...`);
-        
-        const response = await axios.get<AlphaVantageNewsResponse>(url, {
-          timeout: 15000,
-          headers: {
-            'User-Agent': 'Next Trading Labs/1.0',
-            'Accept': 'application/json'
-          }
-        });
-
-        if (response.data && response.data.feed && Array.isArray(response.data.feed) && response.data.feed.length > 0) {
-          console.log(`[AlphaVantage] Approach ${i + 1} successful: ${response.data.feed.length} news items`);
-          return response.data.feed;
-        } else if (response.data && response.data.items === "0") {
-          console.log(`[AlphaVantage] Approach ${i + 1} returned items: "0", trying next approach`);
-          continue;
-        } else {
-          console.log(`[AlphaVantage] Approach ${i + 1} invalid response format`);
-          continue;
+    try {
+      // Simple approach based on Alpha Vantage example - get general financial news
+      const url = `${this.baseUrl}?function=NEWS_SENTIMENT&apikey=${this.apiKey}`;
+      
+      console.log('[AlphaVantage] Fetching financial news from API...');
+      
+      const response = await axios.get<AlphaVantageNewsResponse>(url, {
+        timeout: 15000,
+        headers: {
+          'User-Agent': 'Next Trading Labs/1.0',
+          'Accept': 'application/json'
         }
+      });
 
-      } catch (error: any) {
-        const errorMsg = error.response?.status === 429 ? 'Rate limit exceeded' : 
-                        error.response?.status ? `HTTP ${error.response.status}` : 
-                        error.message;
-        console.log(`[AlphaVantage] Approach ${i + 1} failed: ${errorMsg}`);
-        if (error.response?.status === 429) {
-          // Rate limit hit, no point in trying more approaches
-          break;
-        }
-        continue;
+      if (response.data && response.data.feed && Array.isArray(response.data.feed)) {
+        console.log(`[AlphaVantage] Successfully fetched ${response.data.feed.length} news items from API`);
+        return response.data.feed;
+      } else {
+        console.log('[AlphaVantage] Invalid response format from API', response.data);
+        return [];
       }
-    }
 
-    console.log('[AlphaVantage] All approaches failed, returning empty array');
-    return [];
+    } catch (error: any) {
+      const errorMsg = error.response?.status === 429 ? 'Rate limit exceeded' : 
+                      error.response?.status ? `HTTP ${error.response.status}` : 
+                      error.message;
+      console.log(`[AlphaVantage] News fetch failed: ${errorMsg}`);
+      return [];
+    }
   }
 
   private parseTimePublished(timePublished: string): Date {
     // Handle Alpha Vantage compact format (YYYYMMDDTHHMMSS) and ISO format
     if (/^\d{8}T\d{6}$/.test(timePublished)) {
-      // Compact format: 20240910T143000
+      // Compact format: 20240910T143000 - treat as UTC
       const year = parseInt(timePublished.substring(0, 4));
       const month = parseInt(timePublished.substring(4, 6)) - 1; // Month is 0-indexed
       const day = parseInt(timePublished.substring(6, 8));
       const hour = parseInt(timePublished.substring(9, 11));
       const minute = parseInt(timePublished.substring(11, 13));
       const second = parseInt(timePublished.substring(13, 15));
-      return new Date(year, month, day, hour, minute, second);
+      return new Date(Date.UTC(year, month, day, hour, minute, second));
     } else {
       // Try ISO format or other standard formats
       return new Date(timePublished);
@@ -167,25 +141,27 @@ export class AlphaVantageService {
         sourceUrl: item.url || 'https://www.alphavantage.co'
       };
     }).filter(event => {
-      // Much looser filtering - accept most financial/economic content
+      // Filter for USD-important financial news only
       const title = event.title.toLowerCase();
       const description = event.description.toLowerCase();
+      const content = (title + ' ' + description);
       
-      // Broad financial keywords
-      const financialKeywords = [
-        'fed', 'federal', 'central bank', 'interest rate', 'monetary policy',
-        'inflation', 'cpi', 'pce', 'employment', 'unemployment', 'jobs', 'payroll',
-        'gdp', 'economic', 'economy', 'recession', 'growth',
-        'market', 'stock', 'trading', 'wall street', 'nasdaq', 'dow',
-        'dollar', 'usd', 'currency', 'forex', 'exchange rate',
-        'treasury', 'bond', 'yield', 'debt', 'fiscal',
-        'earnings', 'corporate', 'company', 'business',
-        'oil', 'gold', 'commodity', 'price', 'cost'
+      // USD-important keywords only
+      const usdImportantKeywords = [
+        'fed', 'federal reserve', 'jerome powell', 'fomc', 'interest rate',
+        'inflation', 'cpi', 'pce', 'core inflation',
+        'unemployment', 'nonfarm payroll', 'jobs report', 'employment',
+        'gdp', 'retail sales', 'consumer confidence', 'ism',
+        'dollar', 'usd', 'dxy', 'dollar index',
+        'treasury', 'yield', '10-year', 'bond market',
+        'us economy', 'united states', 'american economy',
+        'wall street', 'nasdaq', 'dow jones', 's&p 500',
+        'oil prices', 'wti', 'crude oil' // Oil affects USD
       ];
       
-      return financialKeywords.some(keyword => 
-        title.includes(keyword) || description.includes(keyword)
-      ) || event.impact !== 'low'; // Always include medium/high impact items
+      return usdImportantKeywords.some(keyword => 
+        content.includes(keyword)
+      );
     });
   }
 

@@ -380,9 +380,30 @@ export class ForexFactoryService {
       return daysDiff >= 0 && daysDiff <= 7;
     });
 
-    // Sort by event time (soonest first) and limit
-    return upcomingEvents
-      .sort((a, b) => new Date(a.eventTime).getTime() - new Date(b.eventTime).getTime())
+    // If we have actual upcoming events (like economic calendar), return them
+    if (upcomingEvents.length > 0) {
+      return upcomingEvents
+        .sort((a, b) => new Date(a.eventTime).getTime() - new Date(b.eventTime).getTime())
+        .slice(0, limit);
+    }
+
+    // If no upcoming events (e.g., using news data from Alpha Vantage), 
+    // return recent high-impact news instead as "important to watch"
+    console.log('[ForexFactory] No upcoming events found, returning recent high-impact news instead');
+    const recentHighImpactNews = allEvents.filter(event => {
+      const eventDate = new Date(event.eventTime);
+      const daysDiff = Math.abs(now.getTime() - eventDate.getTime()) / (1000 * 60 * 60 * 24);
+      return daysDiff <= 2 && (event.impact === 'high' || event.impact === 'medium');
+    });
+
+    // Sort by impact and recency
+    return recentHighImpactNews
+      .sort((a, b) => {
+        const impactScore = { high: 3, medium: 2, low: 1 };
+        const impactDiff = impactScore[b.impact] - impactScore[a.impact];
+        if (impactDiff !== 0) return impactDiff;
+        return new Date(b.eventTime).getTime() - new Date(a.eventTime).getTime();
+      })
       .slice(0, limit);
   }
 
