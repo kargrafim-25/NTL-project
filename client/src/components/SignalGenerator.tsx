@@ -191,12 +191,8 @@ export default function SignalGenerator({ selectedTimeframe = '1H', onTimeframeC
             </Button>
           )}
           
-          {/* AI Loading Animation - Displayed prominently when generating */}
-          {isGenerating && (
-            <div className="mt-6 mb-4 p-4 bg-card/50 rounded-xl border border-border/50 backdrop-blur-sm">
-              <AILoadingAnimation message="Generating AI trading signal..." />
-            </div>
-          )}
+          {/* Full-screen AI Loading Animation */}
+          {isGenerating && <AILoadingAnimation />}
         </div>
 
         {/* Free User Message with Upgrade Button */}

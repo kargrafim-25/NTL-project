@@ -178,5 +178,184 @@
     },
     "executionTime": 71816,
     "success": true
+  },
+  {
+    "timestamp": "2025-09-10T22:00:44.623Z",
+    "userId": "46304040",
+    "timeframe": "5M",
+    "subscriptionTier": "pro",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "5M",
+      "userTier": "pro"
+    },
+    "response": {
+      "action": "BUY",
+      "entry": 3647.94,
+      "stop_loss": 3617.94,
+      "take_profit": 3692.94,
+      "confidence": 78,
+      "take_profits": [
+        {
+          "level": 1,
+          "price": 3692.94,
+          "risk_reward_ratio": 1.5
+        },
+        {
+          "level": 2,
+          "price": 3707.94,
+          "risk_reward_ratio": 2
+        },
+        {
+          "level": 3,
+          "price": 3737.94,
+          "risk_reward_ratio": 3
+        }
+      ],
+      "ai_analysis": {
+        "brief": "On the 5-minute chart XAUUSD is trading near session highs with clear bullish momentum; short-term indicators show overbought readings but trend-following signals favor buying into strength. ([reuters.com](https://www.reuters.com/world/india/gold-firms-rate-cut-bets-us-inflation-data-focus-2025-09-10/))",
+        "detailed": "Price is trading above the short-term moving averages and is close to the upper Bollinger Band, indicating continuation bias. RSI on the 5-minute is elevated above neutral territory consistent with upward momentum while MACD histogram is positive showing bullish impulse. Volume has picked up on recent advances, supporting continuation but stop placement below the intraday swing low is advised. ([reuters.com](https://www.reuters.com/world/india/gold-firms-rate-cut-bets-us-inflation-data-focus-2025-09-10/))",
+        "market_sentiment": "BULLISH",
+        "trend_direction": "UPWARD",
+        "key_indicators": [
+          "RSI (5M)",
+          "MACD (5M)",
+          "EMA 20",
+          "EMA 50",
+          "Bollinger Bands (20,2)",
+          "Volume (5M)",
+          "ATR (14)",
+          "Pivot Points"
+        ]
+      },
+      "future_positions": [],
+      "historical_positions": [
+        {
+          "symbol": "XAUUSD",
+          "entry_price": 3610,
+          "current_status": "ACTIVE",
+          "days_active": 2,
+          "unrealized_pnl": 37.94
+        }
+      ],
+      "has_notifications": true
+    },
+    "executionTime": 63502,
+    "success": true
+  },
+  {
+    "timestamp": "2025-09-10T22:02:33.970Z",
+    "userId": "46304040",
+    "timeframe": "5M",
+    "subscriptionTier": "pro",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "5M",
+      "userTier": "pro"
+    },
+    "response": {
+      "action": "BUY",
+      "entry": 3642.93,
+      "stop_loss": 3627.93,
+      "take_profit": 3665.43,
+      "confidence": 78,
+      "take_profits": [
+        {
+          "level": 1,
+          "price": 3665.43,
+          "risk_reward_ratio": 1.5
+        },
+        {
+          "level": 2,
+          "price": 3672.93,
+          "risk_reward_ratio": 2
+        },
+        {
+          "level": 3,
+          "price": 3687.93,
+          "risk_reward_ratio": 3
+        }
+      ],
+      "ai_analysis": {
+        "brief": "5-minute price action is bullish with spot trading near 3,642.93, above short-term EMAs and near the upper Bollinger Band, indicating upward intraday momentum and a bias for buys on shallow pullbacks. ([reuters.com](https://www.reuters.com/world/india/gold-firms-rate-cut-bets-us-inflation-data-focus-2025-09-10/?utm_source=openai))",
+        "detailed": "On the 5-minute timeframe price is making higher highs and higher lows and is positioned above the 20 and 50 EMAs, signaling a short-term uptrend. Momentum reads as bullish: the 5-minute RSI is elevated into overbought territory while the MACD shows a positive histogram, supporting continuation but warning of pullback risk. Immediate intraday support lies around 3628 (recent 5-minute swing low) with resistance between 3665 and prior recent highs near 3674, so a buy with a 15 USD stop and layered TPs at 1.5/2/3 R is the preferred execution. ([reuters.com](https://www.reuters.com/world/india/gold-firms-rate-cut-bets-us-inflation-data-focus-2025-09-10/?utm_source=openai))",
+        "market_sentiment": "BULLISH",
+        "trend_direction": "UPWARD",
+        "key_indicators": [
+          "RSI (5-minute momentum)",
+          "MACD (5-minute momentum)",
+          "EMA20, EMA50 (short-term trend)",
+          "SMA200 (higher-timeframe filter)",
+          "Bollinger Bands (volatility/price position)",
+          "Volume and Open Interest (confirm institutional activity)",
+          "ATR (intraday volatility sizing)"
+        ]
+      },
+      "future_positions": [],
+      "historical_positions": [
+        {
+          "symbol": "XAUUSD",
+          "entry_price": 3620,
+          "current_status": "ACTIVE",
+          "days_active": 2,
+          "unrealized_pnl": 22.93
+        }
+      ],
+      "has_notifications": true
+    },
+    "executionTime": 71943,
+    "success": true
+  },
+  {
+    "timestamp": "2025-09-10T22:11:53.189Z",
+    "userId": "test-user",
+    "timeframe": "1H",
+    "subscriptionTier": "free",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "1H",
+      "userTier": "free"
+    },
+    "response": {
+      "action": "BUY",
+      "entry": 3642.93,
+      "stop_loss": 3533.64,
+      "take_profit": 3806.87,
+      "confidence": 78,
+      "take_profits": [
+        {
+          "level": 1,
+          "price": 3806.87,
+          "risk_reward_ratio": 1.5
+        }
+      ],
+      "ai_analysis": {
+        "brief": "On the 1H chart XAUUSD shows bullish momentum after recent highs; short-term bias is long with entry at current price, SL just below the nearest technical support and TP set at the first measured-extension target. ([reuters.com](https://www.reuters.com/world/india/gold-firms-rate-cut-bets-us-inflation-data-focus-2025-09-10/?utm_source=openai))",
+        "detailed": "Price action and context: Spot gold recently pushed to fresh highs and is trading with bullish momentum on the 1H timeframe, confirming a short-term breakout bias. Recent news prints show spot around the entry level and continued buyer interest pushing price toward new highs. ([reuters.com](https://www.reuters.com/world/india/gold-firms-rate-cut-bets-us-inflation-data-focus-2025-09-10/?utm_source=openai))\n\nSupport and resistance: Immediate support cluster sits in the 3510–3540 area (session lows and prior consolidation). Immediate resistance / recent high area is 3670–3675; the next measurable extension target is in the 3800–3810 area. SL is placed under the 3510–3540 support band to avoid noise but protect capital; TP is placed near the measured extension and institutional projection zone. ([investing.com](https://www.investing.com/currencies/xau-usd-historical-data?utm_source=openai))\n\nIndicators (1H): RSI is elevated indicating overbought-short-term conditions but still compatible with trend continuation on breakouts (RSI likely >70). MACD on 1H shows a positive MACD line and rising histogram consistent with bullish momentum. Shorter moving averages (EMA20/50) are above the EMA200 on 1H, confirming bullish alignment; price is trading at or above the upper Bollinger Band indicating expansion and strong directional volatility. ATR has expanded, signaling increased intraday range; futures open interest remains elevated, supporting continuation risk. ([fxempire.com](https://www.fxempire.com/forecasts/article/gold-xauusd-price-forecast-traders-eye-3700-as-bullish-gold-market-accelerates-1546968?utm_source=openai))\n\nVolume / order-flow: Futures volume showed heavy activity with open interest increasing recently, which supports that the move higher has participation from larger players rather than only retail spikes. Intraday volume spikes coincide with breakout candles, validating momentum. ([apnews.com](https://apnews.com/article/a76bee3a67f47ebfdb30866c95473fc6?utm_source=openai))\n\nTrade plan and rationale: Action = BUY at current market price 3642.93. Stop loss 3533.64 placed below the strong support cluster to allow intraday volatility while limiting downside. Primary take profit 3806.87 (risk:reward 1:1.5) aligns with measured-move upside and institutional projection bands. Position sizing should respect the trader’s risk rules; the trade assumes continuation of bullish macro drivers (rate-cut expectations, weaker dollar, central bank buying). If price closes back below 3510 on the 1H, the bullish invalidation is triggered and exposure should be reduced. ([reuters.com](https://www.reuters.com/world/india/gold-firms-rate-cut-bets-us-inflation-data-focus-2025-09-10/?utm_source=openai))",
+        "market_sentiment": "BULLISH",
+        "trend_direction": "UPWARD",
+        "key_indicators": [
+          "RSI (1H)",
+          "MACD (1H)",
+          "EMA20/50/200 (1H)",
+          "Bollinger Bands (1H)",
+          "ATR (1H)",
+          "Volume / Futures Open Interest"
+        ]
+      },
+      "future_positions": [],
+      "historical_positions": [
+        {
+          "symbol": "XAUUSD",
+          "entry_price": 3575,
+          "current_status": "ACTIVE",
+          "days_active": 2,
+          "unrealized_pnl": 67.93
+        }
+      ],
+      "has_notifications": true
+    },
+    "executionTime": 81231,
+    "success": true
   }
 ]
