@@ -118,20 +118,41 @@ export class RSSService {
         sourceUrl: item.link || `https://${source.toLowerCase()}.com`
       };
     }).filter(event => {
-      // Filter for financial relevance
+      // EXTREMELY strict filtering - only core USD economic data
       const title = event.title.toLowerCase();
       const description = event.description.toLowerCase();
+      const content = (title + ' ' + description);
       
-      const financialKeywords = [
-        'market', 'stock', 'trading', 'economy', 'economic', 'financial',
-        'fed', 'federal reserve', 'interest rate', 'inflation', 'gdp',
-        'employment', 'jobs', 'dollar', 'currency', 'oil', 'gold',
-        'earnings', 'corporate', 'business', 'wall street', 'nasdaq'
+      // Exclude all corporate/business news first
+      const excludeKeywords = [
+        'company', 'corporation', 'ceo', 'executive', 'earnings', 'quarterly',
+        'stock price', 'stock surge', 'stock fall', 'analyst', 'upgrade', 'downgrade',
+        'merger', 'acquisition', 'deal', 'partnership', 'investment',
+        'crypto', 'bitcoin', 'ethereum', 'blockchain', 'cryptocurrency',
+        'software', 'technology', 'app', 'digital', 'product launch',
+        'real estate', 'property', 'housing market', 'construction',
+        'lawsuit', 'legal', 'court', 'settlement', 'investigation',
+        'sport', 'entertainment', 'gaming', 'movie', 'celebrity',
+        'private equity', 'venture capital', 'fund', 'carlyle', 'red bull'
       ];
       
-      return financialKeywords.some(keyword => 
-        title.includes(keyword) || description.includes(keyword)
-      );
+      const hasExcludeKeywords = excludeKeywords.some(keyword => content.includes(keyword));
+      if (hasExcludeKeywords) {
+        return false;
+      }
+      
+      // Only include core economic indicators
+      const usdEconomicKeywords = [
+        'federal reserve', 'fed meeting', 'fed decision', 'jerome powell',
+        'interest rate', 'rate cut', 'rate hike', 'monetary policy',
+        'inflation report', 'cpi data', 'consumer price index',
+        'unemployment rate', 'jobs report', 'nonfarm payroll',
+        'gdp report', 'economic growth', 'recession',
+        'dollar index', 'usd', 'currency policy', 'exchange rate',
+        'treasury yield', 'bond market', 'government bond'
+      ];
+      
+      return usdEconomicKeywords.some(keyword => content.includes(keyword));
     });
   }
 

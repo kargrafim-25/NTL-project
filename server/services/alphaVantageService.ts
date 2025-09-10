@@ -166,15 +166,21 @@ export class AlphaVantageService {
       const description = event.description.toLowerCase();
       const content = (title + ' ' + description);
       
-      // Exclude clearly non-financial content but allow some corporate financial news
+      // Exclude ALL non-economic news - be very aggressive
       const excludeKeywords = [
-        'software recognized', 'award', 'winner', 'best companies', 'ranking on time',
-        'appointment', 'hired as ceo', 'leadership change', 
-        'product launch', 'new product', 'feature update', 'app version',
-        'drug shows', 'pharmaceutical', 'medical device', 'healthcare',
-        'lawsuit', 'legal action', 'investigation', 'fraud',
-        'gaming', 'video game', 'entertainment', 'movie', 'sport',
-        'real estate', 'property', 'housing market'
+        'software', 'technology company', 'app', 'digital', 'cyber', 'ai',
+        'recognized', 'award', 'winner', 'best companies', 'ranking', 'listed',
+        'appointment', 'hired', 'ceo', 'executive', 'management', 'leadership',
+        'product', 'launch', 'feature', 'update', 'version', 'platform',
+        'drug', 'pharmaceutical', 'medical', 'healthcare', 'hospital', 'treatment',
+        'lawsuit', 'legal', 'investigation', 'fraud', 'court', 'settlement',
+        'gaming', 'video game', 'entertainment', 'movie', 'sport', 'f1', 'racing',
+        'real estate', 'property', 'housing', 'construction', 'building',
+        'merger', 'acquisition', 'deal', 'partnership', 'collaboration',
+        'earnings', 'quarterly', 'revenue', 'profit', 'guidance', 'stock price',
+        'crypto', 'bitcoin', 'ethereum', 'blockchain', 'cryptocurrency',
+        'options', 'trading activity', 'short interest', 'analyst',
+        'private equity', 'venture capital', 'funding', 'investment firm'
       ];
       
       const hasExcludeKeywords = excludeKeywords.some(keyword => content.includes(keyword));
@@ -183,20 +189,16 @@ export class AlphaVantageService {
         return false;
       }
       
-      // Include broader USD-relevant financial and economic keywords
+      // VERY strict - only core USD economic indicators and Federal Reserve policy
       const usdCriticalKeywords = [
-        'federal reserve', 'fed ', 'fed.', 'fomc', 'jerome powell', 'janet yellen',
-        'interest rate', 'rate cut', 'rate hike', 'monetary policy', 'central bank',
-        'inflation', 'cpi', 'pce', 'consumer price', 'price index',
-        'unemployment', 'nonfarm payroll', 'jobs report', 'employment', 'labor market',
-        'gdp', 'gross domestic product', 'economic growth', 'recession',
-        'dollar', 'usd', 'dxy', 'currency', 'exchange rate',
-        'treasury', 'yield', 'bond', 'government bonds',
-        'us economy', 'american economy', 'united states', 'economic data',
-        'wall street', 'dow jones', 'nasdaq', 's&p 500', 'stock market',
-        'oil', 'crude', 'energy', 'commodity', 'gold prices',
-        'retail sales', 'consumer confidence', 'manufacturing', 'ism',
-        'trade', 'tariff', 'import', 'export', 'trade deficit'
+        'federal reserve', 'fed meeting', 'fed decision', 'fomc', 'jerome powell',
+        'interest rate decision', 'rate cut', 'rate hike', 'monetary policy',
+        'inflation report', 'cpi report', 'pce report', 'consumer price index',
+        'unemployment rate', 'nonfarm payroll', 'jobs report', 'employment report',
+        'gdp report', 'gdp data', 'economic growth report', 'recession',
+        'dollar index', 'dxy', 'usd strengthens', 'usd weakens', 'dollar rally',
+        'treasury yield', '10-year yield', 'bond yield', 'yield curve',
+        'us economic data', 'economic calendar', 'economic indicator'
       ];
       
       const hasUsdKeywords = usdCriticalKeywords.some(keyword => content.includes(keyword));
