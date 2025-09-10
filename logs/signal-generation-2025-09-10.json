@@ -357,5 +357,127 @@
     },
     "executionTime": 81231,
     "success": true
+  },
+  {
+    "timestamp": "2025-09-10T22:24:43.714Z",
+    "userId": "46304040",
+    "timeframe": "1H",
+    "subscriptionTier": "pro",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "1H",
+      "userTier": "pro"
+    },
+    "response": {
+      "action": "BUY",
+      "entry": 3642.93,
+      "stop_loss": 3590,
+      "take_profit": 3722.33,
+      "confidence": 78,
+      "take_profits": [
+        {
+          "level": 1,
+          "price": 3722.33,
+          "risk_reward_ratio": 1.5
+        },
+        {
+          "level": 2,
+          "price": 3748.79,
+          "risk_reward_ratio": 2
+        },
+        {
+          "level": 3,
+          "price": 3801.72,
+          "risk_reward_ratio": 3
+        }
+      ],
+      "ai_analysis": {
+        "brief": "Current spot gold is trading near 3643 and the 1 hour technicals favor a continuation of the upside after a fresh high, with price trading above the short and medium moving averages, bullish MACD, RSI showing bullish momentum without extreme overbought readings, and price riding the upper Bollinger band on elevated volume during rallies.",
+        "detailed": "Price is trading above the 50 and 200 period EMAs on the 1 hour timeframe which supports a bullish bias. RSI on the 1 hour is in bullish range while MACD shows positive momentum and the histogram remains above zero, indicating buyers retain control. Bollinger Bands are expanding and volume has been higher on up moves, suggesting momentum continuation while immediate support sits around 3590 and resistance clusters near recent highs around 3674 and the 3720 to 3800 area.",
+        "market_sentiment": "BULLISH",
+        "trend_direction": "UPWARD",
+        "key_indicators": [
+          "RSI 1H",
+          "MACD 1H",
+          "50 EMA",
+          "200 EMA",
+          "Bollinger Bands 1H",
+          "Volume",
+          "Support and Resistance levels"
+        ]
+      },
+      "future_positions": [],
+      "historical_positions": [
+        {
+          "symbol": "XAUUSD",
+          "entry_price": 3600,
+          "current_status": "ACTIVE",
+          "days_active": 2,
+          "unrealized_pnl": 42.93
+        }
+      ],
+      "has_notifications": true
+    },
+    "executionTime": 52555,
+    "success": true
+  },
+  {
+    "timestamp": "2025-09-10T22:28:46.752Z",
+    "userId": "test-user",
+    "timeframe": "1H",
+    "subscriptionTier": "free",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "1H",
+      "userTier": "free"
+    },
+    "response": {
+      "action": "SELL",
+      "entry": 3642.93,
+      "stop_loss": 3685,
+      "take_profit": 3560,
+      "confidence": 78,
+      "take_profits": [
+        {
+          "level": 1,
+          "price": 3560,
+          "risk_reward_ratio": 1.97
+        },
+        {
+          "level": 2,
+          "price": 3500,
+          "risk_reward_ratio": 3.4
+        }
+      ],
+      "ai_analysis": {
+        "brief": "On the 1H timeframe XAUUSD is at elevated levels after a strong rally. Short-term momentum indicators show overbought conditions and price is trading near the recent high, increasing odds of a corrective pullback. Recommended short (SELL) with entry at market, stop above the recent swing high, and layered take-profits at nearby structural supports.",
+        "detailed": "Current price used for this setup: 3,642.93 per ounce. The market has recently pushed to a fresh intraday high, creating stretched momentum on short timeframes. On the 1H chart the trend has been strongly upward over the past several sessions, but momentum oscillators on 1H are showing overbought signatures: the 1H RSI is elevated (typically above 70 during such rallies), MACD histogram has been positive but flattening signaling weakening bullish momentum, and price is pushing against or beyond the upper Bollinger Band which often precedes a mean reversion or corrective leg. Short-term moving averages (20 EMA and 50 EMA on 1H) are aligned bullishly (20 EMA above 50 EMA) confirming the up-trend, while the 200 EMA remains below price confirming overall bullish bias. Volume has increased on the push higher, indicating strong participation in the move, but subsequent candles show lower buying volume which suggests buying exhaustion at the top of the move. Key near-term resistance is the recent intraday high around 3,673–3,674; immediate support levels to watch are 3,600 (minor), 3,550 (major intra-day structure), and 3,500 (deeper support). Given price extension and overbought intraday indicators, the proposed trade is a tactical short targeting a corrective move to initial support zones. Entry is at market 3,642.93, stop-loss placed above the recent swing high at 3,685 to allow for noise while protecting against continuation, primary take-profit at 3,560 (first support cluster) and secondary target at 3,500 for a larger correction. Position sizing should ensure the stop distance matches your risk tolerance; the primary TP provides roughly a 2.0:1 reward-to-risk with the chosen stop. Conditions that would invalidate the short: decisive hourly close above the recent high (sustained breakout) with expanding volume and renewed MACD momentum, or major macro news that reverses rate-cut expectations. Current price and recent intra-day high referenced from live market reporting. ([reuters.com](https://www.reuters.com/world/india/gold-firms-rate-cut-bets-us-inflation-data-focus-2025-09-10/?utm_source=openai))",
+        "market_sentiment": "BEARISH",
+        "trend_direction": "UPWARD",
+        "key_indicators": [
+          "RSI (1H)",
+          "MACD (1H)",
+          "20 EMA (1H)",
+          "50 EMA (1H)",
+          "200 EMA (1H)",
+          "Bollinger Bands (20,2)",
+          "Volume (1H)",
+          "Support/Resistance Price Structure"
+        ]
+      },
+      "future_positions": [],
+      "historical_positions": [
+        {
+          "symbol": "XAUUSD",
+          "entry_price": 3590,
+          "current_status": "ACTIVE",
+          "days_active": 2,
+          "unrealized_pnl": 52.93
+        }
+      ],
+      "has_notifications": true
+    },
+    "executionTime": 38945,
+    "success": true
   }
 ]
