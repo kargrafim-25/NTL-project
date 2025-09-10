@@ -38,22 +38,22 @@ export default function SignalGenerator({ selectedTimeframe = '1H', onTimeframeC
     },
     onSuccess: (data) => {
       if (data.basicConfirmation) {
-        // Handle free user basic confirmation
+        // Handle free user basic confirmation (old logic - shouldn't happen anymore)
         toast({
           title: "AI Confirmation",
           description: data.basicConfirmation.message,
         });
       } else {
-        // Handle full signal for paid users
+        // Handle full signal for all users (including free users)
         toast({
           title: "Signal Generated!",
           description: `New ${data.signal?.direction} signal created successfully.`,
         });
-        
-        // Invalidate and refetch relevant queries
-        queryClient.invalidateQueries({ queryKey: ['/api/v1/signals'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/v1/signals/latest'] });
       }
+      
+      // Always invalidate and refetch relevant queries for any successful signal generation
+      queryClient.invalidateQueries({ queryKey: ['/api/v1/signals'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/v1/signals/latest'] });
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
     },
     onError: (error: Error) => {
@@ -153,9 +153,13 @@ export default function SignalGenerator({ selectedTimeframe = '1H', onTimeframeC
               disabled={isGenerating}
               className="w-full gradient-primary text-white py-4 rounded-xl font-semibold text-lg hover:shadow-lg hover:scale-105 transition-all duration-300 signal-indicator disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid="button-get-basic-confirmation"
+              aria-busy={isGenerating}
             >
               {isGenerating ? (
-                <AILoadingAnimation message="Generating AI trading signal..." />
+                <>
+                  <div className="w-5 h-5 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Analyzing...
+                </>
               ) : (
                 <>
                   <img src={logoUrl} alt="Logo" className="mr-2 h-5 w-5 object-contain" />
@@ -170,9 +174,13 @@ export default function SignalGenerator({ selectedTimeframe = '1H', onTimeframeC
               disabled={isGenerating}
               className="w-full gradient-primary text-white py-4 rounded-xl font-semibold text-lg hover:shadow-lg hover:scale-105 transition-all duration-300 signal-indicator disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid="button-generate-signal"
+              aria-busy={isGenerating}
             >
               {isGenerating ? (
-                <AILoadingAnimation message="Generating AI trading signal..." />
+                <>
+                  <div className="w-5 h-5 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Generating...
+                </>
               ) : (
                 <>
                   <img src={logoUrl} alt="Logo" className="mr-2 h-5 w-5 object-contain" />
@@ -181,6 +189,13 @@ export default function SignalGenerator({ selectedTimeframe = '1H', onTimeframeC
                 </>
               )}
             </Button>
+          )}
+          
+          {/* AI Loading Animation - Displayed prominently when generating */}
+          {isGenerating && (
+            <div className="mt-6 mb-4 p-4 bg-card/50 rounded-xl border border-border/50 backdrop-blur-sm">
+              <AILoadingAnimation message="Generating AI trading signal..." />
+            </div>
           )}
         </div>
 

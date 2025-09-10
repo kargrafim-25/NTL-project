@@ -62,5 +62,121 @@
     },
     "executionTime": 49031,
     "success": true
+  },
+  {
+    "timestamp": "2025-09-10T21:42:27.882Z",
+    "userId": "46304040",
+    "timeframe": "1H",
+    "subscriptionTier": "pro",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "1H",
+      "userTier": "pro"
+    },
+    "response": {
+      "action": "BUY",
+      "entry": 3642.93,
+      "stop_loss": 3592.93,
+      "take_profit": 3717.93,
+      "confidence": 75,
+      "take_profits": [
+        {
+          "level": 1,
+          "price": 3717.93,
+          "risk_reward_ratio": 1.5
+        },
+        {
+          "level": 2,
+          "price": 3742.93,
+          "risk_reward_ratio": 2
+        },
+        {
+          "level": 3,
+          "price": 3792.93,
+          "risk_reward_ratio": 3
+        }
+      ],
+      "ai_analysis": {
+        "brief": "On the 1H timeframe XAUUSD is in a near-term uptrend after a fresh record high and a mild pullback to the 3,640 area; momentum indicators on hourly chart favor buyers while intraday volatility is elevated. ([reuters.com](https://www.reuters.com/world/india/gold-firms-rate-cut-bets-us-inflation-data-focus-2025-09-10/?utm_source=openai))",
+        "detailed": "Price recently made a record high and pulled back to the 3,640 zone where short-term moving averages are providing dynamic support, suggesting continuation is more likely than a reversal. RSI on the hourly chart is neutral-to-bullish, MACD remains above its signal line and Bollinger Bands show expansion consistent with trend continuation; volume on futures markets indicates continued institutional participation. Immediate resistance sits at the recent high near 3,674 while nearby supports to watch are 3,620 and the 3,590 area where the proposed stop loss is placed to protect against deeper retracements. ([reuters.com](https://www.reuters.com/world/india/gold-firms-rate-cut-bets-us-inflation-data-focus-2025-09-10/?utm_source=openai), [apnews.com](https://apnews.com/article/a76bee3a67f47ebfdb30866c95473fc6?utm_source=openai), [fixiomarkets.com](https://fixiomarkets.com/en/prex-blogs/xauusd-1-hour-chart-analysis-2025-06-05/detail?utm_source=openai))",
+        "market_sentiment": "BULLISH",
+        "trend_direction": "UPWARD",
+        "key_indicators": [
+          "RSI (1H)",
+          "MACD (1H)",
+          "50-period MA (1H)",
+          "200-period MA (1H)",
+          "Bollinger Bands (1H)",
+          "Volume / Futures open interest",
+          "Price action support/resistance"
+        ]
+      },
+      "future_positions": [],
+      "historical_positions": [
+        {
+          "symbol": "XAUUSD",
+          "entry_price": 3642.93,
+          "current_status": "ACTIVE",
+          "days_active": 2,
+          "unrealized_pnl": 0
+        }
+      ],
+      "has_notifications": true
+    },
+    "executionTime": 60034,
+    "success": true
+  },
+  {
+    "timestamp": "2025-09-10T21:52:18.341Z",
+    "userId": "mtBIc_",
+    "timeframe": "1H",
+    "subscriptionTier": "free",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "1H",
+      "userTier": "free"
+    },
+    "response": {
+      "action": "BUY",
+      "entry": 3642.93,
+      "stop_loss": 3588,
+      "take_profit": 3720,
+      "confidence": 78,
+      "take_profits": [
+        {
+          "level": 1,
+          "price": 3720,
+          "risk_reward_ratio": 1.4
+        }
+      ],
+      "ai_analysis": {
+        "brief": "1H technical view: price is trading near recent highs with bullish momentum. Short-term indicators show overbought conditions but trend structure remains bullish. Preferred plan is to buy on continued strength or a shallow pullback. Keep stop below immediate intraday support and target the next resistance band near prior highs and measured extension.",
+        "detailed": "Current market snapshot: spot XAUUSD is trading at 3,642.93. The market made a fresh multi-session high recently and remains biased to the upside driven by rate-cut expectations and continued safe-haven / central bank demand. ([reuters.com](https://www.reuters.com/world/india/gold-firms-rate-cut-bets-us-inflation-data-focus-2025-09-10/?utm_source=openai))\n\nPrice structure (1H): the 1-hour chart shows higher highs and higher lows over the past several sessions, with price riding the upper part of the intraday range. Immediate resistance is the recent high area near 3,673–3,674. Immediate support cluster is 3,590–3,600 on the first pullback, followed by a stronger support band 3,530–3,550 which aligns with the previous consolidation and intraday moving-average confluence.\n\nIndicators (1H): RSI is elevated and likely in overbought territory on the 1H (momentum strong but vulnerable to short-term retracement). MACD histogram is positive with MACD line above signal line—bullish momentum across the short term. Price is above short and medium EMAs (50 EMA and 200 EMA on 1H), indicating upward trend bias. Bollinger Bands are widening with price spending time near the upper band, signaling trending conditions but increased short-term volatility. Volume on rally bars has been higher than on pullbacks, supporting the bullish move.\n\nTrade rationale and levels: bias is bullish. Entry at current market price 3,642.93 is acceptable for intraday/short swing traders who accept a tight stop below the recent intraday support. Stop loss is placed at 3,588.00, below the immediate support cluster and below typical 1H pullback zone to avoid noise. Primary take-profit set at 3,720.00 which targets the measured extension beyond the recent high while keeping R:R acceptable (~1.4). Alternate higher targets for extended trend continuation are 3,775–3,840 (secondary targets) if momentum and volume continue to expand.\n\nRisk management: this is a momentum/breakout-biased trade. Keep position size limited to account for intraday volatility; consider scaling out 50% at the first TP and trailing the remainder above higher highs. If price drops below the stop zone or fails to hold the 3,590–3,600 support on a retest, invalidate the bullish thesis and avoid re-entry until structure is rebuilt.\n\nMacro overlay and sentiment: market sentiment is bullish due to priced-in Fed easing expectations and continued safe-haven flows and central bank purchases, which underpin the upside bias on shorter timeframes as well as higher timeframes. Monitor U.S. inflation prints and Fed communications—these events can rapidly shift intraday direction. ([reuters.com](https://www.reuters.com/world/india/gold-firms-rate-cut-bets-us-inflation-data-focus-2025-09-10/?utm_source=openai))",
+        "market_sentiment": "BULLISH",
+        "trend_direction": "UPWARD",
+        "key_indicators": [
+          "RSI (1H)",
+          "MACD (1H)",
+          "50 EMA (1H)",
+          "200 EMA (1H)",
+          "Bollinger Bands (1H)",
+          "Volume (intraday)",
+          "Support/Resistance (price action)"
+        ]
+      },
+      "future_positions": [],
+      "historical_positions": [
+        {
+          "symbol": "XAUUSD",
+          "entry_price": 3500,
+          "current_status": "ACTIVE",
+          "days_active": 2,
+          "unrealized_pnl": 142.93
+        }
+      ],
+      "has_notifications": true
+    },
+    "executionTime": 71816,
+    "success": true
   }
 ]

@@ -87,23 +87,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Check subscription tier and credits
-      if (user.subscriptionTier === 'free') {
-        // For free users, generate basic AI confirmation instead of full signal
-        const basicResponse = {
-          signal: null,
-          basicConfirmation: {
-            message: "This signal has been analyzed by our AI system and meets our quality standards.",
-            confidence: 75,
-            timeframe: timeframe,
-            timestamp: new Date().toISOString()
-          },
-          upgrade: true
-        };
-        return res.json(basicResponse);
+      // Check daily credits for free users (2 daily signals allowed)
+      if (user.subscriptionTier === 'free' && user.dailyCredits >= 2) {
+        return res.status(429).json({ 
+          message: "Daily limit reached. Free users get 2 signals per day. Upgrade to Starter for unlimited daily signals.",
+          creditsRemaining: 0
+        });
       }
 
-      // Check daily credits for non-pro users
+      // Check daily credits for starter users
       if (user.subscriptionTier === 'starter' && user.dailyCredits >= user.maxDailyCredits) {
         return res.status(429).json({ 
           message: "Daily credit limit reached. Upgrade to Pro for unlimited signals.",
