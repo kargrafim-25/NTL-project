@@ -479,5 +479,68 @@
     },
     "executionTime": 38945,
     "success": true
+  },
+  {
+    "timestamp": "2025-09-10T22:31:44.591Z",
+    "userId": "46304040",
+    "timeframe": "1H",
+    "subscriptionTier": "pro",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "1H",
+      "userTier": "pro"
+    },
+    "response": {
+      "action": "BUY",
+      "entry": 3642.93,
+      "stop_loss": 3580,
+      "take_profit": 3737.33,
+      "confidence": 78,
+      "take_profits": [
+        {
+          "level": 1,
+          "price": 3737.33,
+          "risk_reward_ratio": 1.5
+        },
+        {
+          "level": 2,
+          "price": 3768.79,
+          "risk_reward_ratio": 2
+        },
+        {
+          "level": 3,
+          "price": 3831.72,
+          "risk_reward_ratio": 3
+        }
+      ],
+      "ai_analysis": {
+        "brief": "Price is trading at fresh highs on the 1H timeframe with bullish momentum; expect continuation on a confirmed breakout while watching for short-term overbought readings and a pullback toward nearby support before higher targets are taken.",
+        "detailed": "On the 1H chart XAUUSD is in an upward trend with price above the short and medium EMAs and showing bullish MACD momentum, while RSI on the 1H is elevated signaling short-term overbought conditions and the Bollinger Bands are expanded consistent with a volatility-driven advance. Key intraday support sits near the 3580 zone (recent consolidation low) and immediate resistance is the recent high area around 3670–3680; a clean break and hold above that resistance favors continuation toward the listed take-profits. Volume and tick participation have increased on the rallies, which supports trend-following longs, but traders should use a stop below 3580 to protect against a reversal into the moving-average cluster and lower support. ([reuters.com](https://www.reuters.com/world/india/gold-firms-rate-cut-bets-us-inflation-data-focus-2025-09-10/?utm_source=openai))",
+        "market_sentiment": "BULLISH",
+        "trend_direction": "UPWARD",
+        "key_indicators": [
+          "RSI (1H)",
+          "MACD (1H)",
+          "20/50/200 EMAs",
+          "Bollinger Bands (20)",
+          "Volume / tick volume",
+          "Support & Resistance",
+          "ADX (trend strength)"
+        ]
+      },
+      "future_positions": [],
+      "historical_positions": [
+        {
+          "symbol": "XAUUSD",
+          "entry_price": 3590,
+          "current_status": "ACTIVE",
+          "days_active": 2,
+          "unrealized_pnl": 52.93
+        }
+      ],
+      "has_notifications": true
+    },
+    "executionTime": 55055,
+    "success": true
   }
 ]
