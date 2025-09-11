@@ -82,7 +82,8 @@ export class DatabaseStorage implements IStorage {
     await db
       .update(users)
       .set({ 
-        dailyCredits: 0,
+        dailyCredits: 0, // Reset to 0 (meaning "used 0 credits today")
+        lastGenerationTime: null, // Clear cooldown - fresh start for the day
         lastCreditReset: new Date(),
         updatedAt: new Date() 
       })
@@ -107,10 +108,6 @@ export class DatabaseStorage implements IStorage {
     cooldownMinutes: number, 
     now: Date
   ): Promise<{success: boolean}> {
-    const cooldownEndTime = lastGenerationTime 
-      ? new Date(lastGenerationTime.getTime() + (cooldownMinutes * 60 * 1000))
-      : null;
-    
     // Atomic conditional update - only update if conditions are still met
     const result = await db
       .update(users)
@@ -126,14 +123,15 @@ export class DatabaseStorage implements IStorage {
           // Only update if daily credits haven't reached limit
           sql`${users.dailyCredits} < ${dailyLimit}`,
           // Only update if cooldown has expired (or no previous generation)
-          cooldownEndTime 
-            ? sql`${now.toISOString()} >= ${cooldownEndTime.toISOString()}::timestamp`
+          lastGenerationTime 
+            ? sql`(${users.lastGenerationTime} IS NULL OR ${users.lastGenerationTime} + INTERVAL '${cooldownMinutes} minutes' <= ${now.toISOString()}::timestamp)`
             : sql`TRUE`
         )
       );
     
     // Check if any rows were updated (success) or not (race condition occurred)
-    return { success: (result as any).changes > 0 || (result as any).rowCount > 0 };
+    const rowsAffected = (result as any).rowCount ?? (result as any).changes ?? 0;
+    return { success: rowsAffected > 0 };
   }
 
   async createSignal(signal: InsertTradingSignal): Promise<TradingSignal> {

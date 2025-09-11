@@ -34,7 +34,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      let user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Check and perform daily reset if needed
+      const currentTime = new Date();
+      const casablancaTime = new Date(currentTime.toLocaleString("en-US", {timeZone: "Africa/Casablanca"}));
+      const lastReset = new Date(user.lastCreditReset || 0);
+      const lastResetCasablanca = new Date(lastReset.toLocaleString("en-US", {timeZone: "Africa/Casablanca"}));
+      
+      const needsReset = casablancaTime.getDate() !== lastResetCasablanca.getDate() || 
+                        casablancaTime.getMonth() !== lastResetCasablanca.getMonth() ||
+                        casablancaTime.getFullYear() !== lastResetCasablanca.getFullYear();
+      
+      if (needsReset) {
+        console.log(`[AUTH] Daily reset needed for user ${userId}`);
+        await storage.resetDailyCredits(userId);
+        // Fetch updated user data after reset
+        user = await storage.getUser(userId);
+        console.log(`[AUTH] Daily credits reset for user ${userId}, new daily credits: ${user?.dailyCredits}`);
+      }
+      
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -173,17 +196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: "Failed to process request. Please try again." });
       }
 
-      // Reset daily credits if needed (new day)
-      const lastReset = new Date(user.lastCreditReset || 0);
-      const now = new Date();
-      const casablancaTime = new Date(now.toLocaleString("en-US", {timeZone: "Africa/Casablanca"}));
-      
-      if (casablancaTime.getDate() !== lastReset.getDate() || 
-          casablancaTime.getMonth() !== lastReset.getMonth() ||
-          casablancaTime.getFullYear() !== lastReset.getFullYear()) {
-        await storage.resetDailyCredits(userId);
-        user.dailyCredits = 0;
-      }
+      // Daily reset already performed before atomic update
 
       // Generate signal using OpenAI
       const signalData = await generateTradingSignal(timeframe, user.subscriptionTier, userId);
