@@ -1,4 +1,4 @@
-import { Brain, Activity, TrendingUp, Zap, Target, BarChart3 } from 'lucide-react';
+import { Brain, Zap, Target } from 'lucide-react';
 import logoUrl from '../assets/logo.png';
 import { useState, useEffect } from 'react';
 
