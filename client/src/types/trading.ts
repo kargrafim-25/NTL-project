@@ -34,6 +34,7 @@ export interface User {
   maxDailyCredits: number;
   maxMonthlyCredits: number;
   lastCreditReset: string | null;
+  lastGenerationTime: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -52,6 +53,8 @@ export interface GenerateSignalResponse {
   signal?: TradingSignal;
   creditsUsed?: number;
   creditsRemaining?: number | 'unlimited';
+  cooldownMinutes?: number;
+  nextGenerationTime?: string;
   basicConfirmation?: {
     message: string;
     confidence: number;

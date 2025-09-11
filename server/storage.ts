@@ -10,7 +10,7 @@ import {
   type InsertEconomicNews,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, gte, or } from "drizzle-orm";
+import { eq, desc, and, gte, or, sql } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -22,6 +22,8 @@ export interface IStorage {
   // Credit operations
   updateUserCredits(userId: string, dailyCredits: number, monthlyCredits: number): Promise<void>;
   resetDailyCredits(userId: string): Promise<void>;
+  updateUserLastGenerationTime(userId: string, timestamp: Date): Promise<void>;
+  atomicGenerationUpdate(userId: string, currentDailyCredits: number, dailyLimit: number, lastGenerationTime: Date | null, cooldownMinutes: number, now: Date): Promise<{success: boolean}>;
   
   // Signal operations
   createSignal(signal: InsertTradingSignal): Promise<TradingSignal>;
@@ -85,6 +87,53 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date() 
       })
       .where(eq(users.id, userId));
+  }
+
+  async updateUserLastGenerationTime(userId: string, timestamp: Date): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        lastGenerationTime: timestamp,
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async atomicGenerationUpdate(
+    userId: string, 
+    currentDailyCredits: number, 
+    dailyLimit: number, 
+    lastGenerationTime: Date | null, 
+    cooldownMinutes: number, 
+    now: Date
+  ): Promise<{success: boolean}> {
+    const cooldownEndTime = lastGenerationTime 
+      ? new Date(lastGenerationTime.getTime() + (cooldownMinutes * 60 * 1000))
+      : null;
+    
+    // Atomic conditional update - only update if conditions are still met
+    const result = await db
+      .update(users)
+      .set({ 
+        dailyCredits: currentDailyCredits + 1,
+        monthlyCredits: sql`${users.monthlyCredits} + 1`,
+        lastGenerationTime: now,
+        updatedAt: now
+      })
+      .where(
+        and(
+          eq(users.id, userId),
+          // Only update if daily credits haven't reached limit
+          sql`${users.dailyCredits} < ${dailyLimit}`,
+          // Only update if cooldown has expired (or no previous generation)
+          cooldownEndTime 
+            ? sql`${now.toISOString()} >= ${cooldownEndTime.toISOString()}::timestamp`
+            : sql`TRUE`
+        )
+      );
+    
+    // Check if any rows were updated (success) or not (race condition occurred)
+    return { success: (result as any).changes > 0 || (result as any).rowCount > 0 };
   }
 
   async createSignal(signal: InsertTradingSignal): Promise<TradingSignal> {
@@ -166,8 +215,7 @@ export class DatabaseStorage implements IStorage {
     await db
       .update(tradingSignals)
       .set({ 
-        userAction,
-        updatedAt: new Date() 
+        userAction
       })
       .where(eq(tradingSignals.id, signalId));
   }

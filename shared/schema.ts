@@ -42,6 +42,7 @@ export const users = pgTable("users", {
   maxDailyCredits: integer("max_daily_credits").default(2).notNull(),
   maxMonthlyCredits: integer("max_monthly_credits").default(10).notNull(),
   lastCreditReset: timestamp("last_credit_reset").defaultNow(),
+  lastGenerationTime: timestamp("last_generation_time"),
   monthlyCompletionStreak: integer("monthly_completion_streak").default(0).notNull(),
   lastNotificationDate: timestamp("last_notification_date"),
   pendingDiscountCode: varchar("pending_discount_code"),

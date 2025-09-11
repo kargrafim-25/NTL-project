@@ -87,20 +87,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Check daily credits for free users (2 daily signals allowed)
-      if (user.subscriptionTier === 'free' && user.dailyCredits >= 2) {
-        return res.status(429).json({ 
-          message: "Daily limit reached. Free users get 2 signals per day. Upgrade to Starter for unlimited daily signals.",
-          creditsRemaining: 0
-        });
-      }
+      // Define daily limits and cooldowns based on subscription tier
+      const tierLimits = {
+        free: { dailyLimit: 2, cooldownMinutes: 90 },
+        starter: { dailyLimit: 8, cooldownMinutes: 30 },
+        pro: { dailyLimit: 20, cooldownMinutes: 15 }
+      };
+      
+      const userTierLimits = tierLimits[user.subscriptionTier as keyof typeof tierLimits] || tierLimits.free;
 
-      // Check daily credits for starter users
-      if (user.subscriptionTier === 'starter' && user.dailyCredits >= user.maxDailyCredits) {
-        return res.status(429).json({ 
-          message: "Daily credit limit reached. Upgrade to Pro for unlimited signals.",
-          creditsRemaining: 0
-        });
+      // Atomic check and update - prevent race conditions
+      const currentTime = new Date();
+      const cooldownEndTime = user.lastGenerationTime 
+        ? new Date(new Date(user.lastGenerationTime).getTime() + (userTierLimits.cooldownMinutes * 60 * 1000))
+        : null;
+        
+      // Check if user can generate (daily limit and cooldown)
+      const canGenerate = user.dailyCredits < userTierLimits.dailyLimit && 
+                         (!cooldownEndTime || currentTime >= cooldownEndTime);
+      
+      if (!canGenerate) {
+        // Return appropriate error message
+        if (user.dailyCredits >= userTierLimits.dailyLimit) {
+          const upgradeMessages = {
+            free: "Daily limit reached. Free users get 2 signals per day. Upgrade to Starter for 8 signals per day.",
+            starter: "Daily limit reached. Starter users get 8 signals per day. Upgrade to Pro for 20 signals per day.",
+            pro: "Daily limit reached. Pro users get 20 signals per day."
+          };
+          
+          return res.status(429).json({ 
+            message: upgradeMessages[user.subscriptionTier as keyof typeof upgradeMessages] || upgradeMessages.free,
+            creditsRemaining: 0,
+            dailyLimitReached: true
+          });
+        }
+        
+        if (cooldownEndTime && currentTime < cooldownEndTime) {
+          const remainingTime = Math.ceil((cooldownEndTime.getTime() - currentTime.getTime()) / (1000 * 60));
+          return res.status(429).json({
+            message: `Please wait ${remainingTime} minute${remainingTime !== 1 ? 's' : ''} before generating another signal.`,
+            cooldownRemaining: remainingTime,
+            nextGenerationTime: cooldownEndTime.toISOString()
+          });
+        }
+      }
+      
+      // Try atomic update - only proceed if user still can generate
+      const updateResult = await storage.atomicGenerationUpdate(
+        userId, 
+        user.dailyCredits, 
+        userTierLimits.dailyLimit,
+        user.lastGenerationTime,
+        userTierLimits.cooldownMinutes,
+        currentTime
+      );
+      
+      if (!updateResult.success) {
+        // Another request beat us to it, recalculate and return error
+        const updatedUser = await storage.getUser(userId);
+        if (!updatedUser) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        
+        if (updatedUser.dailyCredits >= userTierLimits.dailyLimit) {
+          return res.status(429).json({ 
+            message: "Daily limit reached. Another request was processed first.",
+            creditsRemaining: 0,
+            dailyLimitReached: true
+          });
+        }
+        
+        const newCooldownEndTime = updatedUser.lastGenerationTime 
+          ? new Date(new Date(updatedUser.lastGenerationTime).getTime() + (userTierLimits.cooldownMinutes * 60 * 1000))
+          : null;
+          
+        if (newCooldownEndTime && currentTime < newCooldownEndTime) {
+          const remainingTime = Math.ceil((newCooldownEndTime.getTime() - currentTime.getTime()) / (1000 * 60));
+          return res.status(429).json({
+            message: `Cooldown active. Another request was processed first.`,
+            cooldownRemaining: remainingTime,
+            nextGenerationTime: newCooldownEndTime.toISOString()
+          });
+        }
+        
+        return res.status(500).json({ message: "Failed to process request. Please try again." });
       }
 
       // Reset daily credits if needed (new day)
@@ -138,15 +208,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "fresh",
       });
 
-      // Update user credits (except for pro users)
-      if (user.subscriptionTier !== 'pro') {
-        await storage.updateUserCredits(userId, user.dailyCredits + 1, user.monthlyCredits + 1);
-      }
+      // Credits and generation time already updated atomically above
 
       res.json({
         signal,
         creditsUsed: user.subscriptionTier === 'pro' ? 0 : 1,
-        creditsRemaining: user.subscriptionTier === 'pro' ? 'unlimited' : user.maxDailyCredits - (user.dailyCredits + 1)
+        creditsRemaining: userTierLimits.dailyLimit - (user.dailyCredits + 1),
+        cooldownMinutes: userTierLimits.cooldownMinutes,
+        nextGenerationTime: new Date(Date.now() + (userTierLimits.cooldownMinutes * 60 * 1000)).toISOString()
       });
 
     } catch (error) {

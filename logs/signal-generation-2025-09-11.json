@@ -63,5 +63,313 @@
     },
     "executionTime": 44868,
     "success": true
+  },
+  {
+    "timestamp": "2025-09-11T12:50:04.586Z",
+    "userId": "46304040",
+    "timeframe": "5M",
+    "subscriptionTier": "pro",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "5M",
+      "userTier": "pro"
+    },
+    "response": {
+      "action": "BUY",
+      "entry": 3636.5,
+      "stop_loss": 3615.5,
+      "take_profit": 3668,
+      "confidence": 78,
+      "take_profits": [
+        {
+          "level": 1,
+          "price": 3668,
+          "risk_reward_ratio": 1.5
+        },
+        {
+          "level": 2,
+          "price": 3678.5,
+          "risk_reward_ratio": 2
+        },
+        {
+          "level": 3,
+          "price": 3699.5,
+          "risk_reward_ratio": 3
+        }
+      ],
+      "ai_analysis": {
+        "brief": "On the 5 minute chart XAUUSD shows a short term bullish bias with price at 3636.5 trading above the 50 and 200 EMAs, RSI around 62, MACD positive with a recent bullish crossover, and widening Bollinger Bands; volume spikes on advances confirm buying interest. Immediate intraday support lies at 3620 and 3610 while resistance clusters at 3668 and the recent high near 3674. Trade plan is BUY with stop under 3615.5 and layered take profits at 3668.0, 3678.5, and 3699.5.",
+        "detailed": "Price is trading above the 50 and 200 exponential moving averages on the 5 minute timeframe indicating upward momentum while RSI near 62 suggests bullish room without being overbought. MACD has produced a bullish crossover with expanding histogram and Bollinger Bands are widening which supports continuation, and recent upticks in volume on advances validate buying pressure. Key intraday support is 3620 with a protective stop under 3615 and measured upside targets are 3668, 3678, and 3699 based on recent highs and a measured move projection.",
+        "market_sentiment": "BULLISH",
+        "trend_direction": "UPWARD",
+        "key_indicators": [
+          "RSI",
+          "MACD",
+          "EMA50",
+          "EMA200",
+          "Bollinger Bands",
+          "Volume",
+          "Support/Resistance",
+          "VWAP"
+        ]
+      },
+      "future_positions": [],
+      "historical_positions": [
+        {
+          "symbol": "XAUUSD",
+          "entry_price": 3620,
+          "current_status": "ACTIVE",
+          "days_active": 2,
+          "unrealized_pnl": 16.5
+        }
+      ],
+      "has_notifications": true
+    },
+    "executionTime": 49790,
+    "success": true
+  },
+  {
+    "timestamp": "2025-09-11T12:52:46.548Z",
+    "userId": "46304040",
+    "timeframe": "5M",
+    "subscriptionTier": "pro",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "5M",
+      "userTier": "pro"
+    },
+    "response": {
+      "action": "BUY",
+      "entry": 3621.19,
+      "stop_loss": 3605.19,
+      "take_profit": 3645.19,
+      "confidence": 78,
+      "take_profits": [
+        {
+          "level": 1,
+          "price": 3645.19,
+          "risk_reward_ratio": 1.5
+        },
+        {
+          "level": 2,
+          "price": 3653.19,
+          "risk_reward_ratio": 2
+        },
+        {
+          "level": 3,
+          "price": 3669.19,
+          "risk_reward_ratio": 3
+        }
+      ],
+      "ai_analysis": {
+        "brief": "Price is trading near short-term support after a pullback from recent highs and the 5-minute structure shows higher lows indicating continued buying interest. Momentum oscillators are mixed but biased to the upside, moving averages on the 5M are sloping higher, and Bollinger Bands show a contraction that often precedes continuation. Volume has cooled on the pullback, suggesting sellers are not strongly committed and a controlled long with a tight stop is preferred.",
+        "detailed": "On the 5-minute timeframe the market formed a short consolidation after a run-up to fresh highs, with price holding above the immediate demand zone near 3605 and the short-term moving averages acting as dynamic support. RSI on the 5-minute is neutral-to-firming, MACD histogram is flattening then turning slightly positive, and price sitting near the middle Bollinger Band points to a setup for continuation rather than a full reversal. Given the recent macro backdrop favoring gold and the intraday structure showing higher lows, a tactical long targeting the next resistance cluster near the recent highs offers a favorable risk-to-reward profile.",
+        "market_sentiment": "BULLISH",
+        "trend_direction": "UPWARD",
+        "key_indicators": [
+          "RSI (5M)",
+          "MACD (5M)",
+          "EMA 20 (5M)",
+          "SMA 50 (5M)",
+          "Bollinger Bands (20)",
+          "Volume (5M)",
+          "Price Action (support/resistance)"
+        ]
+      },
+      "future_positions": [],
+      "historical_positions": [
+        {
+          "symbol": "XAUUSD",
+          "entry_price": 3570,
+          "current_status": "ACTIVE",
+          "days_active": 2,
+          "unrealized_pnl": 51.19
+        }
+      ],
+      "has_notifications": true
+    },
+    "executionTime": 54662,
+    "success": true
+  },
+  {
+    "timestamp": "2025-09-11T12:53:32.095Z",
+    "userId": "46304040",
+    "timeframe": "1H",
+    "subscriptionTier": "pro",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "1H",
+      "userTier": "pro"
+    },
+    "response": {
+      "action": "BUY",
+      "entry": 3636.59,
+      "stop_loss": 3590,
+      "take_profit": 3706.48,
+      "confidence": 78,
+      "take_profits": [
+        {
+          "level": 1,
+          "price": 3706.48,
+          "risk_reward_ratio": 1.5
+        },
+        {
+          "level": 2,
+          "price": 3729.77,
+          "risk_reward_ratio": 2
+        },
+        {
+          "level": 3,
+          "price": 3776.36,
+          "risk_reward_ratio": 3
+        }
+      ],
+      "ai_analysis": {
+        "brief": "On the 1H chart XAUUSD is showing bullish momentum near recent highs with price above short and medium moving averages and testing upper Bollinger band, favouring a controlled long trade with a tight stop under nearby support.",
+        "detailed": "The 1H price action is trading above the 50 and 200 period EMAs, momentum indicators are biased to the upside and the MACD histogram is positive, indicating continuation potential. The 14 period RSI is elevated and approaching overbought territory which warns of possible short-term consolidation or pullbacks into support near 3600 and 3550. Key resistance sits around the recent record area near 3675 followed by psychological clusters near 3700 and 3750, making those logical take profit zones while using a stop beneath 3590 to protect against a deeper retracement.",
+        "market_sentiment": "BULLISH",
+        "trend_direction": "UPWARD",
+        "key_indicators": [
+          "RSI(14)",
+          "MACD(12,26,9)",
+          "50 EMA",
+          "200 EMA",
+          "Bollinger Bands (20,2)",
+          "Volume (1H)"
+        ]
+      },
+      "future_positions": [],
+      "historical_positions": [
+        {
+          "symbol": "XAUUSD",
+          "entry_price": 3520,
+          "current_status": "ACTIVE",
+          "days_active": 2,
+          "unrealized_pnl": 116.59
+        }
+      ],
+      "has_notifications": true
+    },
+    "executionTime": 56796,
+    "success": true
+  },
+  {
+    "timestamp": "2025-09-11T19:10:22.443Z",
+    "userId": "cooldown-test-user",
+    "timeframe": "1H",
+    "subscriptionTier": "free",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "1H",
+      "userTier": "free"
+    },
+    "response": {
+      "action": "BUY",
+      "entry": 3636.59,
+      "stop_loss": 3608,
+      "take_profit": 3690,
+      "confidence": 75,
+      "take_profits": [
+        {
+          "level": 1,
+          "price": 3685,
+          "risk_reward_ratio": 1.69
+        },
+        {
+          "level": 2,
+          "price": 3730,
+          "risk_reward_ratio": 3.14
+        }
+      ],
+      "ai_analysis": {
+        "brief": "On the 1H chart gold is trading around 3,636.59 with a bullish bias driven by risk-on flows and growing rate-cut expectations. Momentum indicators show near-term overbought conditions while trend indicators remain positive. Key support cluster: 3,620 – 3,600. Immediate resistance: 3,685 – 3,730. Recommended short-term BUY at market with a tight SL below the 1H support zone and scaled TPs above recent highs. ([reuters.com](https://www.reuters.com/world/india/gold-hovers-near-record-high-soft-us-data-fuels-rate-cut-prospects-2025-09-11/?utm_source=openai))",
+        "detailed": "Price and context: Spot XAUUSD is trading near 3,636.59 on the 1H timeframe, sitting close to recent all-time highs and in a consolidation phase after a strong multi-session advance. The near-term theme is bullish given expectations of easing monetary policy which favors non-yielding assets. ([reuters.com](https://www.reuters.com/world/india/gold-hovers-near-record-high-soft-us-data-fuels-rate-cut-prospects-2025-09-11/?utm_source=openai))\n\nTrend structure: The intermediate 1H trend is upward. Shorter EMAs (50 EMA) are above the longer EMAs (200 EMA) on the 1H, confirming the bullish structure. Pullbacks have found support in the 3,620–3,600 area on multiple 1H candles, establishing a reliable short-term demand zone.\n\nMomentum indicators: RSI on 1H is elevated and likely in overbought territory, reflecting strong upside momentum but warning of possible short-term consolidation/pullback. MACD on 1H shows positive histogram and MACD line above signal line, indicating bullish momentum is still intact but momentum expansion has slowed during the consolidation.\n\nVolatility and bands: Price is testing the upper Bollinger Band on 1H, signaling strong buying pressure but also an increased chance of a short corrective leg or sideways chop while volatility compresses or resets.\n\nSupport and resistance (1H): Support 1 = 3,620 (recent intra-day support); Support 2 = 3,600 (psychological / consolidation low). Resistance 1 = 3,685 (near-term supply / intraday swing high). Resistance 2 = 3,730–3,740 (recent all-time highs and measured extension).\n\nVolume/market behavior: Volume has been higher on up moves than on pullbacks, which supports continuation bias. Short-term price action shows buyers stepping in on dips to the 3,620 zone.\n\nTrade logic (1H timeframe): Enter BUY at market (current price 3,636.59). Place stop loss under the 1H support cluster at 3,608 to allow intraday noise while protecting against structure break. Primary take profit at 3,690 (first objective near recent intraday supply), with a secondary target at 3,730 for traders willing to carry larger moves. Position sizing should respect the distance to stop so account risk per trade remains acceptable.\n\nRisk management: Distance to SL = ~28.59 USD per ounce. TP1 provides R:R ~1.69, TP2 provides R:R ~3.14. If price closes decisively below 3,600 on 1H, invalidate the bullish bias and exit.\n\nSummary recommendation: Short-term BUY at market with SL 3,608 and layered TPs at 3,685 and 3,730. Confidence is moderate-high based on macro drivers and 1H trend, but watch for RSI-driven pullbacks and economic prints that can quickly re-rate Fed expectations. ([coincodex.com](https://coincodex.com/precious-metal/gold/?utm_source=openai))",
+        "market_sentiment": "BULLISH",
+        "trend_direction": "UPWARD",
+        "key_indicators": [
+          "RSI (14)",
+          "MACD (12,26,9)",
+          "EMA 50 / EMA 200",
+          "Bollinger Bands (20,2)",
+          "Volume profile / 1H volume bars"
+        ]
+      },
+      "future_positions": [],
+      "historical_positions": [
+        {
+          "symbol": "XAUUSD",
+          "entry_price": 3620,
+          "current_status": "ACTIVE",
+          "days_active": 2,
+          "unrealized_pnl": 16.59
+        }
+      ],
+      "has_notifications": true
+    },
+    "executionTime": 41801,
+    "success": true
+  },
+  {
+    "timestamp": "2025-09-11T19:20:01.136Z",
+    "userId": "cooldown-test-final",
+    "timeframe": "1H",
+    "subscriptionTier": "free",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "1H",
+      "userTier": "free"
+    },
+    "response": {
+      "action": "BUY",
+      "entry": 3640,
+      "stop_loss": 3570,
+      "take_profit": 3745,
+      "confidence": 78,
+      "take_profits": [
+        {
+          "level": 1,
+          "price": 3745,
+          "risk_reward_ratio": 1.5
+        },
+        {
+          "level": 2,
+          "price": 3840,
+          "risk_reward_ratio": 2.86
+        },
+        {
+          "level": 3,
+          "price": 3970,
+          "risk_reward_ratio": 4.71
+        }
+      ],
+      "ai_analysis": {
+        "brief": "On the 1H timeframe XAUUSD is showing bullish momentum with price trading above the 50 and 200 EMAs, hugging the upper Bollinger Band and a 1H RSI in overbought territory; MACD histogram is positive and volume has increased on recent up candles. Key intraday support is clustered around 3610 and 3570; immediate resistance sits near recent highs ~3668–3675 with a measured breakout target in the 3740–3840 zone. Trade recommendation: BUY at market with stop below 3570 and primary take profit 3745 (R:R ~1.5). ([reuters.com](https://www.reuters.com/world/india/gold-hovers-near-record-high-soft-us-data-fuels-rate-cut-prospects-2025-09-11/?utm_source=openai))",
+        "detailed": "Market context and price: Spot gold is trading near the mid-3600s per ounce on the current session and remains close to recent all-time highs; macro drivers (soft US inflation/PPI and growing Fed rate-cut expectations) are supporting upside momentum. Technical structure (1H): price is above the 50- and 200-period EMAs, indicating a bullish intraday regime. Bollinger Bands (20,2) show the price riding the upper band with expanding band width — typical of trending continuation rather than a passive range. RSI (1H) is overbought (~70–75), signaling strong momentum but raising the risk of short-term pullbacks. MACD (1H) shows MACD line above signal line with positive histogram readings confirming bullish momentum. Volume: recent daytime candles that pushed price higher show volume above the short-term average, supporting the breakout bias. Support & resistance: immediate support cluster at 3610 (minor) and 3570 (major intraday pivot/support, also recent consolidation low). Immediate resistance at 3668–3675 (recent swing high); a clean break and hold above that zone opens room to measured targets 3740–3840. Volatility/ATR: 1H ATR has expanded vs. prior sessions, so intraday stops should respect wider swings. Trade execution and risk management: proposed actionable BUY at market (entry 3640.00) with stop loss at 3570.00 to protect against a failed breakout; primary take profit set at 3745.00 for R:R ≈1.5. Staged profit-taking recommended — partial at TP1 (3745), add or hold for TP2 (3840) if momentum remains and liquidity permits, with trailing stop if price closes multiple 1H candles above the 50 EMA. Alternative scenarios: if price fails to hold 3570 and closes below it on 1H, bias flips short-term toward the 3520–3475 area. Notes on execution: size positions to risk only a planned percentage per trade given elevated volatility; monitor US CPI and Fed commentary as catalysts that can produce rapid moves. ([reuters.com](https://www.reuters.com/world/india/gold-hovers-near-record-high-soft-us-data-fuels-rate-cut-prospects-2025-09-11/?utm_source=openai))",
+        "market_sentiment": "BULLISH",
+        "trend_direction": "UPWARD",
+        "key_indicators": [
+          "RSI (1H)",
+          "MACD (1H)",
+          "EMA 50 & EMA 200 (1H)",
+          "Bollinger Bands (20,2)",
+          "Volume (1H)",
+          "ATR (14,1H)",
+          "Pivot/support-resistance levels"
+        ]
+      },
+      "future_positions": [],
+      "historical_positions": [
+        {
+          "symbol": "XAUUSD",
+          "entry_price": 3430,
+          "current_status": "ACTIVE",
+          "days_active": 2,
+          "unrealized_pnl": 210
+        }
+      ],
+      "has_notifications": true
+    },
+    "executionTime": 72170,
+    "success": true
   }
 ]
