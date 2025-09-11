@@ -43,12 +43,141 @@ export default function AILoadingAnimation({
       aria-live="polite"
       aria-label={loadingPhrases[currentPhraseIndex]}
     >
-      <div className="relative flex flex-col items-center justify-center p-8 min-h-screen">
+      <div className="relative flex flex-col items-center space-y-8 p-8">
 
 
-        {/* Simple Brain at Bottom */}
-        <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2">
-          <Brain className="w-16 h-16 text-primary animate-pulse motion-reduce:animate-none" style={{animationDuration: '2s'}} />
+        {/* Animated Logo Container - Much Larger */}
+        <div className="relative w-32 h-32">
+          {/* Outer rotating ring with orbital particles */}
+          <div className="absolute inset-0 rounded-full border-4 border-primary/40 animate-spin motion-reduce:animate-none" style={{animationDuration: '4s'}}>
+            {/* Moving orbital particles */}
+            {[...Array(8)].map((_, i) => (
+              <div 
+                key={i}
+                className="absolute w-3 h-3 -top-1.5 left-1/2 transform -translate-x-1/2"
+                style={{
+                  transformOrigin: '50% 66px',
+                  transform: `translateX(-50%) rotate(${i * 45}deg)`,
+                  animationDelay: `${i * 125}ms`
+                }}
+              >
+                <div className="w-3 h-3 bg-gradient-to-r from-primary to-secondary rounded-full animate-pulse motion-reduce:animate-none shadow-lg"></div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Middle pulsing ring */}
+          <div className="absolute inset-4 rounded-full border-2 border-secondary/60 animate-ping motion-reduce:animate-none" style={{animationDuration: '2s'}}></div>
+          
+          {/* Inner rotating ring */}
+          <div className="absolute inset-6 rounded-full border-2 border-primary/80 animate-spin motion-reduce:animate-none" style={{animationDuration: '3s', animationDirection: 'reverse'}}>
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <Zap className="w-3 h-3 text-primary animate-pulse motion-reduce:animate-none" />
+            </div>
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
+              <Target className="w-3 h-3 text-secondary animate-pulse delay-500 motion-reduce:animate-none" />
+            </div>
+          </div>
+          
+          {/* Logo in center - Now rotating */}
+          <div className="absolute inset-8 flex items-center justify-center">
+            <img 
+              src={logoUrl} 
+              alt="Next Trading Labs" 
+              className="w-16 h-16 object-contain animate-spin motion-reduce:animate-none"
+              style={{animationDuration: '6s'}}
+              data-testid="loading-logo"
+            />
+          </div>
+        </div>
+
+        {/* Enhanced Neural Network Pattern */}
+        <div className="relative w-80 h-24 overflow-hidden">
+          {/* Dynamic flowing particles */}
+          <div className="absolute inset-0">
+            {[...Array(12)].map((_, i) => (
+              <div 
+                key={i} 
+                className="absolute w-2 h-2 bg-gradient-to-r from-primary to-secondary rounded-full"
+                style={{
+                  left: `${(i * 8) % 100}%`,
+                  top: `${Math.sin(i) * 20 + 50}%`,
+                  animationName: 'float-across',
+                  animationDuration: `${3 + (i % 3)}s`,
+                  animationIterationCount: 'infinite',
+                  animationDelay: `${i * 0.3}s`,
+                  opacity: 0.7
+                }}
+              />
+            ))}
+          </div>
+          
+          {/* Neural connection paths */}
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 320 96">
+            <path 
+              d="M0 48 Q80 20 160 48 T320 48" 
+              stroke="url(#gradient1)" 
+              strokeWidth="2" 
+              fill="none" 
+              className="animate-pulse motion-reduce:animate-none"
+              style={{animationDuration: '2s'}}
+            />
+            <path 
+              d="M0 24 Q80 60 160 24 T320 24" 
+              stroke="url(#gradient2)" 
+              strokeWidth="1.5" 
+              fill="none" 
+              className="animate-pulse motion-reduce:animate-none"
+              style={{animationDuration: '2.5s', animationDelay: '0.5s'}}
+            />
+            <path 
+              d="M0 72 Q80 40 160 72 T320 72" 
+              stroke="url(#gradient3)" 
+              strokeWidth="1.5" 
+              fill="none" 
+              className="animate-pulse motion-reduce:animate-none"
+              style={{animationDuration: '3s', animationDelay: '1s'}}
+            />
+            <defs>
+              <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.2" />
+                <stop offset="50%" stopColor="var(--secondary)" stopOpacity="1" />
+                <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.2" />
+              </linearGradient>
+              <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="var(--secondary)" stopOpacity="0.3" />
+                <stop offset="50%" stopColor="var(--primary)" stopOpacity="0.9" />
+                <stop offset="100%" stopColor="var(--secondary)" stopOpacity="0.3" />
+              </linearGradient>
+              <linearGradient id="gradient3" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.4" />
+                <stop offset="50%" stopColor="var(--secondary)" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.4" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        {/* Brain Only - Removed the two emojis next to it */}
+        <div className="relative">
+          <div className="flex items-center justify-center">
+            <div className="relative">
+              <Brain className="w-12 h-12 text-primary animate-pulse motion-reduce:animate-none" style={{animationDuration: '1.5s'}} />
+              {/* Synaptic sparks around brain */}
+              {[...Array(6)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute w-1.5 h-1.5 bg-secondary rounded-full animate-ping motion-reduce:animate-none"
+                  style={{
+                    top: `${20 + Math.sin(i * 60 * Math.PI / 180) * 25}px`,
+                    left: `${20 + Math.cos(i * 60 * Math.PI / 180) * 25}px`,
+                    animationDelay: `${i * 0.3}s`,
+                    animationDuration: '2s'
+                  }}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Special Designed Loading Messages */}
