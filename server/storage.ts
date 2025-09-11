@@ -23,7 +23,8 @@ export interface IStorage {
   updateUserCredits(userId: string, dailyCredits: number, monthlyCredits: number): Promise<void>;
   resetDailyCredits(userId: string): Promise<void>;
   updateUserLastGenerationTime(userId: string, timestamp: Date): Promise<void>;
-  atomicGenerationUpdate(userId: string, currentDailyCredits: number, dailyLimit: number, lastGenerationTime: Date | null, cooldownMinutes: number, now: Date): Promise<{success: boolean}>;
+  atomicGenerationUpdate(userId: string, dailyLimit: number, cooldownMinutes: number, now: Date): Promise<{success: boolean}>;
+  revertGenerationUpdate(userId: string, previousDailyCredits: number, previousLastGenerationTime: Date | null): Promise<void>;
   
   // Signal operations
   createSignal(signal: InsertTradingSignal): Promise<TradingSignal>;
@@ -102,17 +103,19 @@ export class DatabaseStorage implements IStorage {
 
   async atomicGenerationUpdate(
     userId: string, 
-    currentDailyCredits: number, 
     dailyLimit: number, 
-    lastGenerationTime: Date | null, 
     cooldownMinutes: number, 
     now: Date
   ): Promise<{success: boolean}> {
+    // Compute cutoff time to avoid parameter binding issues in SQL strings
+    const cutoff = new Date(now.getTime() - cooldownMinutes * 60 * 1000);
+    
     // Atomic conditional update - only update if conditions are still met
+    // Always check DB state, don't rely on caller's view of lastGenerationTime
     const result = await db
       .update(users)
       .set({ 
-        dailyCredits: currentDailyCredits + 1,
+        dailyCredits: sql`${users.dailyCredits} + 1`,
         monthlyCredits: sql`${users.monthlyCredits} + 1`,
         lastGenerationTime: now,
         updatedAt: now
@@ -120,18 +123,32 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(users.id, userId),
-          // Only update if daily credits haven't reached limit
+          // Only update if daily credits haven't reached limit (DB state)
           sql`${users.dailyCredits} < ${dailyLimit}`,
-          // Only update if cooldown has expired (or no previous generation)
-          lastGenerationTime 
-            ? sql`(${users.lastGenerationTime} IS NULL OR ${users.lastGenerationTime} + INTERVAL '${cooldownMinutes} minutes' <= ${now.toISOString()}::timestamp)`
-            : sql`TRUE`
+          // Only update if cooldown has expired or no previous generation (DB state)
+          sql`(${users.lastGenerationTime} IS NULL OR ${users.lastGenerationTime} <= ${cutoff})`
         )
       );
     
     // Check if any rows were updated (success) or not (race condition occurred)
     const rowsAffected = (result as any).rowCount ?? (result as any).changes ?? 0;
     return { success: rowsAffected > 0 };
+  }
+  
+  async revertGenerationUpdate(
+    userId: string, 
+    previousDailyCredits: number, 
+    previousLastGenerationTime: Date | null
+  ): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        dailyCredits: previousDailyCredits,
+        monthlyCredits: sql`${users.monthlyCredits} - 1`,
+        lastGenerationTime: previousLastGenerationTime,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
   }
 
   async createSignal(signal: InsertTradingSignal): Promise<TradingSignal> {

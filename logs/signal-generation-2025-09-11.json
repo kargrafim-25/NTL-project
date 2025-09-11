@@ -539,5 +539,56 @@
     },
     "executionTime": 75063,
     "success": true
+  },
+  {
+    "timestamp": "2025-09-11T20:01:00.199Z",
+    "userId": "simple-test-final",
+    "timeframe": "1H",
+    "subscriptionTier": "free",
+    "request": {
+      "symbol": "XAUUSD",
+      "timeframe": "1H",
+      "userTier": "free"
+    },
+    "response": {
+      "action": "BUY",
+      "entry": 3636.59,
+      "stop_loss": 3580,
+      "take_profit": 3720,
+      "confidence": 72,
+      "take_profits": [
+        {
+          "level": 1,
+          "price": 3673.95,
+          "risk_reward_ratio": 0.66
+        }
+      ],
+      "ai_analysis": {
+        "brief": "On the 1H timeframe XAUUSD is trading near record highs with bullish momentum. Price is above short and medium EMAs, RSI on the 1H is elevated (near overbought), MACD histogram is positive but may be flattening, and price is riding the upper Bollinger Band — indicating continuation bias but a short-term pullback risk. Support cluster sits near 3600–3580; immediate resistance is the recent high around 3674 and then the psychological 3720–3750 area.",
+        "detailed": "Current price context and bias: XAUUSD is trading at 3,636.59 and remains in a bullish structure on the 1H timeframe, with higher highs and higher lows over the past 48–72 hours. The recent intra-week high around 3,673.95 marks immediate resistance; intraday support rests in the 3,600–3,580 zone followed by 3,540 as a deeper support. Momentum and indicators: 1) RSI (1H) is elevated and near overbought readings, suggesting short-term exhaustion risk but not an immediate reversal signal. 2) MACD (1H) is positive with a slim histogram, indicating bullish momentum that could be slowing. 3) Short-term EMAs (50 and 20 on 1H) are below price and aligned bullishly above the 200 EMA, confirming upward trend bias. 4) Bollinger Bands (1H) show price hugging the upper band — common during trend extensions but also a warning for mean reversion pullbacks. 5) Volume profile shows higher volume on bullish advances and lighter volume on pullbacks, supporting continuation rather than distribution. Trade rationale and levels: Given the bullish trend on the 1H and the fundamental backdrop favoring gold (rate cut expectations and recent softer US data), a tactical BUY at market is preferred for a short-term momentum trade. Entry at current price 3,636.59, stop loss placed below the nearby support cluster at 3,580 to protect against a break of short-term structure. Primary take profit set at 3,720 targeting continuation above recent highs with acceptable reward. Risk management: Risk per unit is ~56.59 USD (entry to SL). Primary TP at 3,720 yields ~83.41 USD reward for a risk-reward ratio of approximately 1.47, which fits a favorable intraday swing frame while keeping stop tight to the 1H structure. Alternative scenario: If price decisively breaks below 3,580 on increasing volume, invalidate long bias and switch to neutral/bearish intraday view toward 3,540 and lower support zones. Trade size should be adjusted so that the USD risk (entry minus SL times position size) matches account risk rules.",
+        "market_sentiment": "BULLISH",
+        "trend_direction": "UPWARD",
+        "key_indicators": [
+          "RSI (1H)",
+          "MACD (1H)",
+          "EMA 20/50/200 (1H)",
+          "Bollinger Bands (1H)",
+          "Volume profile (1H)"
+        ]
+      },
+      "future_positions": [],
+      "historical_positions": [
+        {
+          "symbol": "XAUUSD",
+          "entry_price": 3550,
+          "current_status": "ACTIVE",
+          "days_active": 2,
+          "unrealized_pnl": 86.59
+        }
+      ],
+      "has_notifications": true
+    },
+    "executionTime": 68309,
+    "success": true
   }
 ]

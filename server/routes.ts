@@ -118,9 +118,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       const userTierLimits = tierLimits[user.subscriptionTier as keyof typeof tierLimits] || tierLimits.free;
+      
+      // Store original values for potential rollback if generation fails
+      const originalDailyCredits = user.dailyCredits;
+      const originalLastGenerationTime = user.lastGenerationTime;
+
+      // Check and perform daily reset before any other operations (add to POST as well)
+      const currentTime = new Date();
+      const casablancaTime = new Date(currentTime.toLocaleString("en-US", {timeZone: "Africa/Casablanca"}));
+      const lastReset = new Date(user.lastCreditReset || 0);
+      const lastResetCasablanca = new Date(lastReset.toLocaleString("en-US", {timeZone: "Africa/Casablanca"}));
+      
+      const needsReset = casablancaTime.getDate() !== lastResetCasablanca.getDate() || 
+                        casablancaTime.getMonth() !== lastResetCasablanca.getMonth() ||
+                        casablancaTime.getFullYear() !== lastResetCasablanca.getFullYear();
+      
+      if (needsReset) {
+        console.log(`[GENERATION] Daily reset needed for user ${userId}`);
+        await storage.resetDailyCredits(userId);
+        // Update our local user object to reflect the reset
+        user.dailyCredits = 0;
+        user.lastCreditReset = currentTime.toISOString();
+        user.lastGenerationTime = null; // Clear cooldown
+      }
 
       // Atomic check and update - prevent race conditions
-      const currentTime = new Date();
       const cooldownEndTime = user.lastGenerationTime 
         ? new Date(new Date(user.lastGenerationTime).getTime() + (userTierLimits.cooldownMinutes * 60 * 1000))
         : null;
@@ -155,12 +177,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Try atomic update - only proceed if user still can generate
+      // Try atomic update - let the database be the source of truth for conditions
       const updateResult = await storage.atomicGenerationUpdate(
         userId, 
-        user.dailyCredits, 
         userTierLimits.dailyLimit,
-        user.lastGenerationTime,
         userTierLimits.cooldownMinutes,
         currentTime
       );
@@ -196,10 +216,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: "Failed to process request. Please try again." });
       }
 
-      // Daily reset already performed before atomic update
-
-      // Generate signal using OpenAI
-      const signalData = await generateTradingSignal(timeframe, user.subscriptionTier, userId);
+      // Generate signal using OpenAI - if this fails, we need to revert credits
+      let signalData;
+      try {
+        signalData = await generateTradingSignal(timeframe, user.subscriptionTier, userId);
+      } catch (error) {
+        console.error(`[GENERATION] OpenAI generation failed for user ${userId}:`, error);
+        // Revert the credit update since generation failed
+        await storage.revertGenerationUpdate(userId, originalDailyCredits, originalLastGenerationTime);
+        return res.status(500).json({ 
+          message: "Signal generation failed. Please try again.",
+          error: error instanceof Error ? error.message : "Unknown error"
+        });
+      }
 
       // Create signal record
       const signal = await storage.createSignal({
