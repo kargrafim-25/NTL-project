@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useDeviceTracking } from "@/hooks/useDeviceFingerprint";
 import { useMarketStatus } from "@/hooks/useMarketStatus";
 import StatsCards from "@/components/StatsCards";
 import SignalGenerator from "@/components/SignalGenerator";
@@ -20,7 +21,19 @@ export default function Dashboard() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading, user } = useAuth();
   const { isOpen: isMarketOpen, isLoading: isMarketLoading } = useMarketStatus();
+  const { fingerprint, trackDeviceAction } = useDeviceTracking();
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1H');
+
+  // Track dashboard access and device fingerprint
+  useEffect(() => {
+    if (isAuthenticated && user && fingerprint) {
+      trackDeviceAction('dashboard_access', {
+        userTier: user.subscriptionTier,
+        dailyCredits: user.dailyCredits,
+        monthlyCredits: user.monthlyCredits
+      });
+    }
+  }, [isAuthenticated, user, fingerprint, trackDeviceAction]);
 
   // Redirect to home if not authenticated
   useEffect(() => {

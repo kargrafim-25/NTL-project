@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useDeviceTracking } from "@/hooks/useDeviceFingerprint";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { Brain, Sparkles, Clock } from "lucide-react";
@@ -29,6 +30,7 @@ interface SignalGeneratorProps {
 export default function SignalGenerator({ selectedTimeframe = '1H', onTimeframeChange }: SignalGeneratorProps) {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { trackDeviceAction } = useDeviceTracking();
   const queryClient = useQueryClient();
   const [cooldownEndTime, setCooldownEndTime] = useState<Date | null>(null);
   const [remainingTime, setRemainingTime] = useState<number>(0);
@@ -52,6 +54,14 @@ export default function SignalGenerator({ selectedTimeframe = '1H', onTimeframeC
           description: `New ${data.signal?.direction} signal created successfully.`,
         });
       }
+      
+      // Track signal generation for abuse detection
+      trackDeviceAction('signal_generated', {
+        timeframe: selectedTimeframe,
+        signalDirection: data.signal?.direction || 'unknown',
+        userTier: user?.subscriptionTier || 'unknown',
+        creditsRemaining: data.creditsRemaining
+      });
       
       // Set cooldown from successful response
       if (data.nextGenerationTime) {

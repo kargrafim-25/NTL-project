@@ -291,6 +291,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Device tracking endpoint
+  app.post('/api/tracking/device-action', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const {
+        action,
+        timestamp,
+        deviceId,
+        browser,
+        os,
+        screenResolution,
+        timezone,
+        language,
+        ...additionalData
+      } = req.body;
+
+      if (!action || !deviceId) {
+        return res.status(400).json({ message: "Action and deviceId are required" });
+      }
+
+      // Store device action in session logs for abuse detection
+      const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+      const userAgent = req.headers['user-agent'] || '';
+      
+      await storage.logUserSession(userId, ipAddress, userAgent, {
+        action,
+        deviceId,
+        browser,
+        os,
+        screenResolution,
+        timezone,
+        language,
+        ...additionalData
+      });
+
+      // Check for device sharing based on fingerprint similarity
+      const suspiciousActivity = await storage.checkSuspiciousActivity(userId, ipAddress);
+      
+      res.json({ 
+        success: true,
+        suspicious: suspiciousActivity.suspicious,
+        reason: suspiciousActivity.reason
+      });
+    } catch (error) {
+      console.error("Error tracking device action:", error);
+      res.status(500).json({ message: "Failed to track device action" });
+    }
+  });
+
   // Abuse detection middleware for all routes
   app.use((req: any, res, next) => {
     // Skip abuse detection for non-authenticated routes
