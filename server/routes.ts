@@ -9,6 +9,7 @@ import { insertSignalSchema, insertNewsSchema } from "@shared/schema";
 import { getSignalStatus } from "./signalLifecycle";
 import { notificationService } from "./services/notificationService";
 import { forexFactoryService } from "./services/forexFactoryService";
+import { verificationService } from "./services/verificationService";
 import { z } from "zod";
 
 const generateSignalRequestSchema = z.object({
@@ -63,6 +64,194 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
     }
+  });
+
+  // Verification endpoints
+  app.post('/api/auth/send-email-verification', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (!user.email) {
+        return res.status(400).json({ message: "No email address found for user" });
+      }
+
+      if (user.emailVerified) {
+        return res.status(400).json({ message: "Email is already verified" });
+      }
+
+      // Generate OTP and send email
+      const token = verificationService.generateOTP();
+      const expiresAt = verificationService.getExpiryTime();
+      
+      const emailResult = await verificationService.sendEmailVerification({
+        to: user.email,
+        firstName: user.firstName || undefined,
+        token
+      });
+
+      if (!emailResult.success) {
+        return res.status(500).json({ message: emailResult.error || "Failed to send verification email" });
+      }
+
+      // Store verification token
+      await storage.setEmailVerificationToken(userId, token, expiresAt);
+
+      // Log session for abuse detection
+      const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+      const userAgent = req.headers['user-agent'] || '';
+      await storage.logUserSession(userId, ipAddress, userAgent);
+
+      res.json({ 
+        success: true, 
+        message: "Verification code sent to your email",
+        expiresIn: 10 // minutes
+      });
+    } catch (error) {
+      console.error("Error sending email verification:", error);
+      res.status(500).json({ message: "Failed to send verification email" });
+    }
+  });
+
+  app.post('/api/auth/send-phone-verification', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (!user.phoneNumber) {
+        return res.status(400).json({ message: "No phone number found for user" });
+      }
+
+      if (user.phoneVerified) {
+        return res.status(400).json({ message: "Phone number is already verified" });
+      }
+
+      // Generate OTP and send SMS
+      const token = verificationService.generateOTP();
+      const expiresAt = verificationService.getExpiryTime();
+      
+      const smsResult = await verificationService.sendSMSVerification({
+        phoneNumber: user.phoneNumber,
+        token
+      });
+
+      if (!smsResult.success) {
+        return res.status(500).json({ message: smsResult.error || "Failed to send verification SMS" });
+      }
+
+      // Store verification token
+      await storage.setPhoneVerificationToken(userId, token, expiresAt);
+
+      // Log session for abuse detection
+      const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+      const userAgent = req.headers['user-agent'] || '';
+      await storage.logUserSession(userId, ipAddress, userAgent);
+
+      res.json({ 
+        success: true, 
+        message: "Verification code sent to your phone",
+        expiresIn: 10 // minutes
+      });
+    } catch (error) {
+      console.error("Error sending phone verification:", error);
+      res.status(500).json({ message: "Failed to send verification SMS" });
+    }
+  });
+
+  app.post('/api/auth/verify-email', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { token } = req.body;
+
+      if (!token || !verificationService.isValidOTPFormat(token)) {
+        return res.status(400).json({ message: "Invalid verification code format" });
+      }
+
+      const verification = await storage.verifyEmailToken(userId, token);
+
+      if (!verification.success) {
+        if (verification.expired) {
+          return res.status(400).json({ message: "Verification code has expired" });
+        }
+        return res.status(400).json({ message: "Invalid verification code" });
+      }
+
+      // Mark email as verified
+      await storage.markEmailVerified(userId);
+
+      res.json({ 
+        success: true, 
+        message: "Email verified successfully" 
+      });
+    } catch (error) {
+      console.error("Error verifying email:", error);
+      res.status(500).json({ message: "Failed to verify email" });
+    }
+  });
+
+  app.post('/api/auth/verify-phone', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { token } = req.body;
+
+      if (!token || !verificationService.isValidOTPFormat(token)) {
+        return res.status(400).json({ message: "Invalid verification code format" });
+      }
+
+      const verification = await storage.verifyPhoneToken(userId, token);
+
+      if (!verification.success) {
+        if (verification.expired) {
+          return res.status(400).json({ message: "Verification code has expired" });
+        }
+        return res.status(400).json({ message: "Invalid verification code" });
+      }
+
+      // Mark phone as verified
+      await storage.markPhoneVerified(userId);
+
+      res.json({ 
+        success: true, 
+        message: "Phone number verified successfully" 
+      });
+    } catch (error) {
+      console.error("Error verifying phone:", error);
+      res.status(500).json({ message: "Failed to verify phone number" });
+    }
+  });
+
+  // Abuse detection middleware for all routes
+  app.use((req: any, res, next) => {
+    // Skip abuse detection for non-authenticated routes
+    if (!req.user) {
+      return next();
+    }
+
+    const userId = req.user.claims.sub;
+    const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+    
+    // Check for suspicious activity
+    storage.checkSuspiciousActivity(userId, ipAddress)
+      .then(result => {
+        if (result.suspicious) {
+          console.log(`Suspicious activity detected for user ${userId}: ${result.reason}`);
+          // For now, just log - could block in the future
+          // return res.status(429).json({ message: "Suspicious activity detected" });
+        }
+        next();
+      })
+      .catch(error => {
+        console.error("Error checking suspicious activity:", error);
+        next(); // Continue even if abuse detection fails
+      });
   });
 
   // Market status endpoint
@@ -138,7 +327,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.resetDailyCredits(userId);
         // Update our local user object to reflect the reset
         user.dailyCredits = 0;
-        user.lastCreditReset = currentTime.toISOString();
+        user.lastCreditReset = currentTime;
         user.lastGenerationTime = null; // Clear cooldown
       }
 

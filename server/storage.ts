@@ -2,15 +2,21 @@ import {
   users,
   tradingSignals,
   economicNews,
+  userSessions,
+  securityEvents,
   type User,
   type UpsertUser,
   type TradingSignal,
   type InsertTradingSignal,
   type EconomicNews,
   type InsertEconomicNews,
+  type UserSession,
+  type InsertUserSession,
+  type SecurityEvent,
+  type InsertSecurityEvent,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, gte, or, sql } from "drizzle-orm";
+import { eq, desc, and, gte, or, sql, ne, count, max } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -42,6 +48,20 @@ export interface IStorage {
   getRecentNews(limit?: number, currency?: string, impact?: string): Promise<EconomicNews[]>;
   getUpcomingNews(limit?: number, currency?: string, impact?: string): Promise<EconomicNews[]>;
   archiveOldNews(daysOld: number): Promise<void>;
+  
+  // Verification operations
+  setEmailVerificationToken(userId: string, token: string, expiresAt: Date): Promise<void>;
+  setPhoneVerificationToken(userId: string, token: string, expiresAt: Date): Promise<void>;
+  verifyEmailToken(userId: string, token: string): Promise<{success: boolean, expired?: boolean}>;
+  verifyPhoneToken(userId: string, token: string): Promise<{success: boolean, expired?: boolean}>;
+  markEmailVerified(userId: string): Promise<void>;
+  markPhoneVerified(userId: string): Promise<void>;
+  
+  // Abuse detection operations
+  logUserSession(userId: string, ipAddress: string, userAgent: string, deviceFingerprint?: string): Promise<void>;
+  checkSuspiciousActivity(userId: string, ipAddress: string): Promise<{suspicious: boolean, reason?: string}>;
+  getActiveSessionsForUser(userId: string): Promise<number>;
+  getActiveSessionsForIP(ipAddress: string): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -311,6 +331,201 @@ export class DatabaseStorage implements IStorage {
           gte(economicNews.eventTime, cutoffDate)
         )
       );
+  }
+
+  // Verification operations
+  async setEmailVerificationToken(userId: string, token: string, expiresAt: Date): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        emailVerificationToken: token,
+        verificationTokenExpiry: expiresAt,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async setPhoneVerificationToken(userId: string, token: string, expiresAt: Date): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        phoneVerificationToken: token,
+        verificationTokenExpiry: expiresAt,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async verifyEmailToken(userId: string, token: string): Promise<{success: boolean, expired?: boolean}> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId));
+
+    if (!user || !user.emailVerificationToken || user.emailVerificationToken !== token) {
+      return { success: false };
+    }
+
+    if (user.verificationTokenExpiry && new Date() > user.verificationTokenExpiry) {
+      return { success: false, expired: true };
+    }
+
+    return { success: true };
+  }
+
+  async verifyPhoneToken(userId: string, token: string): Promise<{success: boolean, expired?: boolean}> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId));
+
+    if (!user || !user.phoneVerificationToken || user.phoneVerificationToken !== token) {
+      return { success: false };
+    }
+
+    if (user.verificationTokenExpiry && new Date() > user.verificationTokenExpiry) {
+      return { success: false, expired: true };
+    }
+
+    return { success: true };
+  }
+
+  async markEmailVerified(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        emailVerified: true,
+        emailVerificationToken: null,
+        verificationTokenExpiry: null,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async markPhoneVerified(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        phoneVerified: true,
+        phoneVerificationToken: null,
+        verificationTokenExpiry: null,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  // Abuse detection operations
+  async logUserSession(userId: string, ipAddress: string, userAgent: string, deviceFingerprint?: string): Promise<void> {
+    // Clean up old sessions for this user (keep only last 5 active sessions)
+    const activeSessions = await db
+      .select()
+      .from(userSessions)
+      .where(and(eq(userSessions.userId, userId), eq(userSessions.isActive, true)))
+      .orderBy(desc(userSessions.lastActivity))
+      .limit(10);
+
+    if (activeSessions.length >= 5) {
+      // Deactivate oldest sessions
+      const sessionsToDeactivate = activeSessions.slice(4);
+      for (const session of sessionsToDeactivate) {
+        await db
+          .update(userSessions)
+          .set({ isActive: false })
+          .where(eq(userSessions.id, session.id));
+      }
+    }
+
+    // Create new session
+    await db
+      .insert(userSessions)
+      .values({
+        userId,
+        ipAddress,
+        userAgent,
+        deviceFingerprint,
+        isActive: true,
+        lastActivity: new Date()
+      });
+  }
+
+  async checkSuspiciousActivity(userId: string, ipAddress: string): Promise<{suspicious: boolean, reason?: string}> {
+    const now = new Date();
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+
+    // Check for multiple IPs in short time
+    const recentSessions = await db
+      .select()
+      .from(userSessions)
+      .where(
+        and(
+          eq(userSessions.userId, userId),
+          gte(userSessions.lastActivity, oneHourAgo)
+        )
+      );
+
+    const uniqueIPs = new Set(recentSessions.map(s => s.ipAddress));
+    if (uniqueIPs.size > 3) {
+      await this.logSecurityEvent(userId, 'multiple_ips', ipAddress, 'Multiple IP addresses in 1 hour', 'medium');
+      return { suspicious: true, reason: 'Multiple IP addresses detected' };
+    }
+
+    // Check for too many concurrent sessions
+    const activeSessions = await this.getActiveSessionsForUser(userId);
+    if (activeSessions > 5) {
+      await this.logSecurityEvent(userId, 'multiple_sessions', ipAddress, 'Too many concurrent sessions', 'high');
+      return { suspicious: true, reason: 'Too many concurrent sessions' };
+    }
+
+    // Check IP reputation (same IP used by multiple users recently)
+    const ipUsers = await this.getActiveSessionsForIP(ipAddress);
+    if (ipUsers > 10) {
+      await this.logSecurityEvent(userId, 'shared_ip', ipAddress, 'IP used by many users', 'medium');
+      return { suspicious: true, reason: 'Shared IP address detected' };
+    }
+
+    return { suspicious: false };
+  }
+
+  async getActiveSessionsForUser(userId: string): Promise<number> {
+    const result = await db
+      .select({ count: count() })
+      .from(userSessions)
+      .where(
+        and(
+          eq(userSessions.userId, userId),
+          eq(userSessions.isActive, true)
+        )
+      );
+
+    return result[0]?.count || 0;
+  }
+
+  async getActiveSessionsForIP(ipAddress: string): Promise<number> {
+    const result = await db
+      .select({ count: count() })
+      .from(userSessions)
+      .where(
+        and(
+          eq(userSessions.ipAddress, ipAddress),
+          eq(userSessions.isActive, true),
+          gte(userSessions.lastActivity, new Date(Date.now() - 24 * 60 * 60 * 1000)) // Last 24 hours
+        )
+      );
+
+    return result[0]?.count || 0;
+  }
+
+  // Helper method for logging security events
+  private async logSecurityEvent(userId: string | null, eventType: string, ipAddress: string, details: string, severity: string): Promise<void> {
+    await db
+      .insert(securityEvents)
+      .values({
+        userId,
+        eventType,
+        ipAddress,
+        details,
+        severity
+      });
   }
 }
 

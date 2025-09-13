@@ -100,6 +100,30 @@ export const economicNews = pgTable("economic_news", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// User sessions for abuse detection
+export const userSessions = pgTable("user_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  ipAddress: varchar("ip_address").notNull(),
+  userAgent: text("user_agent"),
+  deviceFingerprint: varchar("device_fingerprint"),
+  isActive: boolean("is_active").default(true).notNull(),
+  lastActivity: timestamp("last_activity").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Security events for abuse tracking
+export const securityEvents = pgTable("security_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id),
+  eventType: varchar("event_type").notNull(), // login_attempt, suspicious_activity, multiple_sessions, etc
+  ipAddress: varchar("ip_address").notNull(),
+  details: text("details"),
+  severity: varchar("severity").default("low").notNull(), // low, medium, high, critical
+  blocked: boolean("blocked").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const usersRelations = relations(users, ({ many }) => ({
   signals: many(tradingSignals),
 }));
@@ -117,6 +141,10 @@ export type TradingSignal = typeof tradingSignals.$inferSelect;
 export type InsertTradingSignal = typeof tradingSignals.$inferInsert;
 export type EconomicNews = typeof economicNews.$inferSelect;
 export type InsertEconomicNews = typeof economicNews.$inferInsert;
+export type UserSession = typeof userSessions.$inferSelect;
+export type InsertUserSession = typeof userSessions.$inferInsert;
+export type SecurityEvent = typeof securityEvents.$inferSelect;
+export type InsertSecurityEvent = typeof securityEvents.$inferInsert;
 
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
