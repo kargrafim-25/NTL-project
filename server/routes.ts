@@ -11,7 +11,57 @@ import { notificationService } from "./services/notificationService";
 import { forexFactoryService } from "./services/forexFactoryService";
 import { verificationService } from "./services/verificationService";
 import { rateLimitService } from "./services/rateLimitService";
+import { sharingDetectionService } from "./services/sharingDetectionService";
 import { z } from "zod";
+
+// Global sharing detection middleware
+const sharingDetectionMiddleware = async (req: any, res: any, next: any) => {
+  try {
+    // Skip middleware for certain endpoints to prevent infinite loops
+    const skipPaths = ['/api/security/sharing-check', '/api/auth/logout'];
+    if (skipPaths.some(path => req.path.includes(path))) {
+      return next();
+    }
+
+    const userId = req.user?.claims?.sub;
+    if (!userId) {
+      return next(); // No user, let other middleware handle
+    }
+
+    const deviceId = req.headers['x-device-id'] || 'unknown';
+    const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+    const userAgent = req.headers['user-agent'] || '';
+
+    // Perform sharing detection with enforcement
+    const detectionResult = await sharingDetectionService.detectAndEnforce(
+      userId, 
+      deviceId, 
+      ipAddress, 
+      userAgent, 
+      storage
+    );
+
+    // If blocked due to high confidence sharing, deny the request
+    if (detectionResult.enforcement?.blocked) {
+      console.log(`[SHARING-BLOCK] Blocking request for user ${userId} due to sharing detection`);
+      return res.status(403).json({ 
+        message: 'Access denied due to account sharing policy violation.',
+        reason: detectionResult.reason,
+        confidence: detectionResult.confidence,
+        enforcement: detectionResult.enforcement
+      });
+    }
+
+    // Add detection result to request for route handlers to use if needed
+    req.sharingDetection = detectionResult;
+    
+    next();
+  } catch (error) {
+    console.error('Error in sharing detection middleware:', error);
+    // Fail open - allow request to continue if middleware fails
+    next();
+  }
+};
 
 const generateSignalRequestSchema = z.object({
   timeframe: z.enum(['5M', '15M', '30M', '1H', '4H', '1D', '1W']),
@@ -37,7 +87,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.get('/api/auth/user', isAuthenticated, sharingDetectionMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       let user = await storage.getUser(userId);
@@ -72,7 +122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Verification endpoints
-  app.post('/api/auth/send-email-verification', isAuthenticated, async (req: any, res) => {
+  app.post('/api/auth/send-email-verification', isAuthenticated, sharingDetectionMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       
@@ -134,7 +184,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/auth/send-phone-verification', isAuthenticated, async (req: any, res) => {
+  app.post('/api/auth/send-phone-verification', isAuthenticated, sharingDetectionMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       
@@ -291,6 +341,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Sharing detection endpoint
+  app.get('/api/security/sharing-check', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const deviceId = req.headers['x-device-id'] || 'unknown';
+      
+      const detectionResult = await sharingDetectionService.detectSharing(userId, deviceId, storage);
+      const policyResult = await sharingDetectionService.enforcePolicy(userId, detectionResult, storage);
+      
+      res.json({
+        ...detectionResult,
+        policy: policyResult
+      });
+    } catch (error) {
+      console.error("Error checking account sharing:", error);
+      res.status(500).json({ message: "Failed to check account sharing" });
+    }
+  });
+
   // Device tracking endpoint
   app.post('/api/tracking/device-action', isAuthenticated, async (req: any, res) => {
     try {
@@ -304,6 +373,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         screenResolution,
         timezone,
         language,
+        canvasFingerprint,
+        webglFingerprint,
+        hardwareConcurrency,
+        platform,
         ...additionalData
       } = req.body;
 
@@ -311,28 +384,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Action and deviceId are required" });
       }
 
-      // Store device action in session logs for abuse detection
-      const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
-      const userAgent = req.headers['user-agent'] || '';
-      
-      await storage.logUserSession(userId, ipAddress, userAgent, {
-        action,
+      // Build comprehensive device fingerprint
+      const deviceFingerprint = {
         deviceId,
         browser,
         os,
         screenResolution,
         timezone,
         language,
+        canvasFingerprint,
+        webglFingerprint,
+        hardwareConcurrency,
+        platform,
+        action,
+        timestamp: timestamp || new Date().toISOString(),
         ...additionalData
-      });
+      };
 
-      // Check for device sharing based on fingerprint similarity
-      const suspiciousActivity = await storage.checkSuspiciousActivity(userId, ipAddress);
+      // Store device action in session logs for abuse detection
+      const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+      const userAgent = req.headers['user-agent'] || '';
+      
+      // Use the new updateSessionActivity method which properly handles device fingerprints
+      await storage.updateSessionActivity(userId, deviceId, ipAddress, userAgent, deviceFingerprint);
+
+      // Perform sharing detection with the updated session data
+      const detectionResult = await sharingDetectionService.detectAndEnforce(
+        userId, 
+        deviceId, 
+        ipAddress, 
+        userAgent, 
+        storage
+      );
       
       res.json({ 
         success: true,
-        suspicious: suspiciousActivity.suspicious,
-        reason: suspiciousActivity.reason
+        sharingDetection: {
+          isSharing: detectionResult.isSharing,
+          confidence: detectionResult.confidence,
+          reason: detectionResult.reason,
+          activeSessions: detectionResult.activeSessions,
+          enforcement: detectionResult.enforcement
+        }
       });
     } catch (error) {
       console.error("Error tracking device action:", error);
@@ -391,7 +484,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Generate trading signal
-  app.post('/api/v1/generate-signal', isAuthenticated, async (req: any, res) => {
+  app.post('/api/v1/generate-signal', isAuthenticated, sharingDetectionMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -568,7 +661,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get user signals
-  app.get('/api/v1/signals', isAuthenticated, async (req: any, res) => {
+  app.get('/api/v1/signals', isAuthenticated, sharingDetectionMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -596,7 +689,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get latest signal
-  app.get('/api/v1/signals/latest', isAuthenticated, async (req: any, res) => {
+  app.get('/api/v1/signals/latest', isAuthenticated, sharingDetectionMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -632,7 +725,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Notification routes
   
   // Get pending signal reviews for user notification
-  app.get('/api/v1/notifications/pending-reviews', isAuthenticated, async (req: any, res) => {
+  app.get('/api/v1/notifications/pending-reviews', isAuthenticated, sharingDetectionMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const pendingData = await notificationService.checkPendingSignalReviews(userId);
@@ -667,7 +760,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get notification count for badge
-  app.get('/api/v1/notifications/count', isAuthenticated, async (req: any, res) => {
+  app.get('/api/v1/notifications/count', isAuthenticated, sharingDetectionMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const notificationData = await notificationService.getNotificationCount(userId);

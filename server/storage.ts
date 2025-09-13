@@ -59,10 +59,18 @@ export interface IStorage {
   markPhoneVerified(userId: string): Promise<void>;
   
   // Abuse detection operations
-  logUserSession(userId: string, ipAddress: string, userAgent: string, deviceFingerprint?: string): Promise<void>;
+  logUserSession(userId: string, ipAddress: string, userAgent: string, deviceFingerprint?: any): Promise<void>;
   checkSuspiciousActivity(userId: string, ipAddress: string): Promise<{suspicious: boolean, reason?: string}>;
+  getUserSessions(userId: string, sinceDate?: Date): Promise<any[]>;
+  logSuspiciousActivity(userId: string, activityType: string, metadata?: any): Promise<void>;
   getActiveSessionsForUser(userId: string): Promise<number>;
   getActiveSessionsForIP(ipAddress: string): Promise<number>;
+  
+  // Session management operations
+  terminateUserSession(sessionId: string): Promise<void>;
+  terminateOldestUserSessions(userId: string, maxSessions: number): Promise<void>;
+  updateSessionActivity(userId: string, deviceId: string, ipAddress: string, userAgent: string, deviceFingerprint?: any): Promise<void>;
+  terminateAllUserSessions(userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -487,6 +495,43 @@ export class DatabaseStorage implements IStorage {
       });
   }
 
+  async getUserSessions(userId: string, sinceDate?: Date): Promise<any[]> {
+    const cutoffDate = sinceDate || new Date(Date.now() - 24 * 60 * 60 * 1000); // Default: last 24 hours
+    
+    const sessions = await db
+      .select()
+      .from(userSessions)
+      .where(
+        and(
+          eq(userSessions.userId, userId),
+          gte(userSessions.lastActivity, cutoffDate)
+        )
+      )
+      .orderBy(desc(userSessions.lastActivity));
+
+    // Transform to match the interface expected by sharing detection service
+    return sessions.map(session => {
+      let parsedFingerprint = null;
+      if (session.deviceFingerprint) {
+        try {
+          parsedFingerprint = JSON.parse(session.deviceFingerprint);
+        } catch (e) {
+          // If parsing fails, treat as string-based device ID
+          parsedFingerprint = { deviceId: session.deviceFingerprint };
+        }
+      }
+
+      return {
+        userId: session.userId,
+        deviceId: parsedFingerprint?.deviceId || session.deviceFingerprint || 'unknown',
+        ipAddress: session.ipAddress,
+        userAgent: session.userAgent,
+        lastActive: session.lastActivity,
+        deviceFingerprint: parsedFingerprint
+      };
+    });
+  }
+
   async checkSuspiciousActivity(userId: string, ipAddress: string): Promise<{suspicious: boolean, reason?: string}> {
     const now = new Date();
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
@@ -552,6 +597,107 @@ export class DatabaseStorage implements IStorage {
       );
 
     return result[0]?.count || 0;
+  }
+
+  async logSuspiciousActivity(userId: string, activityType: string, metadata?: any): Promise<void> {
+    const details = metadata ? JSON.stringify(metadata) : 'No additional details';
+    await this.logSecurityEvent(userId, activityType, 'system', details, 'medium');
+  }
+
+  // Session management operations
+  async terminateUserSession(sessionId: string): Promise<void> {
+    await db
+      .update(userSessions)
+      .set({ isActive: false })
+      .where(eq(userSessions.id, sessionId));
+  }
+
+  async terminateOldestUserSessions(userId: string, maxSessions: number): Promise<void> {
+    // Get all active sessions for the user, ordered by last activity (oldest first)
+    const activeSessions = await db
+      .select()
+      .from(userSessions)
+      .where(and(eq(userSessions.userId, userId), eq(userSessions.isActive, true)))
+      .orderBy(userSessions.lastActivity); // Oldest first
+
+    if (activeSessions.length > maxSessions) {
+      // Terminate the oldest sessions to get down to maxSessions
+      const sessionsToTerminate = activeSessions.slice(0, activeSessions.length - maxSessions);
+      
+      for (const session of sessionsToTerminate) {
+        await this.terminateUserSession(session.id);
+      }
+
+      // Log the enforcement action
+      await this.logSecurityEvent(
+        userId, 
+        'session_limit_enforced', 
+        'system', 
+        `Terminated ${sessionsToTerminate.length} oldest sessions (limit: ${maxSessions})`, 
+        'medium'
+      );
+    }
+  }
+
+  async updateSessionActivity(userId: string, deviceId: string, ipAddress: string, userAgent: string, deviceFingerprint?: any): Promise<void> {
+    // Try to find existing session with same device and IP
+    const existingSessions = await db
+      .select()
+      .from(userSessions)
+      .where(
+        and(
+          eq(userSessions.userId, userId),
+          eq(userSessions.ipAddress, ipAddress),
+          eq(userSessions.isActive, true)
+        )
+      )
+      .orderBy(desc(userSessions.lastActivity))
+      .limit(1);
+
+    const deviceFingerprintStr = deviceFingerprint ? JSON.stringify(deviceFingerprint) : deviceId;
+
+    if (existingSessions.length > 0) {
+      // Update existing session
+      await db
+        .update(userSessions)
+        .set({ 
+          lastActivity: new Date(),
+          userAgent,
+          deviceFingerprint: deviceFingerprintStr
+        })
+        .where(eq(userSessions.id, existingSessions[0].id));
+    } else {
+      // Create new session
+      await db
+        .insert(userSessions)
+        .values({
+          userId,
+          ipAddress,
+          userAgent,
+          deviceFingerprint: deviceFingerprintStr,
+          isActive: true,
+          lastActivity: new Date()
+        });
+    }
+
+    // Enforce session limits after updating activity
+    await this.terminateOldestUserSessions(userId, 2); // Allow max 2 sessions
+  }
+
+  async terminateAllUserSessions(userId: string): Promise<void> {
+    await db
+      .update(userSessions)
+      .set({ isActive: false })
+      .where(and(eq(userSessions.userId, userId), eq(userSessions.isActive, true)));
+
+    // Log the enforcement action
+    await this.logSecurityEvent(
+      userId, 
+      'all_sessions_terminated', 
+      'system', 
+      'All user sessions terminated due to security policy', 
+      'high'
+    );
   }
 
   // Helper method for logging security events
