@@ -32,9 +32,15 @@ export const sessions = pgTable(
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").unique(),
+  phoneNumber: varchar("phone_number"),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  emailVerified: boolean("email_verified").default(false).notNull(),
+  phoneVerified: boolean("phone_verified").default(false).notNull(),
+  emailVerificationToken: varchar("email_verification_token"),
+  phoneVerificationToken: varchar("phone_verification_token"),
+  verificationTokenExpiry: timestamp("verification_token_expiry"),
   subscriptionTier: varchar("subscription_tier").default("free").notNull(), // free, starter, pro
   subscriptionStartDate: timestamp("subscription_start_date").defaultNow(), // When user started current billing cycle
   dailyCredits: integer("daily_credits").default(0).notNull(),
@@ -114,6 +120,7 @@ export type InsertEconomicNews = typeof economicNews.$inferInsert;
 
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
+  phoneNumber: true,
   firstName: true,
   lastName: true,
   profileImageUrl: true,
