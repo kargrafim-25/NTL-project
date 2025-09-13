@@ -10,6 +10,7 @@ import TradingViewChart from "@/components/TradingViewChart";
 import SignalHistory from "@/components/SignalHistory";
 import PremiumFeatures from "@/components/PremiumFeatures";
 import { EconomicNews } from "@/components/EconomicNews";
+import VerificationModal from "@/components/VerificationModal";
 import { TrendingUp, Database } from "lucide-react";
 import logoUrl from '../assets/logo.png';
 import ChatbotTrigger from '@/components/ChatbotTrigger';
@@ -23,6 +24,7 @@ export default function Dashboard() {
   const { isOpen: isMarketOpen, isLoading: isMarketLoading } = useMarketStatus();
   const { fingerprint, trackDeviceAction } = useDeviceTracking();
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1H');
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
 
   // Track dashboard access and device fingerprint
   useEffect(() => {
@@ -34,6 +36,23 @@ export default function Dashboard() {
       });
     }
   }, [isAuthenticated, user, fingerprint, trackDeviceAction]);
+
+  // Check if verification is needed
+  useEffect(() => {
+    if (user && isAuthenticated) {
+      const needsEmailVerification = user.email && !(user as any).emailVerified;
+      const needsPhoneVerification = (user as any).phoneNumber && !(user as any).phoneVerified;
+      
+      if (needsEmailVerification || needsPhoneVerification) {
+        // Show verification modal after a short delay to let the dashboard load
+        const timer = setTimeout(() => {
+          setShowVerificationModal(true);
+        }, 1000);
+        
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [user, isAuthenticated]);
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -191,6 +210,23 @@ export default function Dashboard() {
       
       {/* Support Chatbot */}
       <ChatbotTrigger />
+
+      {/* Verification Modal */}
+      <VerificationModal
+        isOpen={showVerificationModal}
+        onClose={() => setShowVerificationModal(false)}
+        onComplete={() => {
+          setShowVerificationModal(false);
+          toast({
+            title: "Verification Complete!",
+            description: "Your account has been successfully verified.",
+          });
+        }}
+        userEmail={user?.email || undefined}
+        userPhone={(user as any)?.phoneNumber}
+        emailVerified={(user as any)?.emailVerified || false}
+        phoneVerified={(user as any)?.phoneVerified || false}
+      />
     </div>
   );
 }
