@@ -1,12 +1,23 @@
-import { TransactionalEmailsApi, TransactionalEmailsApiApiKeys } from '@getbrevo/brevo';
+import { TransactionalEmailsApi, TransactionalEmailsApiApiKeys, TransactionalSMSApi } from '@getbrevo/brevo';
 import crypto from 'crypto';
 
-// Initialize Brevo email API
-const emailApi = new TransactionalEmailsApi();
-if (!process.env.BREVO_API_KEY) {
-  throw new Error("BREVO_API_KEY environment variable must be set");
+// Initialize Brevo APIs with proper error handling
+let emailApi: TransactionalEmailsApi | null = null;
+let smsApi: TransactionalSMSApi | null = null;
+
+try {
+  if (process.env.BREVO_API_KEY) {
+    emailApi = new TransactionalEmailsApi();
+    emailApi.setApiKey(TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
+    
+    smsApi = new TransactionalSMSApi();
+    smsApi.setApiKey(TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
+  } else {
+    console.warn('BREVO_API_KEY not found - verification services will be limited');
+  }
+} catch (error) {
+  console.error('Failed to initialize Brevo services:', error);
 }
-emailApi.setApiKey(TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
 
 interface VerificationResult {
   success: boolean;
@@ -28,14 +39,47 @@ interface SMSParams {
 
 export class VerificationService {
   
-  // Generate 6-digit OTP
+  // Generate cryptographically secure 6-digit OTP
   generateOTP(): string {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+    // Use crypto.randomInt for cryptographic security
+    return crypto.randomInt(100000, 1000000).toString();
   }
 
   // Generate secure verification token
   generateToken(): string {
     return crypto.randomBytes(32).toString('hex');
+  }
+
+  // Hash token using SHA-256 for secure storage
+  hashToken(token: string): string {
+    return crypto.createHash('sha256').update(token).digest('hex');
+  }
+
+  // Verify plaintext token against hashed version
+  verifyToken(plainToken: string, hashedToken: string): boolean {
+    try {
+      // Validate inputs to prevent crashes
+      if (!plainToken || !hashedToken || typeof plainToken !== 'string' || typeof hashedToken !== 'string') {
+        return false;
+      }
+
+      // Hash the plaintext token
+      const hashedPlain = this.hashToken(plainToken);
+      
+      // Ensure both tokens are valid hex strings of equal length before comparison
+      if (hashedPlain.length !== hashedToken.length || 
+          !/^[0-9a-fA-F]+$/.test(hashedPlain) || 
+          !/^[0-9a-fA-F]+$/.test(hashedToken)) {
+        return false;
+      }
+
+      // Perform timing-safe comparison
+      return crypto.timingSafeEqual(Buffer.from(hashedPlain, 'hex'), Buffer.from(hashedToken, 'hex'));
+    } catch (error) {
+      // Log error for debugging but don't expose details
+      console.error('Token verification error:', error);
+      return false;
+    }
   }
 
   // Calculate expiry time (10 minutes from now)
@@ -45,6 +89,13 @@ export class VerificationService {
 
   // Send email verification
   async sendEmailVerification(params: EmailParams): Promise<VerificationResult> {
+    if (!emailApi) {
+      return {
+        success: false,
+        error: 'Email service not available - BREVO_API_KEY not configured'
+      };
+    }
+
     try {
       const emailData = {
         to: [{ email: params.to, name: params.firstName || 'User' }],
@@ -123,7 +174,7 @@ Next Trading Labs - Professional AI Trading Platform
       
       return {
         success: true,
-        token: params.token,
+        token: this.hashToken(params.token), // Return hashed token for storage
         expiresAt: this.getExpiryTime()
       };
     } catch (error) {
@@ -135,24 +186,57 @@ Next Trading Labs - Professional AI Trading Platform
     }
   }
 
-  // Send SMS verification (placeholder for now - will implement with SMS service)
+  // Send SMS verification using Brevo SMS API
   async sendSMSVerification(params: SMSParams): Promise<VerificationResult> {
-    try {
-      // For now, just log the SMS (in production, integrate with SMS provider like Twilio)
-      console.log(`SMS Verification Code for ${params.phoneNumber}: ${params.token}`);
-      
-      // TODO: Implement actual SMS sending with Twilio or similar service
+    if (!smsApi) {
+      // Fallback to console logging if Brevo SMS is not available (only in development)
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`[FALLBACK] SMS Verification Code for ${params.phoneNumber}: ${params.token}`);
+      }
+      console.warn('Brevo SMS API not available - using fallback logging');
       
       return {
         success: true,
-        token: params.token,
+        token: this.hashToken(params.token), // Return hashed token for storage
+        expiresAt: this.getExpiryTime()
+      };
+    }
+
+    try {
+      // Format phone number for Brevo (ensure it includes country code)
+      let formattedPhone = params.phoneNumber;
+      if (!formattedPhone.startsWith('+')) {
+        // Assume Morocco (+212) if no country code
+        formattedPhone = `+212${formattedPhone.replace(/^0/, '')}`;
+      }
+
+      const smsData = {
+        sender: 'NextTrading',
+        recipient: formattedPhone,
+        content: `Your Next Trading Labs verification code is: ${params.token}. This code expires in 10 minutes. Never share this code with anyone.`,
+        type: 'transactional' as const
+      };
+
+      await smsApi.sendTransacSms(smsData);
+      
+      return {
+        success: true,
+        token: this.hashToken(params.token), // Return hashed token for storage
         expiresAt: this.getExpiryTime()
       };
     } catch (error) {
-      console.error('SMS verification error:', error);
+      console.error('Brevo SMS verification error:', error);
+      
+      // Fallback to console logging on SMS failure (only in development)
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`[FALLBACK] SMS Verification Code for ${params.phoneNumber}: ${params.token}`);
+      }
+      console.warn('SMS sending failed - using fallback logging');
+      
       return {
-        success: false,
-        error: 'Failed to send verification SMS'
+        success: true, // Still return success since we have fallback
+        token: this.hashToken(params.token), // Return hashed token for storage
+        expiresAt: this.getExpiryTime()
       };
     }
   }

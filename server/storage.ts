@@ -17,6 +17,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, or, sql, ne, count, max } from "drizzle-orm";
+import { verificationService } from "./services/verificationService";
 
 // Interface for storage operations
 export interface IStorage {
@@ -335,10 +336,12 @@ export class DatabaseStorage implements IStorage {
 
   // Verification operations
   async setEmailVerificationToken(userId: string, token: string, expiresAt: Date): Promise<void> {
+    // Hash the token before storing for secure verification
+    const hashedToken = verificationService.hashToken(token);
     await db
       .update(users)
       .set({ 
-        emailVerificationToken: token,
+        emailVerificationToken: hashedToken,
         verificationTokenExpiry: expiresAt,
         updatedAt: new Date()
       })
@@ -346,10 +349,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async setPhoneVerificationToken(userId: string, token: string, expiresAt: Date): Promise<void> {
+    // Hash the token before storing for secure verification
+    const hashedToken = verificationService.hashToken(token);
     await db
       .update(users)
       .set({ 
-        phoneVerificationToken: token,
+        phoneVerificationToken: hashedToken,
         verificationTokenExpiry: expiresAt,
         updatedAt: new Date()
       })
@@ -362,13 +367,30 @@ export class DatabaseStorage implements IStorage {
       .from(users)
       .where(eq(users.id, userId));
 
-    if (!user || !user.emailVerificationToken || user.emailVerificationToken !== token) {
+    if (!user || !user.emailVerificationToken) {
       return { success: false };
     }
 
+    // Check if token is expired first
     if (user.verificationTokenExpiry && new Date() > user.verificationTokenExpiry) {
       return { success: false, expired: true };
     }
+
+    // Use verification service to verify hashed token
+    const isValidToken = verificationService.verifyToken(token, user.emailVerificationToken);
+    if (!isValidToken) {
+      return { success: false };
+    }
+
+    // Invalidate the token immediately after successful verification (single-use)
+    await db
+      .update(users)
+      .set({ 
+        emailVerificationToken: null,
+        verificationTokenExpiry: null,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
 
     return { success: true };
   }
@@ -379,13 +401,30 @@ export class DatabaseStorage implements IStorage {
       .from(users)
       .where(eq(users.id, userId));
 
-    if (!user || !user.phoneVerificationToken || user.phoneVerificationToken !== token) {
+    if (!user || !user.phoneVerificationToken) {
       return { success: false };
     }
 
+    // Check if token is expired first
     if (user.verificationTokenExpiry && new Date() > user.verificationTokenExpiry) {
       return { success: false, expired: true };
     }
+
+    // Use verification service to verify hashed token
+    const isValidToken = verificationService.verifyToken(token, user.phoneVerificationToken);
+    if (!isValidToken) {
+      return { success: false };
+    }
+
+    // Invalidate the token immediately after successful verification (single-use)
+    await db
+      .update(users)
+      .set({ 
+        phoneVerificationToken: null,
+        verificationTokenExpiry: null,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
 
     return { success: true };
   }

@@ -10,10 +10,15 @@ import { getSignalStatus } from "./signalLifecycle";
 import { notificationService } from "./services/notificationService";
 import { forexFactoryService } from "./services/forexFactoryService";
 import { verificationService } from "./services/verificationService";
+import { rateLimitService } from "./services/rateLimitService";
 import { z } from "zod";
 
 const generateSignalRequestSchema = z.object({
   timeframe: z.enum(['5M', '15M', '30M', '1H', '4H', '1D', '1W']),
+});
+
+const verificationTokenSchema = z.object({
+  token: z.string().length(6, "Verification code must be 6 digits").regex(/^\d{6}$/, "Verification code must contain only digits")
 });
 
 // Helper function to apply lifecycle status to signals
@@ -70,6 +75,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/send-email-verification', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      
+      // Check rate limit first
+      const rateLimit = rateLimitService.checkSendLimit(req, userId);
+      if (!rateLimit.allowed) {
+        const resetInMinutes = Math.ceil((rateLimit.resetTime! - Date.now()) / (1000 * 60));
+        return res.status(429).json({ 
+          message: `Too many verification requests. Please try again in ${resetInMinutes} minute${resetInMinutes !== 1 ? 's' : ''}.`,
+          resetTime: rateLimit.resetTime,
+          remainingAttempts: 0
+        });
+      }
+
       const user = await storage.getUser(userId);
 
       if (!user) {
@@ -120,6 +137,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/send-phone-verification', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      
+      // Check rate limit first
+      const rateLimit = rateLimitService.checkSendLimit(req, userId);
+      if (!rateLimit.allowed) {
+        const resetInMinutes = Math.ceil((rateLimit.resetTime! - Date.now()) / (1000 * 60));
+        return res.status(429).json({ 
+          message: `Too many verification requests. Please try again in ${resetInMinutes} minute${resetInMinutes !== 1 ? 's' : ''}.`,
+          resetTime: rateLimit.resetTime,
+          remainingAttempts: 0
+        });
+      }
+
       const user = await storage.getUser(userId);
 
       if (!user) {
@@ -169,11 +198,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/verify-email', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { token } = req.body;
-
-      if (!token || !verificationService.isValidOTPFormat(token)) {
-        return res.status(400).json({ message: "Invalid verification code format" });
+      
+      // Check rate limit first
+      const rateLimit = rateLimitService.checkVerifyLimit(req, userId);
+      if (!rateLimit.allowed) {
+        const resetInMinutes = Math.ceil((rateLimit.resetTime! - Date.now()) / (1000 * 60));
+        return res.status(429).json({ 
+          message: `Too many verification attempts. Please try again in ${resetInMinutes} minute${resetInMinutes !== 1 ? 's' : ''}.`,
+          resetTime: rateLimit.resetTime,
+          remainingAttempts: 0
+        });
       }
+
+      // Validate input
+      const validation = verificationTokenSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid verification code format",
+          errors: validation.error.errors
+        });
+      }
+
+      const { token } = validation.data;
 
       const verification = await storage.verifyEmailToken(userId, token);
 
@@ -200,11 +246,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/verify-phone', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { token } = req.body;
-
-      if (!token || !verificationService.isValidOTPFormat(token)) {
-        return res.status(400).json({ message: "Invalid verification code format" });
+      
+      // Check rate limit first
+      const rateLimit = rateLimitService.checkVerifyLimit(req, userId);
+      if (!rateLimit.allowed) {
+        const resetInMinutes = Math.ceil((rateLimit.resetTime! - Date.now()) / (1000 * 60));
+        return res.status(429).json({ 
+          message: `Too many verification attempts. Please try again in ${resetInMinutes} minute${resetInMinutes !== 1 ? 's' : ''}.`,
+          resetTime: rateLimit.resetTime,
+          remainingAttempts: 0
+        });
       }
+
+      // Validate input
+      const validation = verificationTokenSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid verification code format",
+          errors: validation.error.errors
+        });
+      }
+
+      const { token } = validation.data;
 
       const verification = await storage.verifyPhoneToken(userId, token);
 
