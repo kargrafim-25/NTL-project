@@ -12,6 +12,8 @@ import { forexFactoryService } from "./services/forexFactoryService";
 import { verificationService } from "./services/verificationService";
 import { rateLimitService } from "./services/rateLimitService";
 import { sharingDetectionService } from "./services/sharingDetectionService";
+import { authService } from "./services/authService";
+import { sanitizeUser } from "./utils/userSanitizer";
 import { z } from "zod";
 
 // Global sharing detection middleware
@@ -93,15 +95,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, sharingDetectionMiddleware, async (req: any, res) => {
+  // Unified authentication middleware for /api/auth/user
+  const unifyUserIdentity = async (req: any, res: any, next: any) => {
     try {
-      const userId = req.user.claims.sub;
-      let user = await storage.getUser(userId);
-      
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
+      let userId: string | undefined;
+      let user: any;
+
+      // Try independent authentication first
+      if ((req.session as any)?.user) {
+        user = (req.session as any).user;
+        userId = user.id;
+      } 
+      // Fall back to Replit authentication
+      else if (req.isAuthenticated && req.isAuthenticated() && req.user?.claims?.sub) {
+        userId = req.user.claims.sub;
+        if (userId) {
+          user = await storage.getUser(userId);
+        }
       }
+
+      if (!userId || !user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      // Normalize user identity for downstream middleware (sharing detection)
+      req.user = {
+        ...req.user,
+        claims: { sub: userId },
+        normalizedUser: user
+      };
+
+      return next();
+    } catch (error) {
+      console.error("User identity unification error:", error);
+      return res.status(500).json({ message: "Authentication error" });
+    }
+  };
+
+  // Auth routes - Support both Replit and Independent authentication
+  app.get('/api/auth/user', unifyUserIdentity, sharingDetectionMiddleware, async (req: any, res) => {
+    try {
+      let user = req.user.normalizedUser;
+      const userId = user.id;
       
       // Check and perform daily reset if needed
       const currentTime = new Date();
@@ -121,7 +156,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`[AUTH] Daily credits reset for user ${userId}, new daily credits: ${user?.dailyCredits}`);
       }
       
-      res.json(user);
+      // Sanitize user data before sending to client (remove password hash, tokens)
+      res.json(sanitizeUser(user));
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -360,6 +396,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error verifying phone:", error);
       res.status(500).json({ message: "Failed to verify phone number" });
     }
+  });
+
+  // Independent authentication routes
+  const registrationSchema = z.object({
+    email: z.string().email('Please enter a valid email address'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
+    firstName: z.string().min(1, 'First name is required'),
+    lastName: z.string().min(1, 'Last name is required'),
+  });
+
+  const loginSchema = z.object({
+    email: z.string().email('Please enter a valid email address'),
+    password: z.string().min(1, 'Password is required'),
+  });
+
+  // Registration endpoint
+  app.post('/api/auth/register', async (req, res) => {
+    try {
+      // Validate input
+      const validation = registrationSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({
+          message: 'Invalid input',
+          errors: validation.error.errors
+        });
+      }
+
+      const { email, password, firstName, lastName } = validation.data;
+
+      // Additional password validation
+      const passwordValidation = authService.validatePassword(password);
+      if (!passwordValidation.valid) {
+        return res.status(400).json({
+          message: 'Password does not meet requirements',
+          errors: passwordValidation.errors
+        });
+      }
+
+      // Register user
+      const result = await authService.register(email, password, firstName, lastName);
+      
+      if (!result.success) {
+        return res.status(400).json({ message: result.error });
+      }
+
+      // Set user in session (without password) - regenerate to prevent session fixation
+      const { password: _, ...userWithoutPassword } = result.user!;
+      req.session.regenerate((err) => {
+        if (err) {
+          console.error('Session regeneration error:', err);
+          return res.status(500).json({ message: 'Session error' });
+        }
+        (req.session as any).user = userWithoutPassword;
+        res.json({
+          success: true,
+          message: 'Registration successful',
+          user: sanitizeUser(result.user!)
+        });
+      });
+    } catch (error) {
+      console.error('Registration error:', error);
+      res.status(500).json({ message: 'Registration failed. Please try again.' });
+    }
+  });
+
+  // Login endpoint
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      // Validate input
+      const validation = loginSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({
+          message: 'Invalid input',
+          errors: validation.error.errors
+        });
+      }
+
+      const { email, password } = validation.data;
+
+      // Check rate limit
+      const rateLimitCheck = rateLimitService.checkSendLimit(req, email);
+      if (!rateLimitCheck.allowed) {
+        const resetInMinutes = Math.ceil((rateLimitCheck.resetTime! - Date.now()) / (1000 * 60));
+        return res.status(429).json({ 
+          message: `Too many login attempts. Please try again in ${resetInMinutes} minute${resetInMinutes !== 1 ? 's' : ''}.`,
+          resetTime: rateLimitCheck.resetTime,
+          remainingAttempts: 0
+        });
+      }
+
+      // Login user
+      const result = await authService.login(email, password);
+      
+      if (!result.success) {
+        return res.status(400).json({ message: result.error });
+      }
+
+      // Set user in session (without password) - regenerate to prevent session fixation
+      const { password: _, ...userWithoutPassword } = result.user!;
+      req.session.regenerate((err) => {
+        if (err) {
+          console.error('Session regeneration error:', err);
+          return res.status(500).json({ message: 'Session error' });
+        }
+        (req.session as any).user = userWithoutPassword;
+        res.json({
+          success: true,
+          message: 'Login successful',
+          user: sanitizeUser(result.user!)
+        });
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ message: 'Login failed. Please try again.' });
+    }
+  });
+
+  // Independent logout endpoint
+  app.post('/api/auth/logout-independent', (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Logout error:', err);
+        return res.status(500).json({ message: 'Logout failed' });
+      }
+      res.json({ success: true, message: 'Logged out successfully' });
+    });
   });
 
   // Sharing detection endpoint

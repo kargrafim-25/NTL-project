@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initializeSampleNews } from "./services/newsService";
 import { startSignalLifecycleService } from "./signalLifecycle";
+import { authService } from "./services/authService";
 
 const app = express();
 app.use(express.json());
@@ -48,6 +49,14 @@ app.use((req, res, next) => {
     } catch (error) {
       console.log("Sample news data may already exist, skipping initialization");
     }
+  }
+
+  // Initialize admin user
+  try {
+    console.log("Initializing admin user...");
+    await authService.createDefaultAdmin();
+  } catch (error) {
+    console.error("Error initializing admin user:", error);
   }
 
   // Start signal lifecycle management service

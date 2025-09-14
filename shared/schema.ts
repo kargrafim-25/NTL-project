@@ -41,7 +41,12 @@ export const users = pgTable("users", {
   emailVerificationToken: varchar("email_verification_token"),
   phoneVerificationToken: varchar("phone_verification_token"),
   verificationTokenExpiry: timestamp("verification_token_expiry"),
-  subscriptionTier: varchar("subscription_tier").default("free").notNull(), // free, starter, pro
+  password: varchar("password"), // For independent auth (bcrypt hashed)
+  isActive: boolean("is_active").default(true).notNull(),
+  accountLocked: boolean("account_locked").default(false).notNull(),
+  loginAttempts: integer("login_attempts").default(0).notNull(),
+  lastLoginAttempt: timestamp("last_login_attempt"),
+  subscriptionTier: varchar("subscription_tier").default("free").notNull(), // free, starter, pro, admin
   subscriptionStartDate: timestamp("subscription_start_date").defaultNow(), // When user started current billing cycle
   dailyCredits: integer("daily_credits").default(0).notNull(),
   monthlyCredits: integer("monthly_credits").default(0).notNull(),
