@@ -17,8 +17,15 @@ import { z } from "zod";
 // Global sharing detection middleware
 const sharingDetectionMiddleware = async (req: any, res: any, next: any) => {
   try {
-    // Skip middleware for certain endpoints to prevent infinite loops
-    const skipPaths = ['/api/security/sharing-check', '/api/auth/logout'];
+    // Skip middleware for certain endpoints to prevent infinite loops and verification flows
+    const skipPaths = [
+      '/api/security/sharing-check', 
+      '/api/auth/logout',
+      '/api/auth/send-email-verification',
+      '/api/auth/send-phone-verification',
+      '/api/auth/verify-email',
+      '/api/auth/verify-phone'
+    ];
     if (skipPaths.some(path => req.path.includes(path))) {
       return next();
     }
@@ -122,7 +129,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Verification endpoints
-  app.post('/api/auth/send-email-verification', isAuthenticated, sharingDetectionMiddleware, async (req: any, res) => {
+  app.post('/api/auth/send-email-verification', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       
@@ -184,7 +191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/auth/send-phone-verification', isAuthenticated, sharingDetectionMiddleware, async (req: any, res) => {
+  app.post('/api/auth/send-phone-verification', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       
@@ -205,8 +212,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      if (!user.phoneNumber) {
-        return res.status(400).json({ message: "No phone number found for user" });
+      // Get phone number from request body or existing user phone
+      const phoneNumber = req.body.phoneNumber || user.phoneNumber;
+      
+      if (!phoneNumber) {
+        return res.status(400).json({ message: "Phone number is required" });
+      }
+
+      // If user doesn't have a phone number yet, update their profile
+      if (!user.phoneNumber && req.body.phoneNumber) {
+        await storage.upsertUser({ 
+          id: userId, 
+          phoneNumber: req.body.phoneNumber,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName
+        });
       }
 
       if (user.phoneVerified) {
@@ -218,7 +239,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const expiresAt = verificationService.getExpiryTime();
       
       const smsResult = await verificationService.sendSMSVerification({
-        phoneNumber: user.phoneNumber,
+        phoneNumber: phoneNumber,
         token
       });
 

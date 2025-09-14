@@ -379,8 +379,8 @@ class SharingDetectionService {
     let blocked = false;
 
     // Determine action based on confidence level with actual enforcement
-    if (detectionResult.confidence >= 0.8) {
-      // High confidence - terminate all sessions and block current request
+    if (detectionResult.confidence >= 0.95) {
+      // Very high confidence - terminate all sessions and block current request
       console.log(`[SHARING-ENFORCEMENT] High confidence sharing detected for user ${userId}. Terminating all sessions.`);
       await storage.terminateAllUserSessions(userId);
       blocked = true;

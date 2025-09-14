@@ -7,9 +7,55 @@ import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertCircle, Check, Mail, Phone, Clock, Shield } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+
+// Country codes data
+const COUNTRY_CODES = [
+  { code: "+1", country: "United States", flag: "🇺🇸" },
+  { code: "+1", country: "Canada", flag: "🇨🇦" },
+  { code: "+44", country: "United Kingdom", flag: "🇬🇧" },
+  { code: "+33", country: "France", flag: "🇫🇷" },
+  { code: "+49", country: "Germany", flag: "🇩🇪" },
+  { code: "+39", country: "Italy", flag: "🇮🇹" },
+  { code: "+34", country: "Spain", flag: "🇪🇸" },
+  { code: "+31", country: "Netherlands", flag: "🇳🇱" },
+  { code: "+46", country: "Sweden", flag: "🇸🇪" },
+  { code: "+47", country: "Norway", flag: "🇳🇴" },
+  { code: "+45", country: "Denmark", flag: "🇩🇰" },
+  { code: "+41", country: "Switzerland", flag: "🇨🇭" },
+  { code: "+43", country: "Austria", flag: "🇦🇹" },
+  { code: "+32", country: "Belgium", flag: "🇧🇪" },
+  { code: "+351", country: "Portugal", flag: "🇵🇹" },
+  { code: "+30", country: "Greece", flag: "🇬🇷" },
+  { code: "+48", country: "Poland", flag: "🇵🇱" },
+  { code: "+7", country: "Russia", flag: "🇷🇺" },
+  { code: "+86", country: "China", flag: "🇨🇳" },
+  { code: "+81", country: "Japan", flag: "🇯🇵" },
+  { code: "+82", country: "South Korea", flag: "🇰🇷" },
+  { code: "+91", country: "India", flag: "🇮🇳" },
+  { code: "+61", country: "Australia", flag: "🇦🇺" },
+  { code: "+64", country: "New Zealand", flag: "🇳🇿" },
+  { code: "+55", country: "Brazil", flag: "🇧🇷" },
+  { code: "+52", country: "Mexico", flag: "🇲🇽" },
+  { code: "+54", country: "Argentina", flag: "🇦🇷" },
+  { code: "+56", country: "Chile", flag: "🇨🇱" },
+  { code: "+57", country: "Colombia", flag: "🇨🇴" },
+  { code: "+51", country: "Peru", flag: "🇵🇪" },
+  { code: "+27", country: "South Africa", flag: "🇿🇦" },
+  { code: "+20", country: "Egypt", flag: "🇪🇬" },
+  { code: "+971", country: "UAE", flag: "🇦🇪" },
+  { code: "+966", country: "Saudi Arabia", flag: "🇸🇦" },
+  { code: "+90", country: "Turkey", flag: "🇹🇷" },
+  { code: "+65", country: "Singapore", flag: "🇸🇬" },
+  { code: "+60", country: "Malaysia", flag: "🇲🇾" },
+  { code: "+66", country: "Thailand", flag: "🇹🇭" },
+  { code: "+84", country: "Vietnam", flag: "🇻🇳" },
+  { code: "+63", country: "Philippines", flag: "🇵🇭" },
+  { code: "+62", country: "Indonesia", flag: "🇮🇩" }
+];
 
 interface VerificationModalProps {
   isOpen: boolean;
@@ -45,6 +91,8 @@ export default function VerificationModal({
   const [phoneSent, setPhoneSent] = useState(false);
   const [emailVerificationComplete, setEmailVerificationComplete] = useState(emailVerified);
   const [phoneVerificationComplete, setPhoneVerificationComplete] = useState(phoneVerified);
+  const [selectedCountryCode, setSelectedCountryCode] = useState("+1");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [cooldowns, setCooldowns] = useState<{
     email: number;
     phone: number;
@@ -133,7 +181,11 @@ export default function VerificationModal({
   // Send phone verification
   const sendPhoneVerification = useMutation({
     mutationFn: async (): Promise<VerificationResponse> => {
-      const response = await apiRequest('POST', '/api/auth/send-phone-verification', {});
+      // If no existing phone, use the new phone number with country code
+      const phoneToVerify = userPhone || `${selectedCountryCode}${phoneNumber}`;
+      const response = await apiRequest('POST', '/api/auth/send-phone-verification', {
+        phoneNumber: phoneToVerify
+      });
       return response.json();
     },
     onSuccess: (data) => {
@@ -395,25 +447,65 @@ export default function VerificationModal({
             <TabsContent value="phone" className="space-y-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Phone Number</Label>
-                <div className="flex items-center gap-2">
-                  <Input 
-                    value={userPhone || ""} 
-                    readOnly 
-                    className="bg-muted"
-                    data-testid="input-verification-phone"
-                  />
-                  {phoneVerificationComplete ? (
-                    <Badge variant="secondary" className="text-green-700 bg-green-100">
-                      <Check className="h-3 w-3 mr-1" />
-                      Verified
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline">
-                      <AlertCircle className="h-3 w-3 mr-1" />
-                      Pending
-                    </Badge>
-                  )}
-                </div>
+                {userPhone ? (
+                  <div className="flex items-center gap-2">
+                    <Input 
+                      value={userPhone} 
+                      readOnly 
+                      className="bg-muted"
+                      data-testid="input-verification-phone"
+                    />
+                    {phoneVerificationComplete ? (
+                      <Badge variant="secondary" className="text-green-700 bg-green-100">
+                        <Check className="h-3 w-3 mr-1" />
+                        Verified
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline">
+                        <AlertCircle className="h-3 w-3 mr-1" />
+                        Pending
+                      </Badge>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <Select 
+                        value={selectedCountryCode} 
+                        onValueChange={setSelectedCountryCode}
+                        data-testid="select-country-code"
+                      >
+                        <SelectTrigger className="w-32">
+                          <SelectValue placeholder="Code" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60">
+                          {COUNTRY_CODES.map((country, index) => (
+                            <SelectItem 
+                              key={`${country.code}-${country.country}-${index}`} 
+                              value={country.code}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span>{country.flag}</span>
+                                <span>{country.code}</span>
+                                <span className="text-xs text-muted-foreground">{country.country}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
+                        placeholder="Enter phone number"
+                        className="flex-1"
+                        data-testid="input-phone-number"
+                      />
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Enter your phone number with the country code selected above
+                    </div>
+                  </>
+                )}
               </div>
 
               {!phoneVerificationComplete && (
@@ -421,7 +513,7 @@ export default function VerificationModal({
                   <div className="space-y-2">
                     <Button 
                       onClick={() => sendPhoneVerification.mutate()}
-                      disabled={!canSendPhone}
+                      disabled={!canSendPhone || (!userPhone && phoneNumber.length < 8)}
                       className="w-full"
                       data-testid="button-send-phone-verification"
                     >
