@@ -41,6 +41,13 @@ app.use((req, res, next) => {
 
 (async () => {
   const server = await registerRoutes(app);
+  app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    service: 'ntl-trading-platform'
+  });
+});
   
   // Initialize sample news data (only in development)
   if (app.get("env") === "development") {
