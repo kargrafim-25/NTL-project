@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+// import { setupAuth, isAuthenticated } from "./replitAuth"; // REMOVED
 import { generateTradingSignal } from "./services/openaiService";
 import { apiLogger } from "./utils/apiLogger";
 import { isMarketOpen } from "./services/marketService";
@@ -93,7 +93,7 @@ function applyLifecycleStatus(signals: any[]) {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
-  await setupAuth(app);
+  // await setupAuth(app); // REMOVED - using independent auth only
 
   // Unified authentication middleware for /api/auth/user
   const unifyUserIdentity = async (req: any, res: any, next: any) => {
