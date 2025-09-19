@@ -15,19 +15,38 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    
-    // Simulate login process
-    setTimeout(() => {
-      // In real implementation, this would handle authentication
-      window.location.href = "/api/login"; // Use existing Replit Auth
-    }, 1000);
-  };
+   e.preventDefault();
+   setIsLoading(true);
+  
+   try {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ email, password }),
+     });
 
-  const handleOAuthLogin = () => {
-    window.location.href = "/api/login";
-  };
+    const data = await response.json();
+
+    if (response.ok) {
+      window.location.href = "/"; // Redirect to dashboard
+    } else {
+      alert(data.message || 'Login failed');
+    }
+  } catch (error) {
+    alert('Login failed. Please try again.');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+const handleOAuthLogin = () => {
+  // Remove this function - we're using independent auth
+  handleLogin(new Event('submit') as any);
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center p-4">
