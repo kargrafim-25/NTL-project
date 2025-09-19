@@ -28,24 +28,52 @@ export default function Signup() {
   };
 
   const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords don't match");
-      return;
-    }
-    if (!formData.agreeToTerms) {
-      alert("Please agree to the terms and conditions");
-      return;
-    }
+  e.preventDefault();
+  if (formData.password !== formData.confirmPassword) {
+    alert("Passwords don't match");
+    return;
+  }
+  if (!formData.agreeToTerms) {
+    alert("Please agree to the terms and conditions");
+    return;
+  }
 
-    setIsLoading(true);
-    
-    // Simulate signup process
-    setTimeout(() => {
-      // In real implementation, this would handle user registration
-      window.location.href = "/api/login"; // Redirect to OAuth after registration
-    }, 1500);
-  };
+  setIsLoading(true);
+  
+  try {
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      window.location.href = "/"; // Redirect to dashboard
+    } else {
+      alert(data.message || 'Registration failed');
+    }
+  } catch (error) {
+    alert('Registration failed. Please try again.');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+const handleOAuthSignup = () => {
+  // Remove this function - we're using independent auth
+  alert('Please use the email signup form below');
+};
+
 
   const handleOAuthSignup = () => {
     window.location.href = "/api/login";
