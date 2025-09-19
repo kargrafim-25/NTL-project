@@ -6,9 +6,9 @@ import logoUrl from '../assets/logo.png';
 import ChatbotTrigger from '@/components/ChatbotTrigger';
 
 export default function Landing() {
-  const handleLogin = () => {
-    window.location.href = "/api/login";
-  };
+  const handleGetStarted = () => {
+  window.location.href = "/signup"; // Go to independent signup
+};
 
   return (
     <div className="min-h-screen bg-background">
@@ -32,7 +32,7 @@ export default function Landing() {
             </div>
             
             <Button 
-              onClick={handleLogin}
+              onClick={handleGetStarted}
               className="gradient-primary text-white font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300"
               data-testid="button-login"
             >
