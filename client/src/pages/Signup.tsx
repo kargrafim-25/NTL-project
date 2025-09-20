@@ -75,9 +75,7 @@ const handleOAuthSignup = () => {
 };
 
 
-  const handleOAuthSignup = () => {
-    window.location.href = "/api/login";
-  };
+
 
   const isFormValid = formData.firstName && formData.lastName && formData.email && 
                      formData.password && formData.confirmPassword && 
