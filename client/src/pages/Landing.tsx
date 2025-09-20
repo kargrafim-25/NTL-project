@@ -60,7 +60,7 @@ export default function Landing() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 size="lg"
-                onClick={handleLogin}
+                onClick={handleGetStarted}
                 className="gradient-primary text-white font-semibold text-lg px-8 py-4 hover:shadow-lg hover:scale-105 transition-all duration-300 signal-indicator"
                 data-testid="button-get-started"
               >
@@ -180,7 +180,7 @@ export default function Landing() {
                 <Button 
                   className="w-full mt-6 border-muted text-muted-foreground hover:bg-muted/20"
                   variant="outline"
-                  onClick={handleLogin}
+                  onClick={handleGetStarted}
                   data-testid="button-select-free"
                 >
                   Get Started Free
@@ -229,7 +229,7 @@ export default function Landing() {
                 </ul>
                 <Button 
                   className="w-full mt-6 gradient-primary text-white"
-                  onClick={handleLogin}
+                  onClick={handleGetStarted}
                   data-testid="button-select-starter"
                 >
                   Choose Starter
@@ -276,7 +276,7 @@ export default function Landing() {
                 </ul>
                 <Button 
                   className="w-full mt-6 bg-gradient-to-r from-secondary to-accent text-white"
-                  onClick={handleLogin}
+                  onClick={handleGetStarted}
                   data-testid="button-select-pro"
                 >
                   Choose Pro
