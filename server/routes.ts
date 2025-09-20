@@ -16,6 +16,38 @@ import { authService } from "./services/authService";
 import { sanitizeUser } from "./utils/userSanitizer";
 import { z } from "zod";
 
+// Independent authentication middleware
+const isAuthenticated = async (req: any, res: any, next: any) => {
+  try {
+    const user = (req.session as any)?.user;
+    
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    // Check if account is active  
+    if (!user.isActive) {
+      return res.status(401).json({ message: "Account is disabled" });
+    }
+
+    // Check if account is locked
+    if (user.accountLocked) {
+      return res.status(401).json({ message: "Account is locked" });
+    }
+
+    // Set up user for downstream middleware (sharing detection, etc.)
+    req.user = {
+      claims: { sub: user.id },
+      normalizedUser: user
+    };
+    
+    return next();
+  } catch (error) {
+    console.error("Authentication middleware error:", error);
+    return res.status(500).json({ message: "Authentication error" });
+  }
+};
+
 // Global sharing detection middleware
 const sharingDetectionMiddleware = async (req: any, res: any, next: any) => {
   try {
