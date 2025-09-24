@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
   const { toast } = useToast();
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading, user, isEmailVerificationRequired, emailVerificationError } = useAuth();
   const { isOpen: isMarketOpen, isLoading: isMarketLoading } = useMarketStatus();
   const { fingerprint, trackDeviceAction } = useDeviceTracking();
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1H');
@@ -39,11 +39,13 @@ export default function Dashboard() {
 
   // Check if verification is needed
   useEffect(() => {
-    if (user && isAuthenticated) {
-      const needsEmailVerification = user.email && !(user as any).emailVerified;
+    if (isEmailVerificationRequired) {
+      // Show verification modal immediately if email verification is required
+      setShowVerificationModal(true);
+    } else if (user && isAuthenticated) {
       const needsPhoneVerification = (user as any).phoneNumber && !(user as any).phoneVerified;
       
-      if (needsEmailVerification || needsPhoneVerification) {
+      if (needsPhoneVerification) {
         // Show verification modal after a short delay to let the dashboard load
         const timer = setTimeout(() => {
           setShowVerificationModal(true);
@@ -52,11 +54,11 @@ export default function Dashboard() {
         return () => clearTimeout(timer);
       }
     }
-  }, [user, isAuthenticated]);
+  }, [user, isAuthenticated, isEmailVerificationRequired]);
 
-  // Redirect to home if not authenticated
+  // Redirect to home if not authenticated (but not if email verification is required)
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!isLoading && !isAuthenticated && !isEmailVerificationRequired) {
       toast({
         title: "Unauthorized",
         description: "You are logged out. Logging in again...",
@@ -67,7 +69,7 @@ export default function Dashboard() {
       }, 500);
       return;
     }
-  }, [isAuthenticated, isLoading, toast]);
+  }, [isAuthenticated, isLoading, isEmailVerificationRequired, toast]);
 
   const handleLogout = () => {
     window.location.href = "/api/logout";
@@ -214,7 +216,12 @@ export default function Dashboard() {
       {/* Verification Modal */}
       <VerificationModal
         isOpen={showVerificationModal}
-        onClose={() => setShowVerificationModal(false)}
+        onClose={() => {
+          // Don't allow closing if email verification is required
+          if (!isEmailVerificationRequired) {
+            setShowVerificationModal(false);
+          }
+        }}
         onComplete={() => {
           setShowVerificationModal(false);
           toast({
@@ -222,10 +229,11 @@ export default function Dashboard() {
             description: "Your account has been successfully verified.",
           });
         }}
-        userEmail={user?.email || undefined}
+        userEmail={user?.email || emailVerificationError?.email}
         userPhone={(user as any)?.phoneNumber}
         emailVerified={(user as any)?.emailVerified || false}
         phoneVerified={(user as any)?.phoneVerified || false}
+        isEmailVerificationRequired={isEmailVerificationRequired}
       />
     </div>
   );

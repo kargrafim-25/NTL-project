@@ -65,6 +65,7 @@ interface VerificationModalProps {
   userPhone?: string;
   emailVerified?: boolean;
   phoneVerified?: boolean;
+  isEmailVerificationRequired?: boolean;
 }
 
 interface VerificationResponse {
@@ -82,7 +83,8 @@ export default function VerificationModal({
   userEmail,
   userPhone,
   emailVerified = false,
-  phoneVerified = false
+  phoneVerified = false,
+  isEmailVerificationRequired = false
 }: VerificationModalProps) {
   const { toast } = useToast();
   const [emailCode, setEmailCode] = useState("");
@@ -334,14 +336,19 @@ export default function VerificationModal({
           <div className="flex items-center justify-center mb-2">
             <Shield className="h-8 w-8 text-primary mr-2" />
           </div>
-          <CardTitle className="text-xl">Security Verification</CardTitle>
+          <CardTitle className="text-xl">
+            {isEmailVerificationRequired ? "Email Verification Required" : "Security Verification"}
+          </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Complete verification to secure your account
+            {isEmailVerificationRequired 
+              ? "You must verify your email address to access the dashboard"
+              : "Complete verification to secure your account"
+            }
           </p>
         </CardHeader>
         
         <CardContent>
-          <Tabs defaultValue="email" className="w-full">
+          <Tabs defaultValue={isEmailVerificationRequired ? "email" : "email"} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="email" className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
@@ -600,7 +607,7 @@ export default function VerificationModal({
               </div>
             )}
 
-            {(!emailVerificationComplete || !phoneVerificationComplete) && (
+            {(!emailVerificationComplete || !phoneVerificationComplete) && !isEmailVerificationRequired && (
               <div className="mt-4">
                 <Button 
                   variant="outline" 

@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-// import { setupAuth, isAuthenticated } from "./replitAuth"; // REMOVED
+import { setupAuth } from "./replitAuth";
 import { generateTradingSignal } from "./services/openaiService";
 import { apiLogger } from "./utils/apiLogger";
 import { isMarketOpen } from "./services/marketService";
@@ -33,6 +33,15 @@ const isAuthenticated = async (req: any, res: any, next: any) => {
     // Check if account is locked
     if (user.accountLocked) {
       return res.status(401).json({ message: "Account is locked" });
+    }
+
+    // Check if email is verified (required for all authenticated actions)
+    if (user.email && !user.emailVerified) {
+      return res.status(403).json({ 
+        message: "Email verification required",
+        code: "EMAIL_VERIFICATION_REQUIRED",
+        email: user.email
+      });
     }
 
     // Set up user for downstream middleware (sharing detection, etc.)
@@ -124,8 +133,12 @@ function applyLifecycleStatus(signals: any[]) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  // await setupAuth(app); // REMOVED - using independent auth only
+  // Auth middleware - setup Replit auth if enabled
+  try {
+    await setupAuth(app);
+  } catch (error) {
+    console.log("Replit auth setup failed, using independent auth only:", error);
+  }
 
   // Unified authentication middleware for /api/auth/user
   const unifyUserIdentity = async (req: any, res: any, next: any) => {
@@ -148,6 +161,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!userId || !user) {
         return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      // Check if account is active  
+      if (!user.isActive) {
+        return res.status(401).json({ message: "Account is disabled" });
+      }
+
+      // Check if account is locked
+      if (user.accountLocked) {
+        return res.status(401).json({ message: "Account is locked" });
+      }
+
+      // Check if email is verified (required for all authenticated actions)
+      if (user.email && !user.emailVerified) {
+        return res.status(403).json({ 
+          message: "Email verification required",
+          code: "EMAIL_VERIFICATION_REQUIRED",
+          email: user.email
+        });
       }
 
       // Normalize user identity for downstream middleware (sharing detection)
