@@ -24,7 +24,7 @@ services:
       - key: ADMIN_PASSWORD
         sync: false
       - key: FRONTEND_URL
-        value: https://your-app-name.onrender.com
+        value: https://ntl.onrender.com
 
 databases:
   - name: ntl-database
