@@ -69,10 +69,6 @@ export default function Signup() {
   }
 };
 
-const handleOAuthSignup = () => {
-  // Remove this function - we're using independent auth
-  alert('Please use the email signup form below');
-};
 
 
 
@@ -112,26 +108,6 @@ const handleOAuthSignup = () => {
           </CardHeader>
           
           <CardContent className="space-y-4">
-            {/* OAuth Signup Button */}
-            <Button 
-              onClick={handleOAuthSignup}
-              className="w-full gradient-primary text-white font-semibold py-3 hover:shadow-lg hover:scale-105 transition-all duration-300"
-              data-testid="button-oauth-signup"
-            >
-              <Shield className="mr-2 h-4 w-4" />
-              Sign up with Replit
-            </Button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <Separator className="w-full" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
-                  Or create account with email
-                </span>
-              </div>
-            </div>
 
             {/* Signup Form */}
             <form onSubmit={handleSignup} className="space-y-4">

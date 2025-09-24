@@ -20,11 +20,11 @@ services:
       - key: BREVO_API_KEY
         sync: false
       - key: ADMIN_EMAIL
-        value: admin@example.com
+        sync: false
       - key: ADMIN_PASSWORD
-        value: admin123
+        sync: false
       - key: FRONTEND_URL
-        value: https://ntl-project-v1.onrender.com
+        value: https://your-app-name.onrender.com
 
 databases:
   - name: ntl-database

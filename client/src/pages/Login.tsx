@@ -42,10 +42,6 @@ export default function Login() {
   }
 };
 
-const handleOAuthLogin = () => {
-  // Remove this function - we're using independent auth
-  handleLogin(new Event('submit') as any);
-};
 
 
   return (
@@ -78,26 +74,6 @@ const handleOAuthLogin = () => {
           </CardHeader>
           
           <CardContent className="space-y-4">
-            {/* OAuth Login Button */}
-            <Button 
-              onClick={handleOAuthLogin}
-              className="w-full gradient-primary text-white font-semibold py-3 hover:shadow-lg hover:scale-105 transition-all duration-300"
-              data-testid="button-oauth-login"
-            >
-              <Shield className="mr-2 h-4 w-4" />
-              Continue with Replit
-            </Button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <Separator className="w-full" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
-                  Or continue with email
-                </span>
-              </div>
-            </div>
 
             {/* Email/Password Form */}
             <form onSubmit={handleLogin} className="space-y-4">

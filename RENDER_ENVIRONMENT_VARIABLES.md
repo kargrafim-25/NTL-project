@@ -4,30 +4,30 @@
 
 ### Database Configuration
 ```
-DATABASE_URL=postgresql://ntl_database_user:pf39qfXxKNBmZYLYKWIWMS6NL2LnABzB@dpg-d36r8uumcj7s73e17rl0-a.oregon-postgres.render.com/ntl_database?sslmode=require
+DATABASE_URL=your_postgresql_connection_string_here
 ```
 
 ### Authentication & Security
 ```
-SESSION_SECRET=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
+SESSION_SECRET=your_strong_session_secret_here
 NODE_ENV=production
 ```
 
 ### API Keys
 ```
-OPENAI_API_KEY=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
-BREVO_API_KEY=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
+OPENAI_API_KEY=your_openai_api_key_here
+BREVO_API_KEY=your_brevo_api_key_here
 ```
 
 ### Admin Configuration
 ```
-ADMIN_EMAIL=admin@nextradinglabs.com
-ADMIN_PASSWORD=K@rimadmin2509**
+ADMIN_EMAIL=your_admin_email_here
+ADMIN_PASSWORD=your_admin_password_here
 ```
 
 ### Optional Environment Variables
 ```
-FRONTEND_URL=https://ntl-project-v1.onrender.com
+FRONTEND_URL=https://your-app-name.onrender.com
 ALPHA_VANTAGE_API_KEY=your_alpha_vantage_key_here
 ```
 
@@ -47,6 +47,7 @@ ALPHA_VANTAGE_API_KEY=your_alpha_vantage_key_here
 - **NODE_ENV**: Must be set to "production" for production deployment
 - **FRONTEND_URL**: Update this to match your actual Render app URL
 - All API keys should be kept secure and not committed to version control
+- **Replace all placeholder values** with your actual credentials before deployment
 
 ## Security Considerations
 
